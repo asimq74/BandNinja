@@ -14,17 +14,18 @@ import android.widget.Toast;
 import com.asimq.artists.bandninja.data.Artist;
 import com.asimq.artists.bandninja.data.ArtistInfoPojo;
 import com.asimq.artists.bandninja.data.ArtistsPojo;
-import com.asimq.artists.bandninja.data.Result;
+import com.asimq.artists.bandninja.data.TopAlbumsPojo;
 import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
-
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
+
+    public static final String DEFAULT_FORMAT = "json";
+    public static final String API_KEY = "06aec4c91800f972d32c0d702c003bd5";;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
         Call<ArtistsPojo> call = service.getArtists("artist.search", "The Cult",
-                "06aec4c91800f972d32c0d702c003bd5", "json");
+                API_KEY, DEFAULT_FORMAT);
         call.enqueue(new Callback<ArtistsPojo>() {
 
             @Override
@@ -92,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                 for (Artist artist: artistPojo.getResult().getArtistmatches().getArtists()) {
                     final String artistName = artist.getName();
                     Call<ArtistInfoPojo> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
-                            "06aec4c91800f972d32c0d702c003bd5", "json");
+                            API_KEY, DEFAULT_FORMAT);
                     artistInfoCall.enqueue(new Callback<ArtistInfoPojo>() {
 
                         @Override
@@ -109,6 +110,25 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             Log.d(TAG, "artistInfoPojo=" + artistInfoPojo);
+                            Call<TopAlbumsPojo> topAlbumsPojoCall = service.getTopAlbums("artist.gettopalbums", artistName,
+                                    API_KEY, DEFAULT_FORMAT);
+                            topAlbumsPojoCall.enqueue(new Callback<TopAlbumsPojo>() {
+                                @Override
+                                public void onResponse(Call<TopAlbumsPojo> call, Response<TopAlbumsPojo> response) {
+                                    final TopAlbumsPojo topAlbumsPojo = response.body();
+                                    if (topAlbumsPojo == null) {
+                                        return;
+                                    }
+
+                                    Log.d(TAG, "topAlbumsPojo=" + topAlbumsPojo);
+                                }
+
+                                @Override
+                                public void onFailure(Call<TopAlbumsPojo> call, Throwable t) {
+                                    Log.e(TAG, "error calling service", t);
+                                    Toast.makeText(getApplicationContext(), "Something went wrong...Please try later!", Toast.LENGTH_LONG).show();
+                                }
+                            });
                         }
                     });
                 }

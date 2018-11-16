@@ -2,6 +2,7 @@ package com.asimq.artists.bandninja.remote.retrofit;
 
 import com.asimq.artists.bandninja.data.ArtistInfoPojo;
 import com.asimq.artists.bandninja.data.ArtistsPojo;
+import com.asimq.artists.bandninja.data.TopAlbumsPojo;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -18,4 +19,8 @@ public interface GetArtists {
     @GET("/2.0/")
     Call<ArtistInfoPojo> getArtistInfo(@Query("method") String method, @Query("artist") String artist,
                                        @Query("api_key") String api_key, @Query("format") String format);
+
+    @GET("/2.0/")
+    Call<TopAlbumsPojo> getTopAlbums(@Query("method") String method, @Query("artist") String artist,
+                                     @Query("api_key") String api_key, @Query("format") String format);
 }
