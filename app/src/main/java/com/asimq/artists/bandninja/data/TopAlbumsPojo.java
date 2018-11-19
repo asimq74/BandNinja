@@ -19,7 +19,7 @@ public class TopAlbumsPojo {
     @Override
     public String toString() {
         return "TopAlbumsPojo{" +
-                "topalbums=" + topalbums +
+                "\n\ttopalbums=" + topalbums +
                 '}';
     }
 }

@@ -20,8 +20,8 @@ public class TopAlbums {
 
     @Override
     public String toString() {
-        return "TopAlbums{" +
-                "albums=" + Arrays.toString(albums) +
+        return "\n\tTopAlbums{" +
+                "\n\talbums=" + Arrays.toString(albums) +
                 '}';
     }
 }

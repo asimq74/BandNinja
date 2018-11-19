@@ -22,5 +22,6 @@ public interface GetArtists {
 
     @GET("/2.0/")
     Call<TopAlbumsPojo> getTopAlbums(@Query("method") String method, @Query("artist") String artist,
-                                     @Query("api_key") String api_key, @Query("format") String format);
+                                     @Query("api_key") String api_key, @Query("format") String format,
+        @Query("page") int page);
 }
