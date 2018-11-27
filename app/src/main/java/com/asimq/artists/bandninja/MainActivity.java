@@ -15,6 +15,8 @@ import com.asimq.artists.bandninja.data.Album;
 import com.asimq.artists.bandninja.data.Artist;
 import com.asimq.artists.bandninja.data.ArtistInfoPojo;
 import com.asimq.artists.bandninja.data.ArtistsPojo;
+import com.asimq.artists.bandninja.data.Tag;
+import com.asimq.artists.bandninja.data.Tags;
 import com.asimq.artists.bandninja.data.TopAlbumsPojo;
 import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
@@ -49,6 +51,28 @@ public class MainActivity extends AppCompatActivity {
 				}
 
 				getTopAlbumInfo(artistInfoPojo, service, artistName);
+			}
+		});
+	}
+
+
+	private void getArtistTagInfo(final String mbid, final GetArtists service) {
+		Call<Tag[]> artistTagInfoCall = service.getTagByArtistId("artist.getTags", mbid, API_KEY, "RJ", DEFAULT_FORMAT);
+		artistTagInfoCall.enqueue(new Callback<Tag[]>() {
+
+			@Override
+			public void onFailure(Call<Tag[]> call, Throwable t) {
+				Log.e(TAG, "error calling service", t);
+				Toast.makeText(getApplicationContext(), "Something went wrong...Please try later!", Toast.LENGTH_LONG).show();
+			}
+
+			@Override
+			public void onResponse(Call<Tag[]> call, Response<Tag[]> response) {
+				final Tag[] tags = response.body();
+				if (tags == null) {
+					return;
+				}
+				Log.d(TAG, String.format("\n\ntags for %s : %s", mbid, tags));
 			}
 		});
 	}
@@ -142,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
 				for (Artist artist : artistPojo.getResult().getArtistmatches().getArtists()) {
 					final String artistName = artist.getName();
 					getAlbumInfo(artistName, service);
+					getArtistTagInfo(artist.getMbid(), service);
 				}
 			}
 		});
