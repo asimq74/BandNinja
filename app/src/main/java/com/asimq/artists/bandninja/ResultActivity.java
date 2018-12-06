@@ -26,9 +26,8 @@ import retrofit2.Response;
 
 public class ResultActivity extends AppCompatActivity {
 
-	public static final String API_KEY = "06aec4c91800f972d32c0d702c003bd5";
+	public static final String API_KEY = BuildConfig.LastFMApiKey;
 	public static final String DEFAULT_FORMAT = "json";
-	;
 	final String TAG = this.getClass().getSimpleName();
 
 	private void getAlbumInfo(final String artistName, final GetArtists service) {
@@ -105,10 +104,10 @@ public class ResultActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.result_activity_main);
-		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
-		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+		FloatingActionButton fab = findViewById(R.id.fab);
 		fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
