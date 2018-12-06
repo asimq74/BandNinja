@@ -16,7 +16,6 @@ import com.asimq.artists.bandninja.data.Artist;
 import com.asimq.artists.bandninja.data.ArtistInfoPojo;
 import com.asimq.artists.bandninja.data.ArtistsPojo;
 import com.asimq.artists.bandninja.data.Tag;
-import com.asimq.artists.bandninja.data.Tags;
 import com.asimq.artists.bandninja.data.TopAlbumsPojo;
 import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
@@ -25,7 +24,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class ResultActivity extends AppCompatActivity {
 
 	public static final String API_KEY = "06aec4c91800f972d32c0d702c003bd5";
 	public static final String DEFAULT_FORMAT = "json";
@@ -105,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.result_activity_main);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
