@@ -9,11 +9,6 @@
             android:id="@+id/nav_camera"
             android:icon="@drawable/ic_menu_camera"
             android:title="Import"/>
-        <item android:id="@+id/search"
-              android:title="@string/search_by_artist"
-              android:icon="@android:drawable/ic_menu_search"
-              app:showAsAction="collapseActionView|ifRoom"
-              app:actionViewClass="android.widget.SearchView" />
         <item
             android:id="@+id/nav_gallery"
             android:icon="@drawable/ic_menu_gallery"

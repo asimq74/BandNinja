@@ -1,5 +1,7 @@
 package com.asimq.artists.bandninja;
 
+import android.app.SearchManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -30,7 +32,21 @@ public class ResultActivity extends AppCompatActivity {
 	public static final String DEFAULT_FORMAT = "json";
 	final String TAG = this.getClass().getSimpleName();
 
-	private void getAlbumInfo(final String artistName, final GetArtists service) {
+    @Override
+    protected void onNewIntent(Intent intent) {
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            Log.i(TAG, "query=" + query);
+        }
+    }
+
+
+    private void getAlbumInfo(final String artistName, final GetArtists service) {
 		Call<ArtistInfoPojo> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
 				API_KEY, DEFAULT_FORMAT);
 		artistInfoCall.enqueue(new Callback<ArtistInfoPojo>() {
@@ -115,7 +131,7 @@ public class ResultActivity extends AppCompatActivity {
 						.setAction("Action", null).show();
 			}
 		});
-
+        handleIntent(getIntent());
 	}
 
 	@Override
@@ -142,32 +158,32 @@ public class ResultActivity extends AppCompatActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
-		Call<ArtistsPojo> call = service.getArtists("artist.search", "The Cult",
-				API_KEY, DEFAULT_FORMAT);
-		call.enqueue(new Callback<ArtistsPojo>() {
-
-			@Override
-			public void onFailure(Call<ArtistsPojo> call, Throwable t) {
-				Log.e(TAG, "error calling service", t);
-				Toast.makeText(getApplicationContext(), "Something went wrong...Please try later!", Toast.LENGTH_LONG).show();
-			}
-
-			@Override
-			public void onResponse(Call<ArtistsPojo> call, Response<ArtistsPojo> response) {
-				final ArtistsPojo artistPojo = response.body();
-				if (artistPojo == null) {
-					return;
-				}
-
-				getAlbumInfo("The Cult", service);
-				for (Artist artist : artistPojo.getResult().getArtistmatches().getArtists()) {
-					final String artistName = artist.getName();
-					getAlbumInfo(artistName, service);
-					getArtistTagInfo(artist.getMbid(), service);
-				}
-			}
-		});
+//		final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
+//		Call<ArtistsPojo> call = service.getArtists("artist.search", "The Cult",
+//				API_KEY, DEFAULT_FORMAT);
+//		call.enqueue(new Callback<ArtistsPojo>() {
+//
+//			@Override
+//			public void onFailure(Call<ArtistsPojo> call, Throwable t) {
+//				Log.e(TAG, "error calling service", t);
+//				Toast.makeText(getApplicationContext(), "Something went wrong...Please try later!", Toast.LENGTH_LONG).show();
+//			}
+//
+//			@Override
+//			public void onResponse(Call<ArtistsPojo> call, Response<ArtistsPojo> response) {
+//				final ArtistsPojo artistPojo = response.body();
+//				if (artistPojo == null) {
+//					return;
+//				}
+//
+//				getAlbumInfo("The Cult", service);
+//				for (Artist artist : artistPojo.getResult().getArtistmatches().getArtists()) {
+//					final String artistName = artist.getName();
+//					getAlbumInfo(artistName, service);
+//					getArtistTagInfo(artist.getMbid(), service);
+//				}
+//			}
+//		});
 
 	}
 }
