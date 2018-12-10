@@ -90,6 +90,7 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="action_settings">Settings</string>
+    <string name="action_share">Share</string>
     <string name="title_activity_main_navigation">MainNavigationActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -98,4 +99,5 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="search_by_artist">Search</string>
     <string name="search_hint">The Beatles</string>
+    <string name="logoDescription">Application Logo</string>
 </resources>
