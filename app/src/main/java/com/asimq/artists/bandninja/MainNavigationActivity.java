@@ -244,7 +244,7 @@ public class MainNavigationActivity extends AppCompatActivity
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int i) {
-            Artist artist = artists[i];
+            final Artist artist = artists[i];
             holder.titleView.setText(artist.getName());
             holder.subtitleView.setText(artist.getName());
             attemptToLoadThumbnail(holder, artist);
