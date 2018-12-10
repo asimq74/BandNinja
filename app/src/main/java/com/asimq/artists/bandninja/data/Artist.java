@@ -1,5 +1,6 @@
 package com.asimq.artists.bandninja.data;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Arrays;
@@ -22,6 +23,7 @@ public class Artist {
     @SerializedName("ontour")
     private String ontour;
     @SerializedName("bio")
+    @Expose
     private Bio bio;
     @SerializedName("stats")
     private Stats stats;

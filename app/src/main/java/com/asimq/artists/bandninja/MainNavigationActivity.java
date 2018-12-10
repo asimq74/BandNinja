@@ -179,32 +179,15 @@ public class MainNavigationActivity extends AppCompatActivity
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public ImageButton expandButtonView;
         public TextView subtitleView;
-        public TextView supportingTextView;
         public ImageView thumbnailView;
         public TextView titleView;
 
         public ViewHolder(View view) {
             super(view);
             thumbnailView = view.findViewById(R.id.thumbnail);
-            titleView = view.findViewById(R.id.article_title);
-            subtitleView = view.findViewById(R.id.article_subtitle);
-            expandButtonView = view.findViewById(R.id.expand_button);
-            supportingTextView = view.findViewById(R.id.supporting_text);
-            expandButtonView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (supportingTextView.getVisibility() == View.VISIBLE) {
-                        expandButtonView.setImageResource(R.drawable.ic_expand_less_black_36dp);
-                        supportingTextView.setVisibility(View.GONE);
-                    } else {
-                        expandButtonView.setImageResource(R.drawable.ic_expand_more_black_36dp);
-                        supportingTextView.setVisibility(View.VISIBLE);
-                    }
-                }
-            });
-
+            titleView = view.findViewById(R.id.primary_text);
+            subtitleView = view.findViewById(R.id.sub_text);
         }
     }
 
@@ -248,8 +231,6 @@ public class MainNavigationActivity extends AppCompatActivity
             holder.titleView.setText(artist.getName());
             holder.subtitleView.setText(artist.getName());
             attemptToLoadThumbnail(holder, artist);
-            holder.expandButtonView.setImageResource(R.drawable.ic_expand_less_black_36dp);
-            holder.supportingTextView.setVisibility(View.GONE);
         }
 
         private void attemptToLoadThumbnail(@NonNull ViewHolder holder, @NonNull Artist artist) {
