@@ -108,7 +108,7 @@ public class ResultActivity extends AppCompatActivity {
 					return;
 				}
 
-				Log.d(TAG, String.format("\n\ntop albums for %s (%s items)", artistName, topAlbumsPojo.getTopalbums().getAlbums().length));
+				Log.d(TAG, String.format("\n\ntop albums for %s (%s items)", artistName, topAlbumsPojo.getTopalbums().getAlbums().size()));
 				for (Album album : topAlbumsPojo.getTopalbums().getAlbums()) {
 					Log.d(TAG, String.format("\t%s - %s\n", album.getName(), album.getArtist().getName()));
 				}

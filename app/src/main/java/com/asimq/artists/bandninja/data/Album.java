@@ -1,6 +1,9 @@
 package com.asimq.artists.bandninja.data;
 
 import java.util.Arrays;
+import java.util.List;
+
+import android.provider.MediaStore.Images;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -9,7 +12,7 @@ public class Album {
 	@SerializedName("artist")
 	private Artist artist;
 	@SerializedName("image")
-	private Image[] images;
+	private List<Images> images;
 	@SerializedName("mbid")
 	private String mbid;
 	@SerializedName("name")
@@ -23,7 +26,7 @@ public class Album {
 		return artist;
 	}
 
-	public Image[] getImages() {
+	public List<Images> getImages() {
 		return images;
 	}
 
@@ -47,7 +50,7 @@ public class Album {
 		this.artist = artist;
 	}
 
-	public void setImages(Image[] images) {
+	public void setImages(List<Images> images) {
 		this.images = images;
 	}
 
@@ -73,7 +76,7 @@ public class Album {
 				"mbid='" + mbid + '\'' +
 				", name='" + name + '\'' +
 				", artist=" + artist +
-				", images=" + Arrays.toString(images) +
+				", images=" + images +
 				", playcount='" + playcount + '\'' +
 				", url='" + url + '\'' +
 				"}\n";

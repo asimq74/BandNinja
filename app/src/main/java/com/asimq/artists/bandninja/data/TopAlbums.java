@@ -3,17 +3,18 @@ package com.asimq.artists.bandninja.data;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class TopAlbums {
     @SerializedName("album")
-    private Album[] albums;
+    private List<Album> albums;
 
-    public Album[] getAlbums()
+    public List<Album> getAlbums()
     {
         return albums;
     }
 
-    public void setAlbums(Album[] albums)
+    public void setAlbums(List<Album> albums)
     {
         this.albums = albums;
     }
@@ -21,7 +22,7 @@ public class TopAlbums {
     @Override
     public String toString() {
         return "\n\tTopAlbums{" +
-                "\n\talbums=" + Arrays.toString(albums) +
+                "\n\talbums=" + albums +
                 '}';
     }
 }

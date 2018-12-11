@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class Artist {
     @SerializedName("listeners")
@@ -13,12 +14,13 @@ public class Artist {
     @SerializedName("name")
     private String name;
     @SerializedName("image")
-    private Image[] images;
+    private List<Image> images;
     @SerializedName("streamable")
     private String streamable;
     @SerializedName("url")
     private String url;
     @SerializedName("tags")
+    @Expose
     private Tags tags;
     @SerializedName("ontour")
     private String ontour;
@@ -26,8 +28,10 @@ public class Artist {
     @Expose
     private Bio bio;
     @SerializedName("stats")
+    @Expose
     private Stats stats;
     @SerializedName("similar")
+    @Expose
     private Similar similar;
 
     public Similar getSimilar() {
@@ -94,11 +98,11 @@ public class Artist {
         this.name = name;
     }
 
-    public Image[] getImages() {
+    public List<Image> getImages() {
         return images;
     }
 
-    public void setImages(Image[] images) {
+    public void setImages(List<Image> images) {
         this.images = images;
     }
 
@@ -124,7 +128,7 @@ public class Artist {
                 "listeners='" + listeners + '\'' +
                 ", mbid='" + mbid + '\'' +
                 ", name='" + name + '\'' +
-                ", images=" + Arrays.toString(images) +
+                ", images=" + images +
                 ", streamable='" + streamable + '\'' +
                 ", url='" + url + '\'' +
                 ", tags=" + tags +

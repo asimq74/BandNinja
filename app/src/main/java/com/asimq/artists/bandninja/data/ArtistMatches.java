@@ -3,18 +3,19 @@ package com.asimq.artists.bandninja.data;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class ArtistMatches
 {
     @SerializedName("artist")
-    private Artist[] artists;
+    private List<Artist> artists;
 
-    public Artist[] getArtists()
+    public List<Artist> getArtists()
     {
         return artists;
     }
 
-    public void setArtists(Artist[] artists)
+    public void setArtists(List<Artist> artists)
     {
         this.artists = artists;
     }
@@ -22,7 +23,7 @@ public class ArtistMatches
     @Override
     public String toString() {
         return "ArtistMatches{" +
-                "artists=" + Arrays.toString(artists) +
+                "artists=" + artists +
                 '}';
     }
 }

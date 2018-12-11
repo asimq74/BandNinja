@@ -3,17 +3,18 @@ package com.asimq.artists.bandninja.data;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class Similar {
     @SerializedName("artist")
-    private Artist[] artists;
+    private List<Artist> artists;
 
-    public Artist[] getArtists()
+    public List<Artist> getArtists()
     {
         return artists;
     }
 
-    public void setArtists(Artist[] artists)
+    public void setArtists(List<Artist> artists)
     {
         this.artists = artists;
     }
@@ -21,7 +22,7 @@ public class Similar {
     @Override
     public String toString() {
         return "Similar{" +
-                "artists=" + Arrays.toString(artists) +
+                "artists=" + artists +
                 '}';
     }
 }

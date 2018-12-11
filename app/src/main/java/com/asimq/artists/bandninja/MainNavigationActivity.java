@@ -1,6 +1,11 @@
 package com.asimq.artists.bandninja;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
 import android.app.SearchManager;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,251 +24,222 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.asimq.artists.bandninja.data.Artist;
-import com.asimq.artists.bandninja.data.ArtistsPojo;
 import com.asimq.artists.bandninja.data.Image;
-import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
-import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
+import com.asimq.artists.bandninja.data.Tag;
+import com.asimq.artists.bandninja.viewmodelfactories.SearchResultsViewModelFactory;
+import com.asimq.artists.bandninja.viewmodels.SearchResultsViewModel;
 import com.squareup.picasso.Picasso;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class MainNavigationActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+		implements NavigationView.OnNavigationItemSelectedListener {
 
-    public static final String API_KEY = BuildConfig.LastFMApiKey;
-    public static final String DEFAULT_FORMAT = "json";
-    public static final String ITEM_ID = "ITEM_ID";
-    final String TAG = this.getClass().getSimpleName();
-    private RecyclerView mRecyclerView;
+	private class Adapter extends RecyclerView.Adapter<ViewHolder> {
 
-    private void populateUI(@Nullable Artist[] artists) {
-        Adapter adapter = new Adapter(artists);
-        adapter.setHasStableIds(true);
-        mRecyclerView.setAdapter(adapter);
-        int columnCount = getResources().getInteger(R.integer.list_column_count);
-        StaggeredGridLayoutManager sglm =
-                new StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL);
-        mRecyclerView.setLayoutManager(sglm);
-    }
+		private final List<Artist> artists;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+		private Adapter(@NonNull List<Artist> artists) {
+			this.artists = artists;
+		}
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+		private void attemptToLoadThumbnail(@NonNull ViewHolder holder, @NonNull Artist artist) {
+			String imageUrl = getImageUrl(artist);
+			if (imageUrl.isEmpty()) {
+				return;
+			}
+			Picasso.with(MainNavigationActivity.this).load(imageUrl).into(
+					holder.thumbnailView, new com.squareup.picasso.Callback() {
+						@Override
+						public void onError() {
+							Log.i(TAG, "image is empty");
+						}
 
-//        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-//        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-//                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-//        drawer.addDrawerListener(toggle);
-//        toggle.syncState();
-//
-//        NavigationView navigationView = findViewById(R.id.nav_view);
-//        navigationView.setNavigationItemSelectedListener(this);
-        mRecyclerView = findViewById(R.id.recycler_view);
-    }
+						@Override
+						public void onSuccess() {
 
-//    @Override
-//    public void onBackPressed() {
-//        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-//        if (drawer.isDrawerOpen(GravityCompat.START)) {
-//            drawer.closeDrawer(GravityCompat.START);
-//        } else {
-//            super.onBackPressed();
-//        }
-//    }
+						}
+					});
+		}
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main_navigation, menu);
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                Log.d(TAG, "onQueryTextSubmit: query->" + query);
-                final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
-                Call<ArtistsPojo> call = service.getArtists("artist.search", query,
-                        API_KEY, DEFAULT_FORMAT);
-                call.enqueue(new Callback<ArtistsPojo>() {
+		private String getImageUrl(@NonNull Artist artist) {
+			for (Image image : artist.getImages()) {
+				if ("large".equals(image.getSize())) {
+					return image.getText();
+				}
+			}
+			return "";
+		}
 
-                    @Override
-                    public void onFailure(Call<ArtistsPojo> call, Throwable t) {
-                        Log.e(TAG, "error calling service", t);
-                        Toast.makeText(getApplicationContext(), "Something went wrong...Please try later!", Toast.LENGTH_LONG).show();
-                    }
+		@Override
+		public int getItemCount() {
+			return artists.size();
+		}
 
-                    @Override
-                    public void onResponse(Call<ArtistsPojo> call, Response<ArtistsPojo> response) {
-                        final ArtistsPojo artistPojo = response.body();
-                        if (artistPojo == null) {
-                            return;
-                        }
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
 
-                        Log.i(TAG, "result: " + artistPojo.getResult());
-                        populateUI(artistPojo.getResult().getArtistmatches().getArtists());
+		@Override
+		public void onBindViewHolder(@NonNull ViewHolder holder, int i) {
+			final Artist artist = artists.get(i);
+			holder.titleView.setText(artist.getName());
+			attemptToLoadThumbnail(holder, artist);
+			searchResultsViewModel.getArtistInfo(artist.getName()).observe(MainNavigationActivity.this, artistInfo -> populateTags(holder, artistInfo));
+		}
 
-                    }
-                });
-                return false;
-            }
+		@NonNull
+		@Override
+		public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+			View view = getLayoutInflater().inflate(R.layout.list_item_search_results, viewGroup, false);
+			ViewHolder vh = new ViewHolder(view);
+			view.setOnClickListener((View v) -> {
+				final int adapterPosition = vh.getAdapterPosition();
+				final long itemId = getItemId(adapterPosition);
+				final Intent intent = new Intent(MainNavigationActivity.this, ResultActivity.class);
+				intent.putExtra(ITEM_ID, itemId);
+				startActivity(intent);
+			});
+			return vh;
+		}
 
-            @Override
-            public boolean onQueryTextChange(String s) {
-                return false;
-            }
-        });
-        return true;
-    }
+		private void populateTags(ViewHolder holder, Artist artist) {
+			StringBuilder sb = new StringBuilder();
+			int count = 0;
+			final List<Tag> allTags = artist.getTags().getTags();
+			for (Tag tag : allTags) {
+				sb.append(tag.getName()).append(count++ < (allTags.size() - 1) ? ", " : "");
+			}
+			holder.subtitleView.setText(sb);
+		}
+	}
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+	static class ViewHolder extends RecyclerView.ViewHolder {
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+		@BindView(R.id.sub_text)
+		TextView subtitleView;
+		@BindView(R.id.thumbnail)
+		ImageView thumbnailView;
+		@BindView(R.id.primary_text)
+		TextView titleView;
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
+		public ViewHolder(View view) {
+			super(view);
+			ButterKnife.bind(this, view);
+		}
+	}
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-            Intent intent = new Intent(this, ResultActivity.class);
-            startActivity(intent);
+	public static final String ITEM_ID = "ITEM_ID";
+	final String TAG = this.getClass().getSimpleName();
+	@BindView(R.id.fab)
+	FloatingActionButton fab;
+	@BindView(R.id.recycler_view)
+	RecyclerView mRecyclerView;
+	private SearchResultsViewModel searchResultsViewModel;
+	@Inject
+	SearchResultsViewModelFactory searchResultsViewModelFactory;
+	@BindView(R.id.toolbar)
+	Toolbar toolbar;
 
-        } else if (id == R.id.nav_slideshow) {
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+		ButterKnife.bind(this);
+		final MyApplication application = (MyApplication) getApplicationContext();
+		application.getApplicationComponent().inject(this);
+		searchResultsViewModel = ViewModelProviders.of(this, searchResultsViewModelFactory)
+				.get(SearchResultsViewModel.class);
+		setSupportActionBar(toolbar);
 
-        } else if (id == R.id.nav_manage) {
+		fab.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+						.setAction("Action", null).show();
+			}
+		});
+	}
 
-        } else if (id == R.id.nav_share) {
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main_navigation, menu);
+		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+		SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+		searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+			@Override
+			public boolean onQueryTextChange(String s) {
+				return false;
+			}
 
-        } else if (id == R.id.nav_send) {
+			@Override
+			public boolean onQueryTextSubmit(String query) {
+				Log.d(TAG, "onQueryTextSubmit: query->" + query);
+				searchResultsViewModel.getSearchResultsByArtist(query).observe(MainNavigationActivity.this, artists -> populateUI(artists));
+				return false;
+			}
+		});
+		return true;
+	}
 
-        }
+	@SuppressWarnings("StatementWithEmptyBody")
+	@Override
+	public boolean onNavigationItemSelected(MenuItem item) {
+		// Handle navigation view item clicks here.
+		int id = item.getItemId();
 
-//        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-//        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
+		if (id == R.id.nav_camera) {
+			// Handle the camera action
+		} else if (id == R.id.nav_gallery) {
+			Intent intent = new Intent(this, ResultActivity.class);
+			startActivity(intent);
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+		} else if (id == R.id.nav_slideshow) {
 
-        public TextView subtitleView;
-        public ImageView thumbnailView;
-        public TextView titleView;
+		} else if (id == R.id.nav_manage) {
 
-        public ViewHolder(View view) {
-            super(view);
-            thumbnailView = view.findViewById(R.id.thumbnail);
-            titleView = view.findViewById(R.id.primary_text);
-            subtitleView = view.findViewById(R.id.sub_text);
-        }
-    }
+		} else if (id == R.id.nav_share) {
 
-    private class Adapter extends RecyclerView.Adapter<ViewHolder> {
+		} else if (id == R.id.nav_send) {
 
-        private final Artist[] artists;
+		}
+		return true;
+	}
 
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
 
-        public Adapter(Artist[] artists) {
-            this.artists = artists;
-        }
+		//noinspection SimplifiableIfStatement
+		if (id == R.id.action_settings) {
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
 
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-
-        @NonNull
-        @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-            View view = getLayoutInflater().inflate(R.layout.list_item_search_results, viewGroup, false);
-            final ViewHolder vh = new ViewHolder(view);
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    final int adapterPosition = vh.getAdapterPosition();
-                    final long itemId = getItemId(adapterPosition);
-                    final Intent intent = new Intent(MainNavigationActivity.this, ResultActivity.class);
-                    intent.putExtra(ITEM_ID, itemId);
-                    startActivity(intent);
-                }
-            });
-            return vh;
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int i) {
-            final Artist artist = artists[i];
-            holder.titleView.setText(artist.getName());
-            holder.subtitleView.setText(artist.getName());
-            attemptToLoadThumbnail(holder, artist);
-        }
-
-        private void attemptToLoadThumbnail(@NonNull ViewHolder holder, @NonNull Artist artist) {
-            String imageUrl = getImageUrl(artist);
-            if (imageUrl.isEmpty()) {
-                return;
-            }
-            Picasso.with(MainNavigationActivity.this).load(imageUrl).into(
-                    holder.thumbnailView, new com.squareup.picasso.Callback() {
-                        @Override
-                        public void onSuccess() {
-
-                        }
-
-                        @Override
-                        public void onError() {
-                            Log.i(TAG, "image is empty");
-                        }
-                    });
-        }
-
-        private String getImageUrl(@NonNull Artist artist) {
-            for (Image image : artist.getImages()) {
-                if ("large".equals(image.getSize())) {
-                    return image.getText();
-                }
-            }
-            return "";
-        }
-
-        @Override
-        public int getItemCount() {
-            return artists.length;
-        }
-    }
+	private void populateUI(@Nullable List<Artist> artists) {
+		if (null == artists || artists.isEmpty()) {
+			Toast.makeText(getApplicationContext(), "Something went wrong...Please try later!", Toast.LENGTH_LONG).show();
+			return;
+		}
+		Adapter adapter = new Adapter(artists);
+		adapter.setHasStableIds(true);
+		mRecyclerView.setAdapter(adapter);
+		int columnCount = getResources().getInteger(R.integer.list_column_count);
+		StaggeredGridLayoutManager sglm =
+				new StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL);
+		mRecyclerView.setLayoutManager(sglm);
+	}
 }
