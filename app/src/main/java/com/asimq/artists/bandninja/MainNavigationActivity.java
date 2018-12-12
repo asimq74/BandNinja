@@ -105,6 +105,7 @@ public class MainNavigationActivity extends AppCompatActivity
 				final long itemId = getItemId(adapterPosition);
 				final Intent intent = new Intent(MainNavigationActivity.this, ResultActivity.class);
 				intent.putExtra(ITEM_ID, itemId);
+				intent.putExtra(MB_ID, artists.get(adapterPosition).getMbid());
 				startActivity(intent);
 			});
 			return vh;
@@ -137,6 +138,7 @@ public class MainNavigationActivity extends AppCompatActivity
 	}
 
 	public static final String ITEM_ID = "ITEM_ID";
+	public static final String MB_ID = "MB_ID";
 	final String TAG = this.getClass().getSimpleName();
 	@BindView(R.id.fab)
 	FloatingActionButton fab;
