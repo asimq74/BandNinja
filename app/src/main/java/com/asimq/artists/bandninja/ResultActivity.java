@@ -9,10 +9,13 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +27,7 @@ import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.viewmodelfactories.ArtistDetailViewModelFactory;
 import com.asimq.artists.bandninja.viewmodels.ArtistDetailViewModel;
+import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -40,6 +44,8 @@ public class ResultActivity extends AppCompatActivity {
 	@Inject
 	ArtistDetailViewModelFactory artistDetailViewModelFactory;
 	private String mbid = "";
+	@BindView(R.id.photo)
+	ImageView photo;
 	@BindView(R.id.summary)
 	TextView summary;
 
@@ -202,6 +208,22 @@ public class ResultActivity extends AppCompatActivity {
 	}
 
 	private void populateUI(@NonNull ArtistData artistDetail) {
-		summary.setText(artistDetail.getBio());
+		summary.setText(Html.fromHtml(artistDetail.getBio()
+				.replaceAll("(\r\n\r\n)", "<p/>")
+				.replaceAll("(\r\n)", " ")));
+		summary.setMovementMethod(LinkMovementMethod.getInstance());
+		final String image = artistDetail.getImage();
+		Picasso.with(this).load(image).into(
+				photo, new com.squareup.picasso.Callback() {
+					@Override
+					public void onError() {
+						Log.i(TAG, "image is empty");
+					}
+
+					@Override
+					public void onSuccess() {
+						Log.i(TAG, "successfully loaded image " + image);
+					}
+				});
 	}
 }

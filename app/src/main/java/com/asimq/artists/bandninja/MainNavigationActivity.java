@@ -137,6 +137,7 @@ public class MainNavigationActivity extends AppCompatActivity
 			ButterKnife.bind(this, view);
 		}
 	}
+
 	public static final String ITEM_ID = "ITEM_ID";
 	public static final String MB_ID = "MB_ID";
 	final String TAG = this.getClass().getSimpleName();

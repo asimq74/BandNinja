@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.asimq.artists.bandninja.ui.HeaderView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/header_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/header_view_title"
+        style="@style/ExpandedTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        tools:text="Japanese Fairy Tales" />
+
+    <!-- Subtitle -->
+    <TextView
+        android:id="@+id/header_view_author"
+        style="@style/ExpandedSubTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Hayao Miyazaki" />
+
+    <!-- Subtitle -->
+    <TextView
+        android:id="@+id/header_view_published_date"
+        style="@style/ExpandedSubTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Oct 9, 1980" />
+
+
+</com.asimq.artists.bandninja.ui.HeaderView>
