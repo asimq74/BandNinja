@@ -8,7 +8,7 @@ public class Bio
     private String content;
     @SerializedName("summary")
     private String summary;
-    @SerializedName("linkWrapper")
+    @SerializedName("links")
     private LinkWrapper linkWrapper;
     @SerializedName("published")
     private String published;

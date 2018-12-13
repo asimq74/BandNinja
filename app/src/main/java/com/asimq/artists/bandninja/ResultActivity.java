@@ -1,8 +1,10 @@
 package com.asimq.artists.bandninja;
 
-import android.app.SearchManager;
-import android.content.Intent;
+import javax.inject.Inject;
+
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +13,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.asimq.artists.bandninja.json.Album;
@@ -18,7 +21,12 @@ import com.asimq.artists.bandninja.json.ArtistWrapper;
 import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.json.TopAlbumsWrapper;
 import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
+import com.asimq.artists.bandninja.room.ArtistData;
+import com.asimq.artists.bandninja.viewmodelfactories.ArtistDetailViewModelFactory;
+import com.asimq.artists.bandninja.viewmodels.ArtistDetailViewModel;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -28,22 +36,14 @@ public class ResultActivity extends AppCompatActivity {
 	public static final String API_KEY = BuildConfig.LastFMApiKey;
 	public static final String DEFAULT_FORMAT = "json";
 	final String TAG = this.getClass().getSimpleName();
+	private ArtistDetailViewModel artistDetailViewModel;
+	@Inject
+	ArtistDetailViewModelFactory artistDetailViewModelFactory;
+	private String mbid = "";
+	@BindView(R.id.summary)
+	TextView summary;
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        setIntent(intent);
-        handleIntent(intent);
-    }
-
-    private void handleIntent(Intent intent) {
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            Log.i(TAG, "query=" + query);
-        }
-    }
-
-
-    private void getAlbumInfo(final String artistName, final GetArtists service) {
+	private void getAlbumInfo(final String artistName, final GetArtists service) {
 		Call<ArtistWrapper> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
 				API_KEY, DEFAULT_FORMAT);
 		artistInfoCall.enqueue(new Callback<ArtistWrapper>() {
@@ -66,9 +66,8 @@ public class ResultActivity extends AppCompatActivity {
 		});
 	}
 
-
 	private void getArtistTagInfo(final String mbid, final GetArtists service) {
-		Call<Tag[]> artistTagInfoCall = service.getTagByArtistId("artist.getTagWrapper", mbid, API_KEY, "RJ", DEFAULT_FORMAT);
+		Call<Tag[]> artistTagInfoCall = service.getTagByArtistId("artist.getTag", mbid, API_KEY, "RJ", DEFAULT_FORMAT);
 		artistTagInfoCall.enqueue(new Callback<Tag[]>() {
 
 			@Override
@@ -116,7 +115,19 @@ public class ResultActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if (savedInstanceState == null) {
+			if (getIntent() != null && getIntent().getExtras() != null) {
+				mbid = getIntent().getStringExtra(MainNavigationActivity.MB_ID);
+			}
+		} else {
+			mbid = savedInstanceState.getString(MainNavigationActivity.MB_ID);
+		}
 		setContentView(R.layout.result_activity_main);
+		ButterKnife.bind(this);
+		final MyApplication application = (MyApplication) getApplicationContext();
+		application.getApplicationComponent().inject(this);
+		artistDetailViewModel = ViewModelProviders.of(this, artistDetailViewModelFactory)
+				.get(ArtistDetailViewModel.class);
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
@@ -128,7 +139,7 @@ public class ResultActivity extends AppCompatActivity {
 						.setAction("Action", null).show();
 			}
 		});
-        handleIntent(getIntent());
+		artistDetailViewModel.getArtistDetail(mbid).observe(this, artistDetail -> populateUI(artistDetail));
 	}
 
 	@Override
@@ -182,5 +193,15 @@ public class ResultActivity extends AppCompatActivity {
 //			}
 //		});
 
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putString(MainNavigationActivity.MB_ID, mbid);
+		super.onSaveInstanceState(outState);
+	}
+
+	private void populateUI(@NonNull ArtistData artistDetail) {
+		summary.setText(artistDetail.getBio());
 	}
 }

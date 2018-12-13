@@ -18,7 +18,7 @@ public class Artist {
     private String streamable;
     @SerializedName("url")
     private String url;
-    @SerializedName("tagWrapper")
+    @SerializedName("tags")
     @Expose
     private TagWrapper tagWrapper;
     @SerializedName("ontour")

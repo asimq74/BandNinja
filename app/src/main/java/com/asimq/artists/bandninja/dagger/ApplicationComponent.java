@@ -7,6 +7,8 @@ import android.content.Context;
 
 import com.asimq.artists.bandninja.MainNavigationActivity;
 import com.asimq.artists.bandninja.MyApplication;
+import com.asimq.artists.bandninja.ResultActivity;
+import com.asimq.artists.bandninja.viewmodels.ArtistDetailViewModel;
 import com.asimq.artists.bandninja.viewmodels.SearchResultsViewModel;
 
 import dagger.Component;
@@ -28,6 +30,9 @@ public interface ApplicationComponent {
 
 	void inject(MainNavigationActivity mainNavigationActivity);
 
+	void inject(ResultActivity resultActivity);
+
 	void inject(SearchResultsViewModel searchResultsViewModel);
 
+	void inject(ArtistDetailViewModel artistDetailViewModel);
 }

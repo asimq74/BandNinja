@@ -28,9 +28,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.asimq.artists.bandninja.asynctasks.SaveArtistTask;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.Image;
 import com.asimq.artists.bandninja.json.Tag;
+import com.asimq.artists.bandninja.room.ArtistData;
+import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.viewmodelfactories.SearchResultsViewModelFactory;
 import com.asimq.artists.bandninja.viewmodels.SearchResultsViewModel;
 import com.squareup.picasso.Picasso;
@@ -39,7 +42,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainNavigationActivity extends AppCompatActivity
-		implements NavigationView.OnNavigationItemSelectedListener {
+		implements NavigationView.OnNavigationItemSelectedListener, NavigationListener {
 
 	private class Adapter extends RecyclerView.Adapter<ViewHolder> {
 
@@ -92,7 +95,8 @@ public class MainNavigationActivity extends AppCompatActivity
 			final Artist artist = artists.get(i);
 			holder.titleView.setText(artist.getName());
 			attemptToLoadThumbnail(holder, artist);
-			searchResultsViewModel.getArtistInfo(artist.getName()).observe(MainNavigationActivity.this, artistInfo -> populateTags(holder, artistInfo));
+			searchResultsViewModel.getArtistInfo(artist.getName()).observe(MainNavigationActivity.this,
+					artistDetailedInfo -> populateTags(holder, artistDetailedInfo, i));
 		}
 
 		@NonNull
@@ -100,25 +104,22 @@ public class MainNavigationActivity extends AppCompatActivity
 		public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
 			View view = getLayoutInflater().inflate(R.layout.list_item_search_results, viewGroup, false);
 			ViewHolder vh = new ViewHolder(view);
-			view.setOnClickListener((View v) -> {
-				final int adapterPosition = vh.getAdapterPosition();
-				final long itemId = getItemId(adapterPosition);
-				final Intent intent = new Intent(MainNavigationActivity.this, ResultActivity.class);
-				intent.putExtra(ITEM_ID, itemId);
-				intent.putExtra(MB_ID, artists.get(adapterPosition).getMbid());
-				startActivity(intent);
-			});
 			return vh;
 		}
 
-		private void populateTags(ViewHolder holder, Artist artist) {
+		private void populateTags(ViewHolder holder, Artist artistDetailedInfo, int position) {
 			StringBuilder sb = new StringBuilder();
 			int count = 0;
-			final List<Tag> allTags = artist.getTagWrapper().getTags();
+			final List<Tag> allTags = artistDetailedInfo.getTagWrapper().getTags();
 			for (Tag tag : allTags) {
 				sb.append(tag.getName()).append(count++ < (allTags.size() - 1) ? ", " : "");
 			}
 			holder.subtitleView.setText(sb);
+			holder.itemView.setOnClickListener((View v) -> {
+				final long itemId = getItemId(position);
+				ArtistData artistData = new ArtistData(artistDetailedInfo);
+				new SaveArtistTask(artistDataDao, MainNavigationActivity.this).execute(artistData);
+			});
 		}
 	}
 
@@ -136,10 +137,11 @@ public class MainNavigationActivity extends AppCompatActivity
 			ButterKnife.bind(this, view);
 		}
 	}
-
 	public static final String ITEM_ID = "ITEM_ID";
 	public static final String MB_ID = "MB_ID";
 	final String TAG = this.getClass().getSimpleName();
+	@Inject
+	ArtistDataDao artistDataDao;
 	@BindView(R.id.fab)
 	FloatingActionButton fab;
 	@BindView(R.id.recycler_view)
@@ -149,6 +151,13 @@ public class MainNavigationActivity extends AppCompatActivity
 	SearchResultsViewModelFactory searchResultsViewModelFactory;
 	@BindView(R.id.toolbar)
 	Toolbar toolbar;
+
+	@Override
+	public void navigateTo(@NonNull String mbid) {
+		final Intent intent = new Intent(MainNavigationActivity.this, ResultActivity.class);
+		intent.putExtra(MB_ID, mbid);
+		startActivity(intent);
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
