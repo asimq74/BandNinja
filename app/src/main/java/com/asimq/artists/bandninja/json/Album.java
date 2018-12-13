@@ -1,6 +1,5 @@
-package com.asimq.artists.bandninja.data;
+package com.asimq.artists.bandninja.json;
 
-import java.util.Arrays;
 import java.util.List;
 
 import android.provider.MediaStore.Images;

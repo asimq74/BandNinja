@@ -28,9 +28,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.asimq.artists.bandninja.data.Artist;
-import com.asimq.artists.bandninja.data.Image;
-import com.asimq.artists.bandninja.data.Tag;
+import com.asimq.artists.bandninja.json.Artist;
+import com.asimq.artists.bandninja.json.Image;
+import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.viewmodelfactories.SearchResultsViewModelFactory;
 import com.asimq.artists.bandninja.viewmodels.SearchResultsViewModel;
 import com.squareup.picasso.Picasso;
@@ -114,7 +114,7 @@ public class MainNavigationActivity extends AppCompatActivity
 		private void populateTags(ViewHolder holder, Artist artist) {
 			StringBuilder sb = new StringBuilder();
 			int count = 0;
-			final List<Tag> allTags = artist.getTags().getTags();
+			final List<Tag> allTags = artist.getTagWrapper().getTags();
 			for (Tag tag : allTags) {
 				sb.append(tag.getName()).append(count++ < (allTags.size() - 1) ? ", " : "");
 			}

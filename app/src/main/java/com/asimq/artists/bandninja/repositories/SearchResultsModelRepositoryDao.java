@@ -1,6 +1,5 @@
 package com.asimq.artists.bandninja.repositories;
 
-import java.util.Arrays;
 import java.util.List;
 
 import android.arch.lifecycle.LiveData;
@@ -9,9 +8,9 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.asimq.artists.bandninja.BuildConfig;
-import com.asimq.artists.bandninja.data.Artist;
-import com.asimq.artists.bandninja.data.ArtistInfoPojo;
-import com.asimq.artists.bandninja.data.ArtistsPojo;
+import com.asimq.artists.bandninja.json.Artist;
+import com.asimq.artists.bandninja.json.ArtistWrapper;
+import com.asimq.artists.bandninja.json.ResultsWrapper;
 import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
 
@@ -29,21 +28,21 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 	public LiveData<Artist> getArtistInfo(@NonNull String artistName) {
 		final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
 		final MutableLiveData<Artist> artistInfoMutableLiveData = new MutableLiveData<>();
-		Call<ArtistInfoPojo> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
+		Call<ArtistWrapper> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
 				API_KEY, DEFAULT_FORMAT);
-		artistInfoCall.enqueue(new Callback<ArtistInfoPojo>() {
+		artistInfoCall.enqueue(new Callback<ArtistWrapper>() {
 			@Override
-			public void onFailure(Call<ArtistInfoPojo> call, Throwable t) {
+			public void onFailure(Call<ArtistWrapper> call, Throwable t) {
 				artistInfoMutableLiveData.setValue(null);
 			}
 
 			@Override
-			public void onResponse(Call<ArtistInfoPojo> call, Response<ArtistInfoPojo> response) {
-				final ArtistInfoPojo artistInfoPojo = response.body();
-				if (artistInfoPojo == null) {
+			public void onResponse(Call<ArtistWrapper> call, Response<ArtistWrapper> response) {
+				final ArtistWrapper artistWrapper = response.body();
+				if (artistWrapper == null) {
 					return;
 				}
-				artistInfoMutableLiveData.setValue(artistInfoPojo.getArtist());
+				artistInfoMutableLiveData.setValue(artistWrapper.getArtist());
 			}
 		});
 		return artistInfoMutableLiveData;
@@ -54,19 +53,19 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 		final MutableLiveData<List<Artist>> artistMutableLiveData = new MutableLiveData<>();
 		Log.d(TAG, "onQueryTextSubmit: query->" + query);
 		final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
-		Call<ArtistsPojo> call = service.getArtists("artist.search", query,
+		Call<ResultsWrapper> call = service.getArtists("artist.search", query,
 				API_KEY, DEFAULT_FORMAT);
-		call.enqueue(new Callback<ArtistsPojo>() {
+		call.enqueue(new Callback<ResultsWrapper>() {
 
 			@Override
-			public void onFailure(Call<ArtistsPojo> call, Throwable t) {
+			public void onFailure(Call<ResultsWrapper> call, Throwable t) {
 				Log.e(TAG, "error calling service", t);
 				artistMutableLiveData.setValue(null);
 			}
 
 			@Override
-			public void onResponse(Call<ArtistsPojo> call, Response<ArtistsPojo> response) {
-				final ArtistsPojo artistPojo = response.body();
+			public void onResponse(Call<ResultsWrapper> call, Response<ResultsWrapper> response) {
+				final ResultsWrapper artistPojo = response.body();
 				if (artistPojo == null) {
 					return;
 				}

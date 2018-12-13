@@ -13,14 +13,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.asimq.artists.bandninja.data.Album;
-import com.asimq.artists.bandninja.data.Artist;
-import com.asimq.artists.bandninja.data.ArtistInfoPojo;
-import com.asimq.artists.bandninja.data.ArtistsPojo;
-import com.asimq.artists.bandninja.data.Tag;
-import com.asimq.artists.bandninja.data.TopAlbumsPojo;
+import com.asimq.artists.bandninja.json.Album;
+import com.asimq.artists.bandninja.json.ArtistWrapper;
+import com.asimq.artists.bandninja.json.Tag;
+import com.asimq.artists.bandninja.json.TopAlbumsWrapper;
 import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
-import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -47,31 +44,31 @@ public class ResultActivity extends AppCompatActivity {
 
 
     private void getAlbumInfo(final String artistName, final GetArtists service) {
-		Call<ArtistInfoPojo> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
+		Call<ArtistWrapper> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
 				API_KEY, DEFAULT_FORMAT);
-		artistInfoCall.enqueue(new Callback<ArtistInfoPojo>() {
+		artistInfoCall.enqueue(new Callback<ArtistWrapper>() {
 
 			@Override
-			public void onFailure(Call<ArtistInfoPojo> call, Throwable t) {
+			public void onFailure(Call<ArtistWrapper> call, Throwable t) {
 				Log.e(TAG, "error calling service", t);
 				Toast.makeText(getApplicationContext(), "Something went wrong...Please try later!", Toast.LENGTH_LONG).show();
 			}
 
 			@Override
-			public void onResponse(Call<ArtistInfoPojo> call, Response<ArtistInfoPojo> response) {
-				final ArtistInfoPojo artistInfoPojo = response.body();
-				if (artistInfoPojo == null) {
+			public void onResponse(Call<ArtistWrapper> call, Response<ArtistWrapper> response) {
+				final ArtistWrapper artistWrapper = response.body();
+				if (artistWrapper == null) {
 					return;
 				}
 
-				getTopAlbumInfo(artistInfoPojo, service, artistName);
+				getTopAlbumInfo(artistWrapper, service, artistName);
 			}
 		});
 	}
 
 
 	private void getArtistTagInfo(final String mbid, final GetArtists service) {
-		Call<Tag[]> artistTagInfoCall = service.getTagByArtistId("artist.getTags", mbid, API_KEY, "RJ", DEFAULT_FORMAT);
+		Call<Tag[]> artistTagInfoCall = service.getTagByArtistId("artist.getTagWrapper", mbid, API_KEY, "RJ", DEFAULT_FORMAT);
 		artistTagInfoCall.enqueue(new Callback<Tag[]>() {
 
 			@Override
@@ -91,25 +88,25 @@ public class ResultActivity extends AppCompatActivity {
 		});
 	}
 
-	private void getTopAlbumInfo(final ArtistInfoPojo artistInfoPojo, GetArtists service, final String artistName) {
-		Call<TopAlbumsPojo> topAlbumsPojoCall = service.getTopAlbums("artist.gettopalbums", artistName,
+	private void getTopAlbumInfo(final ArtistWrapper artistWrapper, GetArtists service, final String artistName) {
+		Call<TopAlbumsWrapper> topAlbumsPojoCall = service.getTopAlbums("artist.gettopalbums", artistName,
 				API_KEY, DEFAULT_FORMAT, 1);
-		topAlbumsPojoCall.enqueue(new Callback<TopAlbumsPojo>() {
+		topAlbumsPojoCall.enqueue(new Callback<TopAlbumsWrapper>() {
 			@Override
-			public void onFailure(Call<TopAlbumsPojo> call, Throwable t) {
+			public void onFailure(Call<TopAlbumsWrapper> call, Throwable t) {
 				Log.e(TAG, "error calling service", t);
 				Toast.makeText(getApplicationContext(), "Something went wrong...Please try later!", Toast.LENGTH_LONG).show();
 			}
 
 			@Override
-			public void onResponse(Call<TopAlbumsPojo> call, Response<TopAlbumsPojo> response) {
-				final TopAlbumsPojo topAlbumsPojo = response.body();
-				if (topAlbumsPojo == null) {
+			public void onResponse(Call<TopAlbumsWrapper> call, Response<TopAlbumsWrapper> response) {
+				final TopAlbumsWrapper topAlbumsWrapper = response.body();
+				if (topAlbumsWrapper == null) {
 					return;
 				}
 
-				Log.d(TAG, String.format("\n\ntop albums for %s (%s items)", artistName, topAlbumsPojo.getTopalbums().getAlbums().size()));
-				for (Album album : topAlbumsPojo.getTopalbums().getAlbums()) {
+				Log.d(TAG, String.format("\n\ntop albums for %s (%s items)", artistName, topAlbumsWrapper.getTopalbums().getAlbums().size()));
+				for (Album album : topAlbumsWrapper.getTopalbums().getAlbums()) {
 					Log.d(TAG, String.format("\t%s - %s\n", album.getName(), album.getArtist().getName()));
 				}
 			}
@@ -159,19 +156,19 @@ public class ResultActivity extends AppCompatActivity {
 	protected void onResume() {
 		super.onResume();
 //		final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
-//		Call<ArtistsPojo> call = service.getArtists("artist.search", "The Cult",
+//		Call<ResultsWrapper> call = service.getArtists("artist.search", "The Cult",
 //				API_KEY, DEFAULT_FORMAT);
-//		call.enqueue(new Callback<ArtistsPojo>() {
+//		call.enqueue(new Callback<ResultsWrapper>() {
 //
 //			@Override
-//			public void onFailure(Call<ArtistsPojo> call, Throwable t) {
+//			public void onFailure(Call<ResultsWrapper> call, Throwable t) {
 //				Log.e(TAG, "error calling service", t);
 //				Toast.makeText(getApplicationContext(), "Something went wrong...Please try later!", Toast.LENGTH_LONG).show();
 //			}
 //
 //			@Override
-//			public void onResponse(Call<ArtistsPojo> call, Response<ArtistsPojo> response) {
-//				final ArtistsPojo artistPojo = response.body();
+//			public void onResponse(Call<ResultsWrapper> call, Response<ResultsWrapper> response) {
+//				final ResultsWrapper artistPojo = response.body();
 //				if (artistPojo == null) {
 //					return;
 //				}

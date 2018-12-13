@@ -7,7 +7,7 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.support.annotation.NonNull;
 
-import com.asimq.artists.bandninja.data.Artist;
+import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.repositories.SearchResultsRepository;
 
 public class SearchResultsViewModel extends AndroidViewModel {

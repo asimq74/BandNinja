@@ -1,8 +1,7 @@
-package com.asimq.artists.bandninja.data;
+package com.asimq.artists.bandninja.json;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class TopAlbums {

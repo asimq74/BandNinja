@@ -5,7 +5,7 @@ import java.util.List;
 import android.arch.lifecycle.LiveData;
 import android.support.annotation.NonNull;
 
-import com.asimq.artists.bandninja.data.Artist;
+import com.asimq.artists.bandninja.json.Artist;
 
 public interface SearchResultsRepository {
 

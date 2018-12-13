@@ -1,12 +1,11 @@
-package com.asimq.artists.bandninja.data;
+package com.asimq.artists.bandninja.json;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.Arrays;
 import java.util.List;
 
-public class Tags {
+public class TagWrapper {
     @SerializedName("tag")
     @Expose
     private List<Tag> tags;
@@ -23,7 +22,7 @@ public class Tags {
 
     @Override
     public String toString() {
-        return "Tags{" +
+        return "TagWrapper{" +
                 "tags=" + tags.toString() +
                 '}';
     }

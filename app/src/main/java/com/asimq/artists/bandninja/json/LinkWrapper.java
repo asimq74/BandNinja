@@ -1,8 +1,8 @@
-package com.asimq.artists.bandninja.data;
+package com.asimq.artists.bandninja.json;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Links
+public class LinkWrapper
 {
     @SerializedName("link")
     private Link link;
@@ -19,7 +19,7 @@ public class Links
 
     @Override
     public String toString() {
-        return "Links{" +
+        return "LinkWrapper{" +
                 "link=" + link +
                 '}';
     }

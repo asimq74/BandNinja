@@ -1,4 +1,4 @@
-package com.asimq.artists.bandninja.data;
+package com.asimq.artists.bandninja.json;
 
 import com.google.gson.annotations.SerializedName;
 

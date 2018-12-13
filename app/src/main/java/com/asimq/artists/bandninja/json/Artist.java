@@ -1,9 +1,8 @@
-package com.asimq.artists.bandninja.data;
+package com.asimq.artists.bandninja.json;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class Artist {
@@ -19,9 +18,9 @@ public class Artist {
     private String streamable;
     @SerializedName("url")
     private String url;
-    @SerializedName("tags")
+    @SerializedName("tagWrapper")
     @Expose
-    private Tags tags;
+    private TagWrapper tagWrapper;
     @SerializedName("ontour")
     private String ontour;
     @SerializedName("bio")
@@ -42,12 +41,12 @@ public class Artist {
         this.similar = similar;
     }
 
-    public Tags getTags() {
-        return tags;
+    public TagWrapper getTagWrapper() {
+        return tagWrapper;
     }
 
-    public void setTags(Tags tags) {
-        this.tags = tags;
+    public void setTagWrapper(TagWrapper tagWrapper) {
+        this.tagWrapper = tagWrapper;
     }
 
     public Bio getBio() {
@@ -131,7 +130,7 @@ public class Artist {
                 ", images=" + images +
                 ", streamable='" + streamable + '\'' +
                 ", url='" + url + '\'' +
-                ", tags=" + tags +
+                ", tagWrapper=" + tagWrapper +
                 ", ontour='" + ontour + '\'' +
                 ", bio=" + bio +
                 ", stats=" + stats +

@@ -1,4 +1,4 @@
-package com.asimq.artists.bandninja.data;
+package com.asimq.artists.bandninja.json;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -8,8 +8,8 @@ public class Bio
     private String content;
     @SerializedName("summary")
     private String summary;
-    @SerializedName("links")
-    private Links links;
+    @SerializedName("linkWrapper")
+    private LinkWrapper linkWrapper;
     @SerializedName("published")
     private String published;
 
@@ -33,14 +33,14 @@ public class Bio
         this.summary = summary;
     }
 
-    public Links getLinks ()
+    public LinkWrapper getLinkWrapper()
     {
-        return links;
+        return linkWrapper;
     }
 
-    public void setLinks (Links links)
+    public void setLinkWrapper(LinkWrapper linkWrapper)
     {
-        this.links = links;
+        this.linkWrapper = linkWrapper;
     }
 
     public String getPublished ()
@@ -58,7 +58,7 @@ public class Bio
         return "Bio{" +
                 "content='" + content + '\'' +
                 ", summary='" + summary + '\'' +
-                ", links=" + links +
+                ", linkWrapper=" + linkWrapper +
                 ", published='" + published + '\'' +
                 '}';
     }

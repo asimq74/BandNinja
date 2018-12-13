@@ -1,8 +1,8 @@
-package com.asimq.artists.bandninja.data;
+package com.asimq.artists.bandninja.json;
 
 import com.google.gson.annotations.SerializedName;
 
-public class ArtistsPojo
+public class ResultsWrapper
 {
     @SerializedName("results")
     private Result result;
@@ -19,7 +19,7 @@ public class ArtistsPojo
 
     @Override
     public String toString() {
-        return "ArtistsPojo{" +
+        return "ResultsWrapper{" +
                 "result=" + result +
                 '}';
     }
