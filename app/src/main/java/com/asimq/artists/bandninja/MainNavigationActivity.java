@@ -116,7 +116,6 @@ public class MainNavigationActivity extends AppCompatActivity
 			}
 			holder.subtitleView.setText(sb);
 			holder.itemView.setOnClickListener((View v) -> {
-				final long itemId = getItemId(position);
 				ArtistData artistData = new ArtistData(artistDetailedInfo);
 				new SaveArtistTask(artistDataDao, MainNavigationActivity.this).execute(artistData);
 			});

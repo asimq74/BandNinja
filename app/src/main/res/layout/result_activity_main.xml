@@ -28,14 +28,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fitsSystemWindows="true"
-                android:scaleType="centerCrop"
+                android:scaleType="fitXY"
                 tools:src="@drawable/head_image"
                 app:layout_collapseMode="pin"/>
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
+                android:layout_height="@dimen/actionBarSize"
                 app:layout_collapseMode="pin">
 
                 <include
