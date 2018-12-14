@@ -6,4 +6,9 @@
     <color name="colorPrimaryLight">#534bae</color>
     <color name="colorAccent">#04561A</color>
     <color name="ltgray">#ffe0e0e0</color>
+    <color name="blue">#348af7</color>
+    <color name="temperature_background">@color/blue</color>
+    <color name="temperature_text">@android:color/white</color>
+    <color name="green_dot_big">@color/blue</color>
+    <color name="green_dot_small">@color/blue</color>
 </resources>

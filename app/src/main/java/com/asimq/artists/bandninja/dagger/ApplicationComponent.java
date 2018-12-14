@@ -5,6 +5,7 @@ import javax.inject.Singleton;
 import android.app.Application;
 import android.content.Context;
 
+import com.asimq.artists.bandninja.MainActivity;
 import com.asimq.artists.bandninja.MainNavigationActivity;
 import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.ResultActivity;
@@ -29,6 +30,8 @@ public interface ApplicationComponent {
 	void inject(MyApplication application);
 
 	void inject(MainNavigationActivity mainNavigationActivity);
+
+	void inject(MainActivity mainActivity);
 
 	void inject(ResultActivity resultActivity);
 

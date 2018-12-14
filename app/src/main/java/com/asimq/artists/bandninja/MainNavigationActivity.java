@@ -137,7 +137,6 @@ public class MainNavigationActivity extends AppCompatActivity
 		}
 	}
 
-	public static final String ITEM_ID = "ITEM_ID";
 	public static final String MB_ID = "MB_ID";
 	final String TAG = this.getClass().getSimpleName();
 	@Inject
@@ -154,7 +153,7 @@ public class MainNavigationActivity extends AppCompatActivity
 
 	@Override
 	public void navigateTo(@NonNull String mbid) {
-		final Intent intent = new Intent(MainNavigationActivity.this, ResultActivity.class);
+		final Intent intent = new Intent(MainNavigationActivity.this, MainActivity.class);
 		intent.putExtra(MB_ID, mbid);
 		startActivity(intent);
 	}
@@ -162,7 +161,7 @@ public class MainNavigationActivity extends AppCompatActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.activity_main_launcher);
 		ButterKnife.bind(this);
 		final MyApplication application = (MyApplication) getApplicationContext();
 		application.getApplicationComponent().inject(this);
@@ -211,7 +210,7 @@ public class MainNavigationActivity extends AppCompatActivity
 		if (id == R.id.nav_camera) {
 			// Handle the camera action
 		} else if (id == R.id.nav_gallery) {
-			Intent intent = new Intent(this, ResultActivity.class);
+			Intent intent = new Intent(this, MainActivity.class);
 			startActivity(intent);
 
 		} else if (id == R.id.nav_slideshow) {
