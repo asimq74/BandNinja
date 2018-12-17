@@ -152,17 +152,22 @@ public class MainActivity extends AppCompatActivity {
 	RecyclerView mRecyclerView;
 	private DecodeBitmapTask.Listener mapLoadListener;
 	private ImageSwitcher mapSwitcher;
-	private final int[] maps = {R.drawable.map_paris, R.drawable.map_seoul, R.drawable.map_london, R.drawable.map_beijing, R.drawable.map_greece};
-	private final int[] pics = {R.drawable.p1, R.drawable.p2, R.drawable.p3, R.drawable.p4, R.drawable.p5};
+	private final int[] maps = {R.drawable.map_paris, R.drawable.map_seoul, R.drawable.map_london, R.drawable.map_beijing};
+	private final int[] pics = {R.drawable.p1, R.drawable.p2, R.drawable.p3, R.drawable.p4};
+	private final String[] imageUrls = {"https://lastfm-img2.akamaized.net/i/u/300x300/f96a683436954bc6a9fd8991a818f303.png",
+			"https://lastfm-img2.akamaized.net/i/u/300x300/f96a683436954bc6a9fd8991a818f303.png",
+			"https://lastfm-img2.akamaized.net/i/u/300x300/f96a683436954bc6a9fd8991a818f303.png",
+			"https://lastfm-img2.akamaized.net/i/u/300x300/f96a683436954bc6a9fd8991a818f303.png",
+			"https://lastfm-img2.akamaized.net/i/u/300x300/f96a683436954bc6a9fd8991a818f303.png"};
 	private TextSwitcher placeSwitcher;
 	private final String[] places = {"The Louvre", "Gwanghwamun", "Tower Bridge", "Temple of Heaven", "Aegeana Sea"};
 	private RecyclerView recyclerView;
 	private SearchResultsViewModel searchResultsViewModel;
 	@Inject
 	SearchResultsViewModelFactory searchResultsViewModelFactory;
-	private final SliderAdapter sliderAdapter = new SliderAdapter(pics, 20, new OnCardClickListener());
+	private SliderAdapter sliderAdapter;
 	private TextSwitcher temperatureSwitcher;
-	private final String[] temperatures = {"21°C", "19°C", "17°C", "23°C", "20°C"};
+	private final String[] temperatures = {"21°C", "19°C", "17°C", "23°C"};
 	private final String[] times = {"Aug 1 - Dec 15    7:00-18:00", "Sep 5 - Nov 10    8:00-16:00", "Mar 8 - May 21    7:00-18:00"};
 	@BindView(R.id.toolbar)
 	Toolbar toolbar;
@@ -208,9 +213,10 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void initRecyclerView() {
+		sliderAdapter = new SliderAdapter(this, imageUrls, pics, new OnCardClickListener());
 		recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 		recyclerView.setAdapter(sliderAdapter);
-		recyclerView.setHasFixedSize(true);
+		recyclerView.setHasFixedSize(false);
 
 		recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 			@Override

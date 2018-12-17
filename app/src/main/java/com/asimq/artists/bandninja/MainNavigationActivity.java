@@ -73,7 +73,7 @@ public class MainNavigationActivity extends AppCompatActivity
 
 		private String getImageUrl(@NonNull Artist artist) {
 			for (Image image : artist.getImages()) {
-				if ("large".equals(image.getSize())) {
+				if ("mega".equals(image.getSize())) {
 					return image.getText();
 				}
 			}

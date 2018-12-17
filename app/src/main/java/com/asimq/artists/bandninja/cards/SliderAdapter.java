@@ -1,6 +1,7 @@
 package com.asimq.artists.bandninja.cards;
 
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,13 +11,15 @@ import com.asimq.artists.bandninja.R;
 
 public class SliderAdapter extends RecyclerView.Adapter<SliderCard> {
 
-    private final int count;
     private final int[] content;
     private final View.OnClickListener listener;
+    private final String[] urls;
+    private final Context context;
 
-    public SliderAdapter(int[] content, int count, View.OnClickListener listener) {
+    public SliderAdapter(Context context, String[] urls, int[] content, View.OnClickListener listener) {
+        this.context = context;
+        this.urls = urls;
         this.content = content;
-        this.count = count;
         this.listener = listener;
     }
 
@@ -40,7 +43,7 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderCard> {
 
     @Override
     public void onBindViewHolder(SliderCard holder, int position) {
-        holder.setContent(content[position % content.length]);
+        holder.setContent(context, content[position % content.length], urls, position);
     }
 
     @Override
@@ -50,7 +53,7 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderCard> {
 
     @Override
     public int getItemCount() {
-        return count;
+        return urls.length;
     }
 
 }
