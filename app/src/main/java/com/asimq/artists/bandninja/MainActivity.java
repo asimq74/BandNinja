@@ -1,5 +1,7 @@
 package com.asimq.artists.bandninja;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.inject.Inject;
@@ -15,6 +17,7 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewCompat;
@@ -36,6 +39,7 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.asimq.artists.bandninja.cards.SliderAdapter;
+import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.utils.DecodeBitmapTask;
 import com.asimq.artists.bandninja.viewmodelfactories.SearchResultsViewModelFactory;
@@ -80,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
 			final int clickedPosition = recyclerView.getChildAdapterPosition(view);
 			if (clickedPosition == activeCardPosition) {
 				final Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
-				intent.putExtra(DetailsActivity.BUNDLE_IMAGE_ID, pics[activeCardPosition % pics.length]);
+				intent.putExtra(DetailsActivity.BUNDLE_IMAGE_ID, 2);
 
 				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
 					startActivity(intent);
@@ -153,22 +157,21 @@ public class MainActivity extends AppCompatActivity {
 	private DecodeBitmapTask.Listener mapLoadListener;
 	private ImageSwitcher mapSwitcher;
 	private final int[] maps = {R.drawable.map_paris, R.drawable.map_seoul, R.drawable.map_london, R.drawable.map_beijing};
-	private final int[] pics = {R.drawable.p1, R.drawable.p2, R.drawable.p3, R.drawable.p4};
-	private final String[] imageUrls = {"https://lastfm-img2.akamaized.net/i/u/300x300/f96a683436954bc6a9fd8991a818f303.png",
-			"https://lastfm-img2.akamaized.net/i/u/300x300/f96a683436954bc6a9fd8991a818f303.png",
-			"https://lastfm-img2.akamaized.net/i/u/300x300/f96a683436954bc6a9fd8991a818f303.png",
-			"https://lastfm-img2.akamaized.net/i/u/300x300/f96a683436954bc6a9fd8991a818f303.png",
-			"https://lastfm-img2.akamaized.net/i/u/300x300/f96a683436954bc6a9fd8991a818f303.png"};
+//	private final int[] pics = {R.drawable.p1, R.drawable.p2, R.drawable.p3, R.drawable.p4};
+//	private final String[] imageUrls = {"https://lastfm-img2.akamaized.net/i/u/174s/e909c183889102c07ac45faba7b3ff0a.png",
+//			"https://lastfm-img2.akamaized.net/i/u/174s/e909c183889102c07ac45faba7b3ff0a.png",
+//			"https://lastfm-img2.akamaized.net/i/u/174s/e909c183889102c07ac45faba7b3ff0a.png",
+//			"https://lastfm-img2.akamaized.net/i/u/174s/e909c183889102c07ac45faba7b3ff0a.png"};
 	private TextSwitcher placeSwitcher;
-	private final String[] places = {"The Louvre", "Gwanghwamun", "Tower Bridge", "Temple of Heaven", "Aegeana Sea"};
+//	private final String[] places = {"The Louvre", "Gwanghwamun", "Tower Bridge", "Temple of Heaven", "Aegeana Sea"};
 	private RecyclerView recyclerView;
 	private SearchResultsViewModel searchResultsViewModel;
 	@Inject
 	SearchResultsViewModelFactory searchResultsViewModelFactory;
 	private SliderAdapter sliderAdapter;
 	private TextSwitcher temperatureSwitcher;
-	private final String[] temperatures = {"21°C", "19°C", "17°C", "23°C"};
-	private final String[] times = {"Aug 1 - Dec 15    7:00-18:00", "Sep 5 - Nov 10    8:00-16:00", "Mar 8 - May 21    7:00-18:00"};
+//	private final String[] temperatures = {"21°C", "19°C", "17°C", "23°C"};
+//	private final String[] times = {"Aug 1 - Dec 15    7:00-18:00", "Sep 5 - Nov 10    8:00-16:00", "Mar 8 - May 21    7:00-18:00"};
 	@BindView(R.id.toolbar)
 	Toolbar toolbar;
 
@@ -212,9 +215,9 @@ public class MainActivity extends AppCompatActivity {
 		});
 	}
 
-	private void initRecyclerView() {
-		sliderAdapter = new SliderAdapter(this, imageUrls, pics, new OnCardClickListener());
-		recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+	private void initRecyclerView(@NonNull List<Artist> artists) {
+		sliderAdapter = new SliderAdapter(this, artists, new OnCardClickListener());
+		recyclerView = findViewById(R.id.recycler_view);
 		recyclerView.setAdapter(sliderAdapter);
 		recyclerView.setHasFixedSize(false);
 
@@ -232,18 +235,18 @@ public class MainActivity extends AppCompatActivity {
 		new CardSnapHelper().attachToRecyclerView(recyclerView);
 	}
 
-	private void initSwitchers() {
+	private void initSwitchers(@NonNull List<Artist> artists) {
 		temperatureSwitcher = (TextSwitcher) findViewById(R.id.ts_temperature);
 		temperatureSwitcher.setFactory(new TextViewFactory(R.style.TemperatureTextView, true));
-		temperatureSwitcher.setCurrentText(temperatures[0]);
+		temperatureSwitcher.setCurrentText(artists.get(0).getName());
 
 		placeSwitcher = (TextSwitcher) findViewById(R.id.ts_place);
 		placeSwitcher.setFactory(new TextViewFactory(R.style.PlaceTextView, false));
-		placeSwitcher.setCurrentText(places[0]);
+		placeSwitcher.setCurrentText(artists.get(0).getName());
 
 		clockSwitcher = (TextSwitcher) findViewById(R.id.ts_clock);
 		clockSwitcher.setFactory(new TextViewFactory(R.style.ClockTextView, false));
-		clockSwitcher.setCurrentText(times[0]);
+		clockSwitcher.setCurrentText(artists.get(0).getName());
 
 		descriptionsSwitcher = (TextSwitcher) findViewById(R.id.ts_description);
 		descriptionsSwitcher.setInAnimation(this, android.R.anim.fade_in);
@@ -275,6 +278,8 @@ public class MainActivity extends AppCompatActivity {
 		onActiveCardChange(pos);
 	}
 
+	List<Artist> artists = new ArrayList<>();
+
 	private void onActiveCardChange(int pos) {
 		int animH[] = new int[]{R.anim.slide_in_right, R.anim.slide_out_left};
 		int animV[] = new int[]{R.anim.slide_in_top, R.anim.slide_out_bottom};
@@ -292,17 +297,17 @@ public class MainActivity extends AppCompatActivity {
 
 		temperatureSwitcher.setInAnimation(MainActivity.this, animH[0]);
 		temperatureSwitcher.setOutAnimation(MainActivity.this, animH[1]);
-		temperatureSwitcher.setText(temperatures[pos % temperatures.length]);
+		temperatureSwitcher.setText(artists.get(pos % artists.size()).getName());
 
 		placeSwitcher.setInAnimation(MainActivity.this, animV[0]);
 		placeSwitcher.setOutAnimation(MainActivity.this, animV[1]);
-		placeSwitcher.setText(places[pos % places.length]);
+		placeSwitcher.setText(artists.get(pos % artists.size()).getName());
 
 		clockSwitcher.setInAnimation(MainActivity.this, animV[0]);
 		clockSwitcher.setOutAnimation(MainActivity.this, animV[1]);
-		clockSwitcher.setText(times[pos % times.length]);
+		clockSwitcher.setText(artists.get(pos % artists.size()).getName());
 
-		descriptionsSwitcher.setText(getString(descriptions[pos % descriptions.length]));
+		descriptionsSwitcher.setText(artists.get(pos % artists.size()).getName());
 
 		showMap(maps[pos % maps.length]);
 
@@ -324,9 +329,10 @@ public class MainActivity extends AppCompatActivity {
 		searchResultsViewModel = ViewModelProviders.of(this, searchResultsViewModelFactory)
 				.get(SearchResultsViewModel.class);
 		setSupportActionBar(toolbar);
-		initRecyclerView();
+		List<Artist> artists = new ArrayList<>();
+		initRecyclerView(artists);
 		initCountryText();
-		initSwitchers();
+		initSwitchers(artists);
 		initGreenDot();
 	}
 

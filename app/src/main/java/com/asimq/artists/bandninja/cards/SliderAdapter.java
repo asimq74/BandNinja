@@ -1,5 +1,6 @@
 package com.asimq.artists.bandninja.cards;
 
+import java.util.List;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -8,52 +9,48 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.asimq.artists.bandninja.R;
+import com.asimq.artists.bandninja.json.Artist;
 
 public class SliderAdapter extends RecyclerView.Adapter<SliderCard> {
 
-    private final int[] content;
-    private final View.OnClickListener listener;
-    private final String[] urls;
-    private final Context context;
+	private final Context context;
+	private final View.OnClickListener listener;
+	private final List<Artist> artists;
 
-    public SliderAdapter(Context context, String[] urls, int[] content, View.OnClickListener listener) {
-        this.context = context;
-        this.urls = urls;
-        this.content = content;
-        this.listener = listener;
-    }
+	public SliderAdapter(Context context, List<Artist> artists, View.OnClickListener listener) {
+		this.context = context;
+		this.artists = artists;
+		this.listener = listener;
+	}
 
-    @Override
-    public SliderCard onCreateViewHolder(ViewGroup parent, int viewType) {
-        final View view = LayoutInflater
-                .from(parent.getContext())
-                .inflate(R.layout.layout_slider_card, parent, false);
+	@Override
+	public int getItemCount() {
+		return artists.size();
+	}
 
-        if (listener != null) {
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    listener.onClick(view);
-                }
-            });
-        }
+	@Override
+	public void onBindViewHolder(SliderCard holder, int position) {
+		holder.setContent(context, artists.get(position));
+	}
 
-        return new SliderCard(view);
-    }
 
-    @Override
-    public void onBindViewHolder(SliderCard holder, int position) {
-        holder.setContent(context, content[position % content.length], urls, position);
-    }
 
-    @Override
-    public void onViewRecycled(SliderCard holder) {
-        holder.clearContent();
-    }
+	@Override
+	public SliderCard onCreateViewHolder(ViewGroup parent, int viewType) {
+		final View view = LayoutInflater
+				.from(parent.getContext())
+				.inflate(R.layout.layout_slider_card, parent, false);
 
-    @Override
-    public int getItemCount() {
-        return urls.length;
-    }
+		if (listener != null) {
+			view.setOnClickListener(sliderLayoutView -> listener.onClick(sliderLayoutView));
+		}
+
+		return new SliderCard(view);
+	}
+
+	@Override
+	public void onViewRecycled(SliderCard holder) {
+		holder.clearContent();
+	}
 
 }

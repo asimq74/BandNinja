@@ -34,7 +34,7 @@ public class ArtistData {
 
     private String getImageUrl(@NonNull Artist artist) {
         for (Image image : artist.getImages()) {
-            if ("mega".equals(image.getSize())) {
+            if ("large".equals(image.getSize())) {
                 return image.getText();
             }
         }
