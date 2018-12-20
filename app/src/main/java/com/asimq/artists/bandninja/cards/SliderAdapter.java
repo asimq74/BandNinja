@@ -23,6 +23,12 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderCard> {
 		this.listener = listener;
 	}
 
+	public void clear() {
+		final int size = artists.size();
+		artists.clear();
+		notifyItemRangeRemoved(0, size);
+	}
+
 	@Override
 	public int getItemCount() {
 		return artists.size();

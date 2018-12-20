@@ -50,6 +50,9 @@ public class SliderCard extends RecyclerView.ViewHolder implements DecodeBitmapT
 	}
 
 	protected void loadImageUrl(Context context, String url) {
+		if (url.isEmpty()) {
+			return;
+		}
 		Picasso.with(context).load(url).resize(viewWidth, viewWidth).into(
 				imageView, new com.squareup.picasso.Callback() {
 					@Override

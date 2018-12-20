@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
 				}
 			} else if (clickedPosition > activeCardPosition) {
 				recyclerView.smoothScrollToPosition(clickedPosition);
-				onActiveCardChange(clickedPosition);
+//				onActiveCardChange(artists, clickedPosition);
 			}
 		}
 	}
@@ -216,23 +216,23 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void initRecyclerView(@NonNull List<Artist> artists) {
+
 		sliderAdapter = new SliderAdapter(this, artists, new OnCardClickListener());
 		recyclerView = findViewById(R.id.recycler_view);
 		recyclerView.setAdapter(sliderAdapter);
 		recyclerView.setHasFixedSize(false);
-
 		recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 			@Override
 			public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
 				if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-					onActiveCardChange();
+					onActiveCardChange(artists);
 				}
 			}
 		});
 
 		layoutManger = (CardSliderLayoutManager) recyclerView.getLayoutManager();
 
-		new CardSnapHelper().attachToRecyclerView(recyclerView);
+//		new CardSnapHelper().attachToRecyclerView(recyclerView);
 	}
 
 	private void initSwitchers(@NonNull List<Artist> artists) {
@@ -269,18 +269,17 @@ public class MainActivity extends AppCompatActivity {
 		};
 	}
 
-	private void onActiveCardChange() {
+	private void onActiveCardChange(List<Artist> artists) {
 		final int pos = layoutManger.getActiveCardPosition();
 		if (pos == RecyclerView.NO_POSITION || pos == currentPosition) {
 			return;
 		}
 
-		onActiveCardChange(pos);
+		onActiveCardChange(artists, pos);
 	}
 
-	List<Artist> artists = new ArrayList<>();
 
-	private void onActiveCardChange(int pos) {
+	private void onActiveCardChange(List<Artist> artists, int pos) {
 		int animH[] = new int[]{R.anim.slide_in_right, R.anim.slide_out_left};
 		int animV[] = new int[]{R.anim.slide_in_top, R.anim.slide_out_bottom};
 
@@ -293,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
 			animV[1] = R.anim.slide_out_top;
 		}
 
-		setCountryText(countries[pos % countries.length], left2right);
+		setCountryText(artists.get(pos % artists.size()).getName(), left2right);
 
 		temperatureSwitcher.setInAnimation(MainActivity.this, animH[0]);
 		temperatureSwitcher.setOutAnimation(MainActivity.this, animH[1]);
@@ -329,7 +328,9 @@ public class MainActivity extends AppCompatActivity {
 		searchResultsViewModel = ViewModelProviders.of(this, searchResultsViewModelFactory)
 				.get(SearchResultsViewModel.class);
 		setSupportActionBar(toolbar);
-		List<Artist> artists = new ArrayList<>();
+	}
+
+	private void populateUI(List<Artist> artists) {
 		initRecyclerView(artists);
 		initCountryText();
 		initSwitchers(artists);
@@ -352,7 +353,7 @@ public class MainActivity extends AppCompatActivity {
 			@Override
 			public boolean onQueryTextSubmit(String query) {
 				Log.d(TAG, "onQueryTextSubmit: query->" + query);
-//				searchResultsViewModel.getSearchResultsByArtist(query).observe(MainNavigationActivity.this, artists -> populateUI(artists));
+				searchResultsViewModel.getSearchResultsByArtist(query).observe(MainActivity.this, artists -> populateUI(artists));
 				return false;
 			}
 		});
