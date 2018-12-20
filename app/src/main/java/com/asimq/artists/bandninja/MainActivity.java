@@ -52,6 +52,8 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
 
+	public static final CardSnapHelper CARD_SNAP_HELPER = new CardSnapHelper();
+
 	private class ImageViewFactory implements ViewSwitcher.ViewFactory {
 
 		@Override
@@ -216,11 +218,13 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void initRecyclerView(@NonNull List<Artist> artists) {
-
+		if (null != sliderAdapter) {
+			sliderAdapter.clear();
+		}
 		sliderAdapter = new SliderAdapter(this, artists, new OnCardClickListener());
+		sliderAdapter.notifyDataSetChanged();
 		recyclerView = findViewById(R.id.recycler_view);
 		recyclerView.setAdapter(sliderAdapter);
-		recyclerView.setHasFixedSize(false);
 		recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 			@Override
 			public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -230,31 +234,37 @@ public class MainActivity extends AppCompatActivity {
 			}
 		});
 
+		recyclerView.setLayoutManager(new CardSliderLayoutManager(this));
 		layoutManger = (CardSliderLayoutManager) recyclerView.getLayoutManager();
 
-//		new CardSnapHelper().attachToRecyclerView(recyclerView);
+		CARD_SNAP_HELPER.attachToRecyclerView(recyclerView);
 	}
 
 	private void initSwitchers(@NonNull List<Artist> artists) {
 		temperatureSwitcher = (TextSwitcher) findViewById(R.id.ts_temperature);
+		temperatureSwitcher.removeAllViews();
 		temperatureSwitcher.setFactory(new TextViewFactory(R.style.TemperatureTextView, true));
 		temperatureSwitcher.setCurrentText(artists.get(0).getName());
 
 		placeSwitcher = (TextSwitcher) findViewById(R.id.ts_place);
+		placeSwitcher.removeAllViews();
 		placeSwitcher.setFactory(new TextViewFactory(R.style.PlaceTextView, false));
 		placeSwitcher.setCurrentText(artists.get(0).getName());
 
 		clockSwitcher = (TextSwitcher) findViewById(R.id.ts_clock);
+		clockSwitcher.removeAllViews();
 		clockSwitcher.setFactory(new TextViewFactory(R.style.ClockTextView, false));
 		clockSwitcher.setCurrentText(artists.get(0).getName());
 
 		descriptionsSwitcher = (TextSwitcher) findViewById(R.id.ts_description);
+		descriptionsSwitcher.removeAllViews();
 		descriptionsSwitcher.setInAnimation(this, android.R.anim.fade_in);
 		descriptionsSwitcher.setOutAnimation(this, android.R.anim.fade_out);
 		descriptionsSwitcher.setFactory(new TextViewFactory(R.style.DescriptionTextView, false));
 		descriptionsSwitcher.setCurrentText(getString(descriptions[0]));
 
 		mapSwitcher = (ImageSwitcher) findViewById(R.id.ts_map);
+		mapSwitcher.removeAllViews();
 		mapSwitcher.setInAnimation(this, R.anim.fade_in);
 		mapSwitcher.setOutAnimation(this, R.anim.fade_out);
 		mapSwitcher.setFactory(new ImageViewFactory());

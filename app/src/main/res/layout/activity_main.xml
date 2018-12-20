@@ -108,7 +108,6 @@
             android:layout_marginTop="18dp"
             android:clipChildren="false"
             android:overScrollMode="never"
-            app:layoutManager="com.ramotion.cardslider.CardSliderLayoutManager"
             app:viewUpdater="com.asimq.artists.bandninja.cards.CardsUpdater"/>
 
         <FrameLayout
