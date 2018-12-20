@@ -11,8 +11,10 @@ import android.animation.ObjectAnimator;
 import android.app.ActivityOptions;
 import android.app.SearchManager;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,6 +22,7 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -38,8 +41,13 @@ import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
+import com.asimq.artists.bandninja.asynctasks.BaseSaveArtistTask;
 import com.asimq.artists.bandninja.cards.SliderAdapter;
+import com.asimq.artists.bandninja.cards.SliderCard;
+import com.asimq.artists.bandninja.dagger.ApplicationComponent;
 import com.asimq.artists.bandninja.json.Artist;
+import com.asimq.artists.bandninja.json.Tag;
+import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.utils.DecodeBitmapTask;
 import com.asimq.artists.bandninja.viewmodelfactories.SearchResultsViewModelFactory;
@@ -53,6 +61,7 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity {
 
 	public static final CardSnapHelper CARD_SNAP_HELPER = new CardSnapHelper();
+	private ApplicationComponent applicationComponent;
 
 	private class ImageViewFactory implements ViewSwitcher.ViewFactory {
 
@@ -217,11 +226,43 @@ public class MainActivity extends AppCompatActivity {
 		});
 	}
 
+	@Override
+	protected void onPause() {
+//		LocalBroadcastManager.getInstance(this).unregisterReceiver(
+//				mMessageReceiver);
+		super.onPause();
+		if (isFinishing() && decodeMapBitmapTask != null) {
+			decodeMapBitmapTask.cancel(true);
+		}
+	}
+
+	@Override
+	protected void onResume() {
+		// Register to receive messages.
+		// We are registering an observer (mMessageReceiver) to receive Intents
+		// with actions named "custom-event-name".
+//		LocalBroadcastManager.getInstance(this).registerReceiver(
+//				mMessageReceiver, new IntentFilter("ARTIST_BOUND"));
+		super.onResume();
+	}
+
+	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive( Context context, Intent intent ) {
+			if (!"ARTIST_BOUND".equals(intent.getAction())) {
+				return;
+			}
+			String artistName = intent.getStringExtra("ARTIST_NAME");
+			String artistMbid = intent.getStringExtra("ARTIST_MBID");
+			Log.d( TAG, String.format("artist: %s mbid: %s", artistName, artistMbid));
+		}
+	};
+
 	private void initRecyclerView(@NonNull List<Artist> artists) {
 		if (null != sliderAdapter) {
 			sliderAdapter.clear();
 		}
-		sliderAdapter = new SliderAdapter(this, artists, new OnCardClickListener());
+		sliderAdapter = new SliderAdapter(applicationComponent, artists, new OnCardClickListener());
 		sliderAdapter.notifyDataSetChanged();
 		recyclerView = findViewById(R.id.recycler_view);
 		recyclerView.setAdapter(sliderAdapter);
@@ -240,7 +281,26 @@ public class MainActivity extends AppCompatActivity {
 		CARD_SNAP_HELPER.attachToRecyclerView(recyclerView);
 	}
 
+
+	private void populateTags(Artist artistDetailedInfo) {
+		StringBuilder sb = new StringBuilder();
+		int count = 0;
+		final List<Tag> allTags = artistDetailedInfo.getTagWrapper().getTags();
+		for (Tag tag : allTags) {
+			sb.append(tag.getName()).append(count++ < (allTags.size() - 1) ? ", " : "");
+		}
+		ArtistData artistData = new ArtistData(artistDetailedInfo);
+		Log.d( TAG, String.format("artistData: %s", artistData));
+		new BaseSaveArtistTask(artistDataDao).execute(artistData);
+	}
+
 	private void initSwitchers(@NonNull List<Artist> artists) {
+		String artistName = artists.get(0).getName();
+		String artistMbid = artists.get(0).getMbid();
+		Log.d( TAG, String.format("artist: %s mbid: %s", artistName, artistMbid));
+		searchResultsViewModel.getArtistInfo(artistName).observe(MainActivity.this,
+				artistDetailedInfo -> populateTags(artistDetailedInfo));
+
 		temperatureSwitcher = (TextSwitcher) findViewById(R.id.ts_temperature);
 		temperatureSwitcher.removeAllViews();
 		temperatureSwitcher.setFactory(new TextViewFactory(R.style.TemperatureTextView, true));
@@ -290,6 +350,11 @@ public class MainActivity extends AppCompatActivity {
 
 
 	private void onActiveCardChange(List<Artist> artists, int pos) {
+		String artistName = artists.get(pos).getName();
+		String artistMbid = artists.get(pos).getMbid();
+		Log.d( TAG, String.format("artist: %s mbid: %s", artistName, artistMbid));
+		searchResultsViewModel.getArtistInfo(artistName).observe(MainActivity.this,
+				artistDetailedInfo -> populateTags(artistDetailedInfo));
 		int animH[] = new int[]{R.anim.slide_in_right, R.anim.slide_out_left};
 		int animV[] = new int[]{R.anim.slide_in_top, R.anim.slide_out_bottom};
 
@@ -334,7 +399,8 @@ public class MainActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_main);
 		ButterKnife.bind(this);
 		final MyApplication application = (MyApplication) getApplicationContext();
-		application.getApplicationComponent().inject(this);
+		applicationComponent = application.getApplicationComponent();
+		applicationComponent.inject(this);
 		searchResultsViewModel = ViewModelProviders.of(this, searchResultsViewModelFactory)
 				.get(SearchResultsViewModel.class);
 		setSupportActionBar(toolbar);
@@ -370,13 +436,6 @@ public class MainActivity extends AppCompatActivity {
 		return true;
 	}
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-		if (isFinishing() && decodeMapBitmapTask != null) {
-			decodeMapBitmapTask.cancel(true);
-		}
-	}
 
 	private void setCountryText(String text, boolean left2right) {
 		final TextView invisibleText;

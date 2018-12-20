@@ -78,7 +78,6 @@ public class SliderCard extends RecyclerView.ViewHolder implements DecodeBitmapT
 				@Override
 				public void onGlobalLayout() {
 					itemView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-
 					viewWidth = itemView.getWidth();
 					viewHeight = itemView.getHeight();
 					loadImageUrl(context, getImageUrl(artist));

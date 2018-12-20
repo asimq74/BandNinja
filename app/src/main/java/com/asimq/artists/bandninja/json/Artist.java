@@ -8,6 +8,7 @@ import java.util.List;
 public class Artist {
     @SerializedName("listeners")
     private String listeners;
+
     @SerializedName("mbid")
     private String mbid;
     @SerializedName("name")
@@ -32,7 +33,6 @@ public class Artist {
     @SerializedName("similar")
     @Expose
     private Similar similar;
-
     public Similar getSimilar() {
         return similar;
     }

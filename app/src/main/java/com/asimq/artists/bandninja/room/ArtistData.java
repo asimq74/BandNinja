@@ -73,4 +73,14 @@ public class ArtistData {
     public void setBio(String bio) {
         this.bio = bio;
     }
+
+    @Override
+    public String toString() {
+        return "ArtistData {" +
+                "mbid='" + mbid + '\'' +
+                ", name='" + name + '\'' +
+                ", images=" + image +
+                ", bio=" + bio +
+                '}';
+    }
 }

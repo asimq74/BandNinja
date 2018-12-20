@@ -96,7 +96,7 @@ public class MainNavigationActivity extends AppCompatActivity
 			holder.titleView.setText(artist.getName());
 			attemptToLoadThumbnail(holder, artist);
 			searchResultsViewModel.getArtistInfo(artist.getName()).observe(MainNavigationActivity.this,
-					artistDetailedInfo -> populateTags(holder, artistDetailedInfo, i));
+					artistDetailedInfo -> populateTags(holder, artistDetailedInfo));
 		}
 
 		@NonNull
@@ -107,7 +107,7 @@ public class MainNavigationActivity extends AppCompatActivity
 			return vh;
 		}
 
-		private void populateTags(ViewHolder holder, Artist artistDetailedInfo, int position) {
+		private void populateTags(ViewHolder holder, Artist artistDetailedInfo) {
 			StringBuilder sb = new StringBuilder();
 			int count = 0;
 			final List<Tag> allTags = artistDetailedInfo.getTagWrapper().getTags();
