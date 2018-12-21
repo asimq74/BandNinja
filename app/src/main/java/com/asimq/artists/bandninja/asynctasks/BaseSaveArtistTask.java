@@ -18,6 +18,9 @@ public class BaseSaveArtistTask extends AsyncTask<ArtistData, Void, String> {
 	@Override
 	protected String doInBackground(ArtistData... artistData) {
 		final ArtistData data = artistData[0];
+		if (null == data.getMbid()) {
+			return "";
+		}
 		artistDataDao.insertArtist(data);
 		return data.getMbid();
 	}

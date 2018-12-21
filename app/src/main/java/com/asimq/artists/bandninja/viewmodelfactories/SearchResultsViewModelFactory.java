@@ -7,6 +7,7 @@ import android.app.Application;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.repositories.SearchResultsRepository;
 import com.asimq.artists.bandninja.viewmodels.SearchResultsViewModel;
 
@@ -15,15 +16,19 @@ public class SearchResultsViewModelFactory implements ViewModelProvider.Factory 
 
 	private final Application application;
 	private final SearchResultsRepository searchResultsRepository;
+	private final BandItemRepository bandItemRepository;
 
 	@Inject
-	public SearchResultsViewModelFactory(@NonNull Application application, @NonNull SearchResultsRepository searchResultsRepository) {
+	public SearchResultsViewModelFactory(@NonNull Application application,
+										 @NonNull SearchResultsRepository searchResultsRepository,
+										 @NonNull BandItemRepository bandItemRepository) {
 		this.application = application;
 		this.searchResultsRepository = searchResultsRepository;
+		this.bandItemRepository = bandItemRepository;
 	}
 
 	@Override
 	public SearchResultsViewModel create(@NonNull Class modelClass) {
-		return new SearchResultsViewModel(application, searchResultsRepository);
+		return new SearchResultsViewModel(application, searchResultsRepository, bandItemRepository);
 	}
 }

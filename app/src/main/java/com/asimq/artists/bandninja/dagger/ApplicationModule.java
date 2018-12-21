@@ -10,6 +10,7 @@ import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.repositories.SearchResultsModelRepositoryDao;
 import com.asimq.artists.bandninja.repositories.SearchResultsRepository;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
+import com.asimq.artists.bandninja.room.dao.ArtistTagDao;
 import com.asimq.artists.bandninja.room.database.BandItemDataSource;
 import com.asimq.artists.bandninja.room.database.BandItemDatabase;
 import com.asimq.artists.bandninja.viewmodelfactories.ArtistDetailViewModelFactory;
@@ -38,8 +39,8 @@ public class ApplicationModule {
 
 	@Provides
 	@Singleton
-	public BandItemRepository bookItemRepository(ArtistDataDao artistDataDao) {
-		return new BandItemDataSource(artistDataDao);
+	public BandItemRepository bandItemRepository(ArtistDataDao artistDataDao, ArtistTagDao artistTagDao) {
+		return new BandItemDataSource(artistDataDao, artistTagDao);
 	}
 
 	@Provides
@@ -51,6 +52,12 @@ public class ApplicationModule {
 	@Singleton
 	public ArtistDataDao provideArtistDataDao(BandItemDatabase bandItemDatabase) {
 		return bandItemDatabase.artistDataDao();
+	}
+
+	@Provides
+	@Singleton
+	public ArtistTagDao provideArtistTagDao(BandItemDatabase bandItemDatabase) {
+		return bandItemDatabase.artistTagDao();
 	}
 
 	@Provides
@@ -72,8 +79,9 @@ public class ApplicationModule {
 
 	@Provides
 	@Singleton
-	SearchResultsViewModelFactory provideSearchResultsViewModelFactory(SearchResultsRepository searchResultsRepository) {
-		return new SearchResultsViewModelFactory(mApplication, searchResultsRepository);
+	SearchResultsViewModelFactory provideSearchResultsViewModelFactory(
+	        SearchResultsRepository searchResultsRepository, BandItemRepository bandItemRepository) {
+		return new SearchResultsViewModelFactory(mApplication, searchResultsRepository, bandItemRepository);
 	}
 
 	@Provides

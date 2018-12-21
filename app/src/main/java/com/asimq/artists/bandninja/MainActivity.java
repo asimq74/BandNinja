@@ -42,13 +42,16 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.asimq.artists.bandninja.asynctasks.BaseSaveArtistTask;
+import com.asimq.artists.bandninja.asynctasks.SaveArtistTagTask;
 import com.asimq.artists.bandninja.cards.SliderAdapter;
 import com.asimq.artists.bandninja.cards.SliderCard;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.room.ArtistData;
+import com.asimq.artists.bandninja.room.ArtistTag;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
+import com.asimq.artists.bandninja.room.dao.ArtistTagDao;
 import com.asimq.artists.bandninja.utils.DecodeBitmapTask;
 import com.asimq.artists.bandninja.viewmodelfactories.SearchResultsViewModelFactory;
 import com.asimq.artists.bandninja.viewmodels.SearchResultsViewModel;
@@ -147,6 +150,8 @@ public class MainActivity extends AppCompatActivity {
 	final String TAG = this.getClass().getSimpleName();
 	@Inject
 	ArtistDataDao artistDataDao;
+	@Inject
+	ArtistTagDao artistTagDao;
 	private TextSwitcher clockSwitcher;
 	private final String[] countries = {"PARIS", "SEOUL", "LONDON", "BEIJING", "THIRA"};
 	private TextView country1TextView;
@@ -283,15 +288,27 @@ public class MainActivity extends AppCompatActivity {
 
 
 	private void populateTags(Artist artistDetailedInfo) {
-		StringBuilder sb = new StringBuilder();
-		int count = 0;
-		final List<Tag> allTags = artistDetailedInfo.getTagWrapper().getTags();
-		for (Tag tag : allTags) {
-			sb.append(tag.getName()).append(count++ < (allTags.size() - 1) ? ", " : "");
-		}
 		ArtistData artistData = new ArtistData(artistDetailedInfo);
 		Log.d( TAG, String.format("artistData: %s", artistData));
 		new BaseSaveArtistTask(artistDataDao).execute(artistData);
+		searchResultsViewModel.getArtistTags(artistDetailedInfo).observe(MainActivity.this,
+				tags -> processTags(tags));
+
+	}
+
+	private void processTags(List<ArtistTag> tags) {
+		Log.d(TAG, "tags=" + tags);
+		StringBuilder sb = new StringBuilder();
+		int count = 0;
+		for (ArtistTag tag : tags) {
+			sb.append(tag.getName()).append(count++ < (tags.size() - 1) ? ", " : "");
+		}
+		String tagsText = sb.toString();
+		placeSwitcher = findViewById(R.id.ts_place);
+		placeSwitcher.removeAllViews();
+		placeSwitcher.setFactory(new TextViewFactory(R.style.PlaceTextView, false));
+		placeSwitcher.setCurrentText(tagsText);
+
 	}
 
 	private void initSwitchers(@NonNull List<Artist> artists) {
@@ -306,10 +323,10 @@ public class MainActivity extends AppCompatActivity {
 		temperatureSwitcher.setFactory(new TextViewFactory(R.style.TemperatureTextView, true));
 		temperatureSwitcher.setCurrentText(artists.get(0).getName());
 
-		placeSwitcher = (TextSwitcher) findViewById(R.id.ts_place);
-		placeSwitcher.removeAllViews();
-		placeSwitcher.setFactory(new TextViewFactory(R.style.PlaceTextView, false));
-		placeSwitcher.setCurrentText(artists.get(0).getName());
+//		placeSwitcher = (TextSwitcher) findViewById(R.id.ts_place);
+//		placeSwitcher.removeAllViews();
+//		placeSwitcher.setFactory(new TextViewFactory(R.style.PlaceTextView, false));
+//		placeSwitcher.setCurrentText(artists.get(0).getName());
 
 		clockSwitcher = (TextSwitcher) findViewById(R.id.ts_clock);
 		clockSwitcher.removeAllViews();

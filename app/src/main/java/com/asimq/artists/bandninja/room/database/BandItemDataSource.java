@@ -9,15 +9,35 @@ import android.support.annotation.NonNull;
 
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.ArtistData;
+import com.asimq.artists.bandninja.room.ArtistTag;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
+import com.asimq.artists.bandninja.room.dao.ArtistTagDao;
 
 public class BandItemDataSource implements BandItemRepository {
 
-	private ArtistDataDao artistDataDao;
+	private final ArtistDataDao artistDataDao;
+	private final ArtistTagDao artistTagDao;
 
 	@Inject
-	public BandItemDataSource(ArtistDataDao artistDataDao) {
+	public BandItemDataSource(ArtistDataDao artistDataDao, ArtistTagDao artistTagDao) {
 		this.artistDataDao = artistDataDao;
+		this.artistTagDao = artistTagDao;
+	}
+
+	@NonNull
+	@Override
+	public LiveData<List<ArtistTag>> getArtistTags(@NonNull String artistDataMbId) {
+		return artistTagDao.fetchArtistTagsByArtistId(artistDataMbId);
+	}
+
+	@Override
+	public void saveArtistTag(@NonNull ArtistTag artistTag) {
+		artistTagDao.insertArtistTag(artistTag);
+	}
+
+	@Override
+	public void saveMultipleArtistTags(@NonNull List<ArtistTag> artistTagList) {
+		artistTagDao.insertMultipleArtistTags(artistTagList);
 	}
 
 	@NonNull

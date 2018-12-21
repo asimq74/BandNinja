@@ -8,22 +8,37 @@ import android.arch.lifecycle.LiveData;
 import android.support.annotation.NonNull;
 
 import com.asimq.artists.bandninja.json.Artist;
+import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.repositories.SearchResultsRepository;
+import com.asimq.artists.bandninja.room.ArtistTag;
 
 public class SearchResultsViewModel extends AndroidViewModel {
 
 	private final SearchResultsRepository searchResultsRepository;
+	private final BandItemRepository bandItemRepository;
 	private LiveData<List<Artist>> mLiveArtists;
 	private LiveData<Artist> mLiveArtist;
+	private LiveData<List<ArtistTag>> mLiveArtistTags;
 
-	public SearchResultsViewModel(@NonNull Application application, @NonNull SearchResultsRepository repository) {
+	public SearchResultsViewModel(@NonNull Application application,
+								  @NonNull SearchResultsRepository searchResultsRepository,
+								  @NonNull BandItemRepository bandItemRepository) {
 		super(application);
-		this.searchResultsRepository = repository;
+		this.searchResultsRepository = searchResultsRepository;
+		this.bandItemRepository = bandItemRepository;
 	}
 
 	public LiveData<List<Artist>> getSearchResultsByArtist(@NonNull String artistQuery) {
 		mLiveArtists = searchResultsRepository.getSearchResultsByArtist(artistQuery);
 		return mLiveArtists;
+	}
+
+	public LiveData<List<ArtistTag>> getArtistTags(@NonNull Artist artist) {
+		mLiveArtistTags = bandItemRepository.getArtistTags(artist.getMbid());
+		if (mLiveArtistTags == null) {
+			bandItemRepository.saveMultipleArtistTags(ArtistTag.getTags(artist));
+		}
+		return mLiveArtistTags;
 	}
 
 	public LiveData<Artist> getArtistInfo(@NonNull String artistName) {
