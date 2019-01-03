@@ -1,6 +1,5 @@
 package com.asimq.artists.bandninja;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -14,7 +13,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,7 +20,6 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -42,14 +39,11 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.asimq.artists.bandninja.asynctasks.BaseSaveArtistTask;
-import com.asimq.artists.bandninja.asynctasks.SaveArtistTagTask;
 import com.asimq.artists.bandninja.cards.SliderAdapter;
-import com.asimq.artists.bandninja.cards.SliderCard;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.room.ArtistData;
-import com.asimq.artists.bandninja.room.ArtistTag;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistTagDao;
 import com.asimq.artists.bandninja.utils.DecodeBitmapTask;
@@ -153,12 +147,11 @@ public class MainActivity extends AppCompatActivity {
 	@Inject
 	ArtistTagDao artistTagDao;
 	private TextSwitcher clockSwitcher;
-	private final String[] countries = {"PARIS", "SEOUL", "LONDON", "BEIJING", "THIRA"};
-	private TextView country1TextView;
-	private TextView country2TextView;
-	private long countryAnimDuration;
-	private int countryOffset1;
-	private int countryOffset2;
+	private TextView artist1TextView;
+	private TextView artist2TextView;
+	private long artistAnimDuration;
+	private int artistOffset1;
+	private int artistOffset2;
 	private int currentPosition;
 	private DecodeBitmapTask decodeMapBitmapTask;
 	private final int[] descriptions = {R.string.text1, R.string.text2, R.string.text3, R.string.text4, R.string.text5};
@@ -191,17 +184,18 @@ public class MainActivity extends AppCompatActivity {
 	@BindView(R.id.toolbar)
 	Toolbar toolbar;
 
-	private void initCountryText() {
-		countryAnimDuration = getResources().getInteger(R.integer.labels_animation_duration);
-		countryOffset1 = getResources().getDimensionPixelSize(R.dimen.left_offset);
-		countryOffset2 = getResources().getDimensionPixelSize(R.dimen.card_width);
-		country1TextView = (TextView) findViewById(R.id.tv_country_1);
-		country2TextView = (TextView) findViewById(R.id.tv_country_2);
+	private void initArtistNameText(@NonNull List<Artist> artists) {
+		String artistName = artists.get(0).getName();
+		artistAnimDuration = getResources().getInteger(R.integer.labels_animation_duration);
+		artistOffset1 = getResources().getDimensionPixelSize(R.dimen.left_offset);
+		artistOffset2 = getResources().getDimensionPixelSize(R.dimen.card_width);
+		artist1TextView = findViewById(R.id.mainTitleView_1);
+		artist2TextView = findViewById(R.id.mainTitleView_2);
 
-		country1TextView.setX(countryOffset1);
-		country2TextView.setX(countryOffset2);
-		country1TextView.setText(countries[0]);
-		country2TextView.setAlpha(0f);
+		artist1TextView.setX(artistOffset1);
+		artist2TextView.setX(artistOffset2);
+		artist1TextView.setText(artistName);
+		artist2TextView.setAlpha(0f);
 	}
 
 	private void initGreenDot() {
@@ -287,20 +281,21 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 
-	private void populateTags(Artist artistDetailedInfo) {
+	private void populateArtistInfo(Artist artistDetailedInfo) {
 		ArtistData artistData = new ArtistData(artistDetailedInfo);
 		Log.d( TAG, String.format("artistData: %s", artistData));
 		new BaseSaveArtistTask(artistDataDao).execute(artistData);
-		searchResultsViewModel.getArtistTags(artistDetailedInfo).observe(MainActivity.this,
-				tags -> processTags(tags));
-
+		searchResultsViewModel.getArtistInfo(artistData.getName()).observe(MainActivity.this,
+				artist -> processArtistInfo(artist));
 	}
 
-	private void processTags(List<ArtistTag> tags) {
+
+	private void processArtistInfo(Artist artist) {
+		List<Tag> tags = artist.getTagWrapper().getTags();
 		Log.d(TAG, "tags=" + tags);
 		StringBuilder sb = new StringBuilder();
 		int count = 0;
-		for (ArtistTag tag : tags) {
+		for (Tag tag : tags) {
 			sb.append(tag.getName()).append(count++ < (tags.size() - 1) ? ", " : "");
 		}
 		String tagsText = sb.toString();
@@ -309,19 +304,26 @@ public class MainActivity extends AppCompatActivity {
 		placeSwitcher.setFactory(new TextViewFactory(R.style.PlaceTextView, false));
 		placeSwitcher.setCurrentText(tagsText);
 
+		descriptionsSwitcher = findViewById(R.id.ts_description);
+		descriptionsSwitcher.removeAllViews();
+		descriptionsSwitcher.setInAnimation(this, android.R.anim.fade_in);
+		descriptionsSwitcher.setOutAnimation(this, android.R.anim.fade_out);
+		descriptionsSwitcher.setFactory(new TextViewFactory(R.style.DescriptionTextView, false));
+		descriptionsSwitcher.setCurrentText(artist.getBio().getSummary());
 	}
+
 
 	private void initSwitchers(@NonNull List<Artist> artists) {
 		String artistName = artists.get(0).getName();
 		String artistMbid = artists.get(0).getMbid();
 		Log.d( TAG, String.format("artist: %s mbid: %s", artistName, artistMbid));
 		searchResultsViewModel.getArtistInfo(artistName).observe(MainActivity.this,
-				artistDetailedInfo -> populateTags(artistDetailedInfo));
+				artistDetailedInfo -> populateArtistInfo(artistDetailedInfo));
 
 		temperatureSwitcher = (TextSwitcher) findViewById(R.id.ts_temperature);
 		temperatureSwitcher.removeAllViews();
 		temperatureSwitcher.setFactory(new TextViewFactory(R.style.TemperatureTextView, true));
-		temperatureSwitcher.setCurrentText(artists.get(0).getName());
+		temperatureSwitcher.setCurrentText(artists.get(0).getListeners() + "");
 
 //		placeSwitcher = (TextSwitcher) findViewById(R.id.ts_place);
 //		placeSwitcher.removeAllViews();
@@ -370,8 +372,11 @@ public class MainActivity extends AppCompatActivity {
 		String artistName = artists.get(pos).getName();
 		String artistMbid = artists.get(pos).getMbid();
 		Log.d( TAG, String.format("artist: %s mbid: %s", artistName, artistMbid));
+		temperatureSwitcher.removeAllViews();
+		temperatureSwitcher.setFactory(new TextViewFactory(R.style.TemperatureTextView, true));
+		temperatureSwitcher.setCurrentText(artists.get(pos).getListeners() + "");
 		searchResultsViewModel.getArtistInfo(artistName).observe(MainActivity.this,
-				artistDetailedInfo -> populateTags(artistDetailedInfo));
+				artistDetailedInfo -> populateArtistInfo(artistDetailedInfo));
 		int animH[] = new int[]{R.anim.slide_in_right, R.anim.slide_out_left};
 		int animV[] = new int[]{R.anim.slide_in_top, R.anim.slide_out_bottom};
 
@@ -384,21 +389,25 @@ public class MainActivity extends AppCompatActivity {
 			animV[1] = R.anim.slide_out_top;
 		}
 
-		setCountryText(artists.get(pos % artists.size()).getName(), left2right);
+		setArtistText(artists.get(pos % artists.size()).getName(), left2right);
 
 		temperatureSwitcher.setInAnimation(MainActivity.this, animH[0]);
 		temperatureSwitcher.setOutAnimation(MainActivity.this, animH[1]);
-		temperatureSwitcher.setText(artists.get(pos % artists.size()).getName());
+		//replace with progress bar
+//		temperatureSwitcher.setText(artists.get(pos % artists.size()).getName());
 
 		placeSwitcher.setInAnimation(MainActivity.this, animV[0]);
 		placeSwitcher.setOutAnimation(MainActivity.this, animV[1]);
-		placeSwitcher.setText(artists.get(pos % artists.size()).getName());
+//replace with progress bar
+//		placeSwitcher.setText(artists.get(pos % artists.size()).getName());
 
 		clockSwitcher.setInAnimation(MainActivity.this, animV[0]);
 		clockSwitcher.setOutAnimation(MainActivity.this, animV[1]);
-		clockSwitcher.setText(artists.get(pos % artists.size()).getName());
+		// replace with progress bar
+//		clockSwitcher.setText(artists.get(pos % artists.size()).getName());
 
-		descriptionsSwitcher.setText(artists.get(pos % artists.size()).getName());
+		// replace with progress bar
+//		descriptionsSwitcher.setText(artists.get(pos % artists.size()).getName());
 
 		showMap(maps[pos % maps.length]);
 
@@ -425,7 +434,7 @@ public class MainActivity extends AppCompatActivity {
 
 	private void populateUI(List<Artist> artists) {
 		initRecyclerView(artists);
-		initCountryText();
+		initArtistNameText(artists);
 		initSwitchers(artists);
 		initGreenDot();
 	}
@@ -454,23 +463,23 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 
-	private void setCountryText(String text, boolean left2right) {
+	private void setArtistText(String text, boolean left2right) {
 		final TextView invisibleText;
 		final TextView visibleText;
-		if (country1TextView.getAlpha() > country2TextView.getAlpha()) {
-			visibleText = country1TextView;
-			invisibleText = country2TextView;
+		if (artist1TextView.getAlpha() > artist2TextView.getAlpha()) {
+			visibleText = artist1TextView;
+			invisibleText = artist2TextView;
 		} else {
-			visibleText = country2TextView;
-			invisibleText = country1TextView;
+			visibleText = artist2TextView;
+			invisibleText = artist1TextView;
 		}
 
 		final int vOffset;
 		if (left2right) {
 			invisibleText.setX(0);
-			vOffset = countryOffset2;
+			vOffset = artistOffset2;
 		} else {
-			invisibleText.setX(countryOffset2);
+			invisibleText.setX(artistOffset2);
 			vOffset = 0;
 		}
 
@@ -478,12 +487,12 @@ public class MainActivity extends AppCompatActivity {
 
 		final ObjectAnimator iAlpha = ObjectAnimator.ofFloat(invisibleText, "alpha", 1f);
 		final ObjectAnimator vAlpha = ObjectAnimator.ofFloat(visibleText, "alpha", 0f);
-		final ObjectAnimator iX = ObjectAnimator.ofFloat(invisibleText, "x", countryOffset1);
+		final ObjectAnimator iX = ObjectAnimator.ofFloat(invisibleText, "x", artistOffset1);
 		final ObjectAnimator vX = ObjectAnimator.ofFloat(visibleText, "x", vOffset);
 
 		final AnimatorSet animSet = new AnimatorSet();
 		animSet.playTogether(iAlpha, vAlpha, iX, vX);
-		animSet.setDuration(countryAnimDuration);
+		animSet.setDuration(artistAnimDuration);
 		animSet.start();
 	}
 

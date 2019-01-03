@@ -1,5 +1,6 @@
 package com.asimq.artists.bandninja.repositories;
 
+import java.util.Collections;
 import java.util.List;
 
 import android.arch.lifecycle.LiveData;
@@ -76,6 +77,7 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 					artistMutableLiveData.setValue(null);
 					return;
 				}
+				Collections.sort(artists);
 				artistMutableLiveData.setValue(artists);
 			}
 		});
