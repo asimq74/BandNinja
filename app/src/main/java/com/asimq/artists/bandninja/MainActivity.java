@@ -433,6 +433,7 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void populateUI(List<Artist> artists) {
+		findViewById(R.id.blueTabLayout).setVisibility(View.GONE);
 		initRecyclerView(artists);
 		initArtistNameText(artists);
 		initSwitchers(artists);
