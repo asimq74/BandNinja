@@ -20,7 +20,7 @@ public interface GetArtists {
 	//	/2.0/?method=artist.search&artist=cher&api_key=YOUR_API_KEY&format=json
 	@GET("/2.0/")
 	Call<ResultsWrapper> getArtists(@Query("method") String method, @Query("artist") String artist,
-									@Query("api_key") String api_key, @Query("format") String format);
+									@Query("api_key") String api_key, @Query("format") String format, @Query("limit") int limit);
 
 	@GET("/2.0/")
 	Call<TopAlbumsWrapper> getTopAlbums(@Query("method") String method, @Query("artist") String artist,

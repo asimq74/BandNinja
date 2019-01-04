@@ -23,6 +23,7 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 
 	public static final String API_KEY = BuildConfig.LastFMApiKey;
 	public static final String DEFAULT_FORMAT = "json";
+	public static final int SEARCH_RESULTS_LIMIT = 10;
 	final String TAG = this.getClass().getSimpleName();
 
 	@Override
@@ -55,7 +56,7 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 		Log.d(TAG, "onQueryTextSubmit: query->" + query);
 		final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
 		Call<ResultsWrapper> call = service.getArtists("artist.search", query,
-				API_KEY, DEFAULT_FORMAT);
+				API_KEY, DEFAULT_FORMAT, SEARCH_RESULTS_LIMIT);
 		call.enqueue(new Callback<ResultsWrapper>() {
 
 			@Override
