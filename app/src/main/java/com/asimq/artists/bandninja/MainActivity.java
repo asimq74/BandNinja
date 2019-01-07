@@ -57,9 +57,6 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
 
-	public static final CardSnapHelper CARD_SNAP_HELPER = new CardSnapHelper();
-	private ApplicationComponent applicationComponent;
-
 	private class ImageViewFactory implements ViewSwitcher.ViewFactory {
 
 		@Override
@@ -94,15 +91,11 @@ public class MainActivity extends AppCompatActivity {
 				final Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
 				intent.putExtra(DetailsActivity.BUNDLE_IMAGE_ID, 2);
 
-				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-					startActivity(intent);
-				} else {
-					final CardView cardView = (CardView) view;
-					final View sharedView = cardView.getChildAt(cardView.getChildCount() - 1);
-					final ActivityOptions options = ActivityOptions
-							.makeSceneTransitionAnimation(MainActivity.this, sharedView, "shared");
-					startActivity(intent, options.toBundle());
-				}
+				final CardView cardView = (CardView) view;
+				final View sharedView = cardView.getChildAt(cardView.getChildCount() - 1);
+				final ActivityOptions options = ActivityOptions
+						.makeSceneTransitionAnimation(MainActivity.this, sharedView, "shared");
+				startActivity(intent, options.toBundle());
 			} else if (clickedPosition > activeCardPosition) {
 				recyclerView.smoothScrollToPosition(clickedPosition);
 //				onActiveCardChange(artists, clickedPosition);
@@ -141,17 +134,19 @@ public class MainActivity extends AppCompatActivity {
 
 	}
 	public static final String MB_ID = "MB_ID";
+	public final CardSnapHelper CARD_SNAP_HELPER = new CardSnapHelper();
 	final String TAG = this.getClass().getSimpleName();
-	@Inject
-	ArtistDataDao artistDataDao;
-	@Inject
-	ArtistTagDao artistTagDao;
-	private TextSwitcher clockSwitcher;
+	private ApplicationComponent applicationComponent;
 	private TextView artist1TextView;
 	private TextView artist2TextView;
 	private long artistAnimDuration;
+	@Inject
+	ArtistDataDao artistDataDao;
 	private int artistOffset1;
 	private int artistOffset2;
+	@Inject
+	ArtistTagDao artistTagDao;
+	private TextSwitcher clockSwitcher;
 	private int currentPosition;
 	private DecodeBitmapTask decodeMapBitmapTask;
 	private final int[] descriptions = {R.string.text1, R.string.text2, R.string.text3, R.string.text4, R.string.text5};
@@ -161,25 +156,36 @@ public class MainActivity extends AppCompatActivity {
 	FloatingActionButton fab;
 	private View greenDot;
 	private CardSliderLayoutManager layoutManger;
+	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (!"ARTIST_BOUND".equals(intent.getAction())) {
+				return;
+			}
+			String artistName = intent.getStringExtra("ARTIST_NAME");
+			String artistMbid = intent.getStringExtra("ARTIST_MBID");
+			Log.d(TAG, String.format("artist: %s mbid: %s", artistName, artistMbid));
+		}
+	};
 	@BindView(R.id.recycler_view)
 	RecyclerView mRecyclerView;
 	private DecodeBitmapTask.Listener mapLoadListener;
 	private ImageSwitcher mapSwitcher;
 	private final int[] maps = {R.drawable.map_paris, R.drawable.map_seoul, R.drawable.map_london, R.drawable.map_beijing};
-//	private final int[] pics = {R.drawable.p1, R.drawable.p2, R.drawable.p3, R.drawable.p4};
+	//	private final int[] pics = {R.drawable.p1, R.drawable.p2, R.drawable.p3, R.drawable.p4};
 //	private final String[] imageUrls = {"https://lastfm-img2.akamaized.net/i/u/174s/e909c183889102c07ac45faba7b3ff0a.png",
 //			"https://lastfm-img2.akamaized.net/i/u/174s/e909c183889102c07ac45faba7b3ff0a.png",
 //			"https://lastfm-img2.akamaized.net/i/u/174s/e909c183889102c07ac45faba7b3ff0a.png",
 //			"https://lastfm-img2.akamaized.net/i/u/174s/e909c183889102c07ac45faba7b3ff0a.png"};
 	private TextSwitcher placeSwitcher;
-//	private final String[] places = {"The Louvre", "Gwanghwamun", "Tower Bridge", "Temple of Heaven", "Aegeana Sea"};
+	//	private final String[] places = {"The Louvre", "Gwanghwamun", "Tower Bridge", "Temple of Heaven", "Aegeana Sea"};
 	private RecyclerView recyclerView;
 	private SearchResultsViewModel searchResultsViewModel;
 	@Inject
 	SearchResultsViewModelFactory searchResultsViewModelFactory;
 	private SliderAdapter sliderAdapter;
 	private TextSwitcher temperatureSwitcher;
-//	private final String[] temperatures = {"21°C", "19°C", "17°C", "23°C"};
+	//	private final String[] temperatures = {"21°C", "19°C", "17°C", "23°C"};
 //	private final String[] times = {"Aug 1 - Dec 15    7:00-18:00", "Sep 5 - Nov 10    8:00-16:00", "Mar 8 - May 21    7:00-18:00"};
 	@BindView(R.id.toolbar)
 	Toolbar toolbar;
@@ -225,38 +231,6 @@ public class MainActivity extends AppCompatActivity {
 		});
 	}
 
-	@Override
-	protected void onPause() {
-//		LocalBroadcastManager.getInstance(this).unregisterReceiver(
-//				mMessageReceiver);
-		super.onPause();
-		if (isFinishing() && decodeMapBitmapTask != null) {
-			decodeMapBitmapTask.cancel(true);
-		}
-	}
-
-	@Override
-	protected void onResume() {
-		// Register to receive messages.
-		// We are registering an observer (mMessageReceiver) to receive Intents
-		// with actions named "custom-event-name".
-//		LocalBroadcastManager.getInstance(this).registerReceiver(
-//				mMessageReceiver, new IntentFilter("ARTIST_BOUND"));
-		super.onResume();
-	}
-
-	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive( Context context, Intent intent ) {
-			if (!"ARTIST_BOUND".equals(intent.getAction())) {
-				return;
-			}
-			String artistName = intent.getStringExtra("ARTIST_NAME");
-			String artistMbid = intent.getStringExtra("ARTIST_MBID");
-			Log.d( TAG, String.format("artist: %s mbid: %s", artistName, artistMbid));
-		}
-	};
-
 	private void initRecyclerView(@NonNull List<Artist> artists) {
 		if (null != sliderAdapter) {
 			sliderAdapter.clear();
@@ -280,43 +254,10 @@ public class MainActivity extends AppCompatActivity {
 		CARD_SNAP_HELPER.attachToRecyclerView(recyclerView);
 	}
 
-
-	private void populateArtistInfo(Artist artistDetailedInfo) {
-		ArtistData artistData = new ArtistData(artistDetailedInfo);
-		Log.d( TAG, String.format("artistData: %s", artistData));
-		new BaseSaveArtistTask(artistDataDao).execute(artistData);
-		searchResultsViewModel.getArtistInfo(artistData.getName()).observe(MainActivity.this,
-				artist -> processArtistInfo(artist));
-	}
-
-
-	private void processArtistInfo(Artist artist) {
-		List<Tag> tags = artist.getTagWrapper().getTags();
-		Log.d(TAG, "tags=" + tags);
-		StringBuilder sb = new StringBuilder();
-		int count = 0;
-		for (Tag tag : tags) {
-			sb.append(tag.getName()).append(count++ < (tags.size() - 1) ? ", " : "");
-		}
-		String tagsText = sb.toString();
-		placeSwitcher = findViewById(R.id.ts_place);
-		placeSwitcher.removeAllViews();
-		placeSwitcher.setFactory(new TextViewFactory(R.style.PlaceTextView, false));
-		placeSwitcher.setCurrentText(tagsText);
-
-		descriptionsSwitcher = findViewById(R.id.ts_description);
-		descriptionsSwitcher.removeAllViews();
-		descriptionsSwitcher.setInAnimation(this, android.R.anim.fade_in);
-		descriptionsSwitcher.setOutAnimation(this, android.R.anim.fade_out);
-		descriptionsSwitcher.setFactory(new TextViewFactory(R.style.DescriptionTextView, false));
-		descriptionsSwitcher.setCurrentText(artist.getBio().getSummary());
-	}
-
-
 	private void initSwitchers(@NonNull List<Artist> artists) {
 		String artistName = artists.get(0).getName();
 		String artistMbid = artists.get(0).getMbid();
-		Log.d( TAG, String.format("artist: %s mbid: %s", artistName, artistMbid));
+		Log.d(TAG, String.format("artist: %s mbid: %s", artistName, artistMbid));
 		searchResultsViewModel.getArtistInfo(artistName).observe(MainActivity.this,
 				artistDetailedInfo -> populateArtistInfo(artistDetailedInfo));
 
@@ -367,11 +308,10 @@ public class MainActivity extends AppCompatActivity {
 		onActiveCardChange(artists, pos);
 	}
 
-
 	private void onActiveCardChange(List<Artist> artists, int pos) {
 		String artistName = artists.get(pos).getName();
 		String artistMbid = artists.get(pos).getMbid();
-		Log.d( TAG, String.format("artist: %s mbid: %s", artistName, artistMbid));
+		Log.d(TAG, String.format("artist: %s mbid: %s", artistName, artistMbid));
 		temperatureSwitcher.removeAllViews();
 		temperatureSwitcher.setFactory(new TextViewFactory(R.style.TemperatureTextView, true));
 		temperatureSwitcher.setCurrentText(artists.get(pos).getListeners() + "");
@@ -432,14 +372,6 @@ public class MainActivity extends AppCompatActivity {
 		setSupportActionBar(toolbar);
 	}
 
-	private void populateUI(List<Artist> artists) {
-		findViewById(R.id.blueTabLayout).setVisibility(View.GONE);
-		initRecyclerView(artists);
-		initArtistNameText(artists);
-		initSwitchers(artists);
-		initGreenDot();
-	}
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -463,6 +395,63 @@ public class MainActivity extends AppCompatActivity {
 		return true;
 	}
 
+	@Override
+	protected void onPause() {
+//		LocalBroadcastManager.getInstance(this).unregisterReceiver(
+//				mMessageReceiver);
+		super.onPause();
+		if (isFinishing() && decodeMapBitmapTask != null) {
+			decodeMapBitmapTask.cancel(true);
+		}
+	}
+
+	@Override
+	protected void onResume() {
+		// Register to receive messages.
+		// We are registering an observer (mMessageReceiver) to receive Intents
+		// with actions named "custom-event-name".
+//		LocalBroadcastManager.getInstance(this).registerReceiver(
+//				mMessageReceiver, new IntentFilter("ARTIST_BOUND"));
+		super.onResume();
+	}
+
+	private void populateArtistInfo(Artist artistDetailedInfo) {
+		ArtistData artistData = new ArtistData(artistDetailedInfo);
+		Log.d(TAG, String.format("artistData: %s", artistData));
+		new BaseSaveArtistTask(artistDataDao).execute(artistData);
+		searchResultsViewModel.getArtistInfo(artistData.getName()).observe(MainActivity.this,
+				artist -> processArtistInfo(artist));
+	}
+
+	private void populateUI(List<Artist> artists) {
+		findViewById(R.id.blueTabLayout).setVisibility(View.GONE);
+		initRecyclerView(artists);
+		initArtistNameText(artists);
+		initSwitchers(artists);
+		initGreenDot();
+	}
+
+	private void processArtistInfo(Artist artist) {
+		List<Tag> tags = artist.getTagWrapper().getTags();
+		Log.d(TAG, "tags=" + tags);
+		StringBuilder sb = new StringBuilder();
+		int count = 0;
+		for (Tag tag : tags) {
+			sb.append(tag.getName()).append(count++ < (tags.size() - 1) ? ", " : "");
+		}
+		String tagsText = sb.toString();
+		placeSwitcher = findViewById(R.id.ts_place);
+		placeSwitcher.removeAllViews();
+		placeSwitcher.setFactory(new TextViewFactory(R.style.PlaceTextView, false));
+		placeSwitcher.setCurrentText(tagsText);
+
+		descriptionsSwitcher = findViewById(R.id.ts_description);
+		descriptionsSwitcher.removeAllViews();
+		descriptionsSwitcher.setInAnimation(this, android.R.anim.fade_in);
+		descriptionsSwitcher.setOutAnimation(this, android.R.anim.fade_out);
+		descriptionsSwitcher.setFactory(new TextViewFactory(R.style.DescriptionTextView, false));
+		descriptionsSwitcher.setCurrentText(artist.getBio().getSummary());
+	}
 
 	private void setArtistText(String text, boolean left2right) {
 		final TextView invisibleText;
