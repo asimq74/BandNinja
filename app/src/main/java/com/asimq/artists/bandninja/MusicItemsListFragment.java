@@ -439,6 +439,7 @@ public class MusicItemsListFragment extends Fragment {
 		applicationComponent.inject(this);
 		searchResultsViewModel = ViewModelProviders.of(this, searchResultsViewModelFactory)
 				.get(SearchResultsViewModel.class);
+		searchResultsViewModel.getSearchResultsByArtist("kelly").observe(this, artists -> populateUI(artists));
 		return view;
 	}
 
