@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 		super.onAttachFragment(fragment);
 		if (fragment instanceof MusicItemsListFragment) {
 			MusicItemsListFragment musicItemsListFragment = (MusicItemsListFragment) fragment;
-			musicItemsListFragment.setOnHeadlineSelectedListener(this);
+			musicItemsListFragment.setOnFragmentInteractionListener(this);
 		}
 	}
 

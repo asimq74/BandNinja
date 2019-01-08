@@ -540,7 +540,7 @@ public class MusicItemsListFragment extends Fragment {
 		animSet.start();
 	}
 
-	public void setOnHeadlineSelectedListener(OnFragmentInteractionListener onFragmentInteractionListener) {
+	public void setOnFragmentInteractionListener(OnFragmentInteractionListener onFragmentInteractionListener) {
 		mCallback = onFragmentInteractionListener;
 	}
 
