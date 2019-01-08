@@ -14,12 +14,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -38,6 +40,7 @@ import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
+import com.asimq.artists.bandninja.MusicItemsListFragment.OnFragmentInteractionListener;
 import com.asimq.artists.bandninja.asynctasks.BaseSaveArtistTask;
 import com.asimq.artists.bandninja.cards.SliderAdapter;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
@@ -55,7 +58,21 @@ import com.ramotion.cardslider.CardSnapHelper;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnFragmentInteractionListener {
+
+	@Override
+	public void onFragmentInteraction(Uri uri) {
+
+	}
+
+	@Override
+	public void onAttachFragment(Fragment fragment) {
+		super.onAttachFragment(fragment);
+		if (fragment instanceof MusicItemsListFragment) {
+			MusicItemsListFragment musicItemsListFragment = (MusicItemsListFragment) fragment;
+			musicItemsListFragment.setOnHeadlineSelectedListener(this);
+		}
+	}
 
 	private class ImageViewFactory implements ViewSwitcher.ViewFactory {
 

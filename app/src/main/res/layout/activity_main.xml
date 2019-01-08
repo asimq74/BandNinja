@@ -59,6 +59,12 @@
             android:paddingRight="@dimen/list_side_margin"
             android:paddingTop="116dp">
 
+            <fragment
+                android:id="@+id/musicItemsListFragment"
+                class="com.asimq.artists.bandninja.MusicItemsListFragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

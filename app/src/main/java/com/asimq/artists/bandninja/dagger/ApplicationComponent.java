@@ -7,6 +7,7 @@ import android.content.Context;
 
 import com.asimq.artists.bandninja.MainActivity;
 import com.asimq.artists.bandninja.MainNavigationActivity;
+import com.asimq.artists.bandninja.MusicItemsListFragment;
 import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.ResultActivity;
 import com.asimq.artists.bandninja.cards.SliderAdapter;
@@ -33,6 +34,8 @@ public interface ApplicationComponent {
 	void inject(MainNavigationActivity mainNavigationActivity);
 
 	void inject(MainActivity mainActivity);
+
+	void inject(MusicItemsListFragment musicItemsListFragment);
 
 	void inject(ResultActivity resultActivity);
 
