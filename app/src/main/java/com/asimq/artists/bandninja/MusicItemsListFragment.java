@@ -13,7 +13,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
@@ -23,7 +22,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -78,7 +76,7 @@ public class MusicItemsListFragment extends Fragment {
 	public interface OnFragmentInteractionListener {
 
 		// TODO: Update argument type and name
-		void onFragmentInteraction(Uri uri);
+		void onSearchedForArtistName(@NonNull String artistName);
 	}
 
 	private class ImageViewFactory implements ViewSwitcher.ViewFactory {
@@ -157,6 +155,7 @@ public class MusicItemsListFragment extends Fragment {
 		}
 
 	}
+
 	// TODO: Rename parameter arguments, choose names that match
 	// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 	private static final String ARG_PARAM1 = "param1";
@@ -180,11 +179,14 @@ public class MusicItemsListFragment extends Fragment {
 		fragment.setArguments(args);
 		return fragment;
 	}
+
 	public final CardSnapHelper CARD_SNAP_HELPER = new CardSnapHelper();
 	final String TAG = this.getClass().getSimpleName();
 	private ApplicationComponent applicationComponent;
-	private TextView artist1TextView;
-	private TextView artist2TextView;
+	@BindView(R.id.mainTitleView_1)
+	TextView artist1TextView;
+	@BindView(R.id.mainTitleView_2)
+	TextView artist2TextView;
 	private long artistAnimDuration;
 	@Inject
 	ArtistDataDao artistDataDao;
@@ -192,16 +194,20 @@ public class MusicItemsListFragment extends Fragment {
 	private int artistOffset2;
 	@Inject
 	ArtistTagDao artistTagDao;
-	private TextSwitcher clockSwitcher;
+	@BindView(R.id.blueTabLayout)
+	View blueTabLayout;
+	@BindView(R.id.ts_clock)
+	TextSwitcher clockSwitcher;
 	private int currentPosition;
 	private DecodeBitmapTask decodeMapBitmapTask;
 	private final int[] descriptions = {R.string.text1, R.string.text2, R.string.text3, R.string.text4, R.string.text5};
-	private TextSwitcher descriptionsSwitcher;
+	@BindView(R.id.ts_description)
+	TextSwitcher descriptionsSwitcher;
 	private final int[][] dotCoords = new int[5][2];
-	private View greenDot;
+	@BindView(R.id.green_dot)
+	View greenDot;
 	private CardSliderLayoutManager layoutManger;
 	OnFragmentInteractionListener mCallback;
-	private OnFragmentInteractionListener mListener;
 	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -216,20 +222,27 @@ public class MusicItemsListFragment extends Fragment {
 	// TODO: Rename and change types of parameters
 	private String mParam1;
 	private String mParam2;
-	@BindView(R.id.recycler_view)
-	RecyclerView mRecyclerView;
 	private DecodeBitmapTask.Listener mapLoadListener;
-	private ImageSwitcher mapSwitcher;
+	@BindView(R.id.ts_map)
+	ImageSwitcher mapSwitcher;
 	private final int[] maps = {R.drawable.map_paris, R.drawable.map_seoul, R.drawable.map_london, R.drawable.map_beijing};
-	private TextSwitcher placeSwitcher;
-	private RecyclerView recyclerView;
+	@BindView(R.id.ts_place)
+	TextSwitcher placeSwitcher;
+	@BindView(R.id.recycler_view)
+	RecyclerView recyclerView;
 	private SearchResultsViewModel searchResultsViewModel;
 	@Inject
 	SearchResultsViewModelFactory searchResultsViewModelFactory;
 	private SliderAdapter sliderAdapter;
-	private TextSwitcher temperatureSwitcher;
+	@BindView(R.id.ts_temperature)
+	TextSwitcher temperatureSwitcher;
+
 	public MusicItemsListFragment() {
 		// Required empty public constructor
+	}
+
+	protected void displaySearchResultsByArtist(@NonNull String artistName) {
+		searchResultsViewModel.getSearchResultsByArtist(artistName).observe(this, artists -> populateUI(artists));
 	}
 
 	private void initArtistNameText(@NonNull List<Artist> artists) {
@@ -237,9 +250,6 @@ public class MusicItemsListFragment extends Fragment {
 		artistAnimDuration = getResources().getInteger(R.integer.labels_animation_duration);
 		artistOffset1 = getResources().getDimensionPixelSize(R.dimen.left_offset);
 		artistOffset2 = getResources().getDimensionPixelSize(R.dimen.card_width);
-		artist1TextView = getActivity().findViewById(R.id.mainTitleView_1);
-		artist2TextView = getActivity().findViewById(R.id.mainTitleView_2);
-
 		artist1TextView.setX(artistOffset1);
 		artist2TextView.setX(artistOffset2);
 		artist1TextView.setText(artistName);
@@ -266,7 +276,6 @@ public class MusicItemsListFragment extends Fragment {
 					dotCoords[i][1] = viewTop + border + rnd.nextInt(yRange);
 				}
 
-				greenDot = getActivity().findViewById(R.id.green_dot);
 				greenDot.setX(dotCoords[0][0]);
 				greenDot.setY(dotCoords[0][1]);
 			}
@@ -279,7 +288,6 @@ public class MusicItemsListFragment extends Fragment {
 		}
 		sliderAdapter = new SliderAdapter(applicationComponent, artists, new OnCardClickListener());
 		sliderAdapter.notifyDataSetChanged();
-		recyclerView = getActivity().findViewById(R.id.recycler_view);
 		recyclerView.setAdapter(sliderAdapter);
 		recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 			@Override
@@ -303,29 +311,20 @@ public class MusicItemsListFragment extends Fragment {
 		searchResultsViewModel.getArtistInfo(artistName).observe(getActivity(),
 				artistDetailedInfo -> populateArtistInfo(artistDetailedInfo));
 
-		temperatureSwitcher = (TextSwitcher) getActivity().findViewById(R.id.ts_temperature);
 		temperatureSwitcher.removeAllViews();
 		temperatureSwitcher.setFactory(new TextViewFactory(R.style.TemperatureTextView, true));
 		temperatureSwitcher.setCurrentText(artists.get(0).getListeners() + "");
 
-//		placeSwitcher = (TextSwitcher) getActivity().findViewById(R.id.ts_place);
-//		placeSwitcher.removeAllViews();
-//		placeSwitcher.setFactory(new TextViewFactory(R.style.PlaceTextView, false));
-//		placeSwitcher.setCurrentText(artists.get(0).getName());
-
-		clockSwitcher = (TextSwitcher) getActivity().findViewById(R.id.ts_clock);
 		clockSwitcher.removeAllViews();
 		clockSwitcher.setFactory(new TextViewFactory(R.style.ClockTextView, false));
 		clockSwitcher.setCurrentText(artists.get(0).getName());
 
-		descriptionsSwitcher = (TextSwitcher) getActivity().findViewById(R.id.ts_description);
 		descriptionsSwitcher.removeAllViews();
 		descriptionsSwitcher.setInAnimation(getActivity(), android.R.anim.fade_in);
 		descriptionsSwitcher.setOutAnimation(getActivity(), android.R.anim.fade_out);
 		descriptionsSwitcher.setFactory(new TextViewFactory(R.style.DescriptionTextView, false));
 		descriptionsSwitcher.setCurrentText(getString(descriptions[0]));
 
-		mapSwitcher = (ImageSwitcher) getActivity().findViewById(R.id.ts_map);
 		mapSwitcher.removeAllViews();
 		mapSwitcher.setInAnimation(getActivity(), R.anim.fade_in);
 		mapSwitcher.setOutAnimation(getActivity(), R.anim.fade_out);
@@ -402,24 +401,6 @@ public class MusicItemsListFragment extends Fragment {
 	}
 
 	@Override
-	public void onAttach(Context context) {
-		super.onAttach(context);
-		if (context instanceof OnFragmentInteractionListener) {
-			mListener = (OnFragmentInteractionListener) context;
-		} else {
-			throw new RuntimeException(context.toString()
-					+ " must implement OnFragmentInteractionListener");
-		}
-	}
-
-	// TODO: Rename method, update argument and hook method into UI event
-	public void onButtonPressed(Uri uri) {
-		if (mListener != null) {
-			mListener.onFragmentInteraction(uri);
-		}
-	}
-
-	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (getArguments() != null) {
@@ -439,20 +420,16 @@ public class MusicItemsListFragment extends Fragment {
 		applicationComponent.inject(this);
 		searchResultsViewModel = ViewModelProviders.of(this, searchResultsViewModelFactory)
 				.get(SearchResultsViewModel.class);
-		searchResultsViewModel.getSearchResultsByArtist("kelly").observe(this, artists -> populateUI(artists));
 		return view;
 	}
 
 	@Override
 	public void onDetach() {
 		super.onDetach();
-		mListener = null;
 	}
 
 	@Override
 	public void onPause() {
-//		LocalBroadcastManager.getInstance(this).unregisterReceiver(
-//				mMessageReceiver);
 		super.onPause();
 		if (getActivity().isFinishing() && decodeMapBitmapTask != null) {
 			decodeMapBitmapTask.cancel(true);
@@ -478,7 +455,7 @@ public class MusicItemsListFragment extends Fragment {
 	}
 
 	private void populateUI(List<Artist> artists) {
-		getActivity().findViewById(R.id.blueTabLayout).setVisibility(View.GONE);
+		blueTabLayout.setVisibility(View.GONE);
 		initRecyclerView(artists);
 		initArtistNameText(artists);
 		initSwitchers(artists);
@@ -494,12 +471,10 @@ public class MusicItemsListFragment extends Fragment {
 			sb.append(tag.getName()).append(count++ < (tags.size() - 1) ? ", " : "");
 		}
 		String tagsText = sb.toString();
-		placeSwitcher = getActivity().findViewById(R.id.ts_place);
 		placeSwitcher.removeAllViews();
 		placeSwitcher.setFactory(new TextViewFactory(R.style.PlaceTextView, false));
 		placeSwitcher.setCurrentText(tagsText);
 
-		descriptionsSwitcher = getActivity().findViewById(R.id.ts_description);
 		descriptionsSwitcher.removeAllViews();
 		descriptionsSwitcher.setInAnimation(getActivity(), android.R.anim.fade_in);
 		descriptionsSwitcher.setOutAnimation(getActivity(), android.R.anim.fade_out);
