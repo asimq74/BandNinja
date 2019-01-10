@@ -44,7 +44,9 @@ import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistTagDao;
 import com.asimq.artists.bandninja.utils.DecodeBitmapTask;
+import com.asimq.artists.bandninja.viewmodelfactories.AlbumDetailViewModelFactory;
 import com.asimq.artists.bandninja.viewmodelfactories.SearchResultsViewModelFactory;
+import com.asimq.artists.bandninja.viewmodels.AlbumDetailViewModel;
 import com.asimq.artists.bandninja.viewmodels.SearchResultsViewModel;
 import com.ramotion.cardslider.CardSliderLayoutManager;
 import com.ramotion.cardslider.CardSnapHelper;
@@ -184,9 +186,9 @@ public class MusicItemsListFragment extends Fragment {
 	final String TAG = this.getClass().getSimpleName();
 	private ApplicationComponent applicationComponent;
 	@BindView(R.id.mainTitleView_1)
-	TextView artist1TextView;
+	TextView mainTitleView1;
 	@BindView(R.id.mainTitleView_2)
-	TextView artist2TextView;
+	TextView mainTitleView2;
 	private long artistAnimDuration;
 	@Inject
 	ArtistDataDao artistDataDao;
@@ -200,7 +202,6 @@ public class MusicItemsListFragment extends Fragment {
 	TextSwitcher clockSwitcher;
 	private int currentPosition;
 	private DecodeBitmapTask decodeMapBitmapTask;
-	private final int[] descriptions = {R.string.text1, R.string.text2, R.string.text3, R.string.text4, R.string.text5};
 	@BindView(R.id.ts_description)
 	TextSwitcher descriptionsSwitcher;
 	private final int[][] dotCoords = new int[5][2];
@@ -233,6 +234,9 @@ public class MusicItemsListFragment extends Fragment {
 	private SearchResultsViewModel searchResultsViewModel;
 	@Inject
 	SearchResultsViewModelFactory searchResultsViewModelFactory;
+	private AlbumDetailViewModel albumDetailViewModel;
+	@Inject
+	AlbumDetailViewModelFactory albumDetailViewModelFactory;
 	private SliderAdapter sliderAdapter;
 	@BindView(R.id.ts_temperature)
 	TextSwitcher temperatureSwitcher;
@@ -250,10 +254,10 @@ public class MusicItemsListFragment extends Fragment {
 		artistAnimDuration = getResources().getInteger(R.integer.labels_animation_duration);
 		artistOffset1 = getResources().getDimensionPixelSize(R.dimen.left_offset);
 		artistOffset2 = getResources().getDimensionPixelSize(R.dimen.card_width);
-		artist1TextView.setX(artistOffset1);
-		artist2TextView.setX(artistOffset2);
-		artist1TextView.setText(artistName);
-		artist2TextView.setAlpha(0f);
+		mainTitleView1.setX(artistOffset1);
+		mainTitleView2.setX(artistOffset2);
+		mainTitleView1.setText(artistName);
+		mainTitleView2.setAlpha(0f);
 	}
 
 	private void initGreenDot() {
@@ -323,7 +327,7 @@ public class MusicItemsListFragment extends Fragment {
 		descriptionsSwitcher.setInAnimation(getActivity(), android.R.anim.fade_in);
 		descriptionsSwitcher.setOutAnimation(getActivity(), android.R.anim.fade_out);
 		descriptionsSwitcher.setFactory(new TextViewFactory(R.style.DescriptionTextView, false));
-		descriptionsSwitcher.setCurrentText(getString(descriptions[0]));
+		descriptionsSwitcher.setCurrentText("");
 
 		mapSwitcher.removeAllViews();
 		mapSwitcher.setInAnimation(getActivity(), R.anim.fade_in);
@@ -420,6 +424,7 @@ public class MusicItemsListFragment extends Fragment {
 		applicationComponent.inject(this);
 		searchResultsViewModel = ViewModelProviders.of(this, searchResultsViewModelFactory)
 				.get(SearchResultsViewModel.class);
+		albumDetailViewModel = ViewModelProviders.of(this, albumDetailViewModelFactory).get(AlbumDetailViewModel.class);
 		return view;
 	}
 
@@ -452,6 +457,7 @@ public class MusicItemsListFragment extends Fragment {
 		new BaseSaveArtistTask(artistDataDao).execute(artistData);
 		searchResultsViewModel.getArtistInfo(artistData.getName()).observe(this,
 				artist -> processArtistInfo(artist));
+		albumDetailViewModel.getAlbumsByArtist(artistData.getName()).observe(this, albums -> {Log.d(TAG, "albums: " + albums);});
 	}
 
 	private void populateUI(List<Artist> artists) {
@@ -485,12 +491,12 @@ public class MusicItemsListFragment extends Fragment {
 	private void setArtistText(String text, boolean left2right) {
 		final TextView invisibleText;
 		final TextView visibleText;
-		if (artist1TextView.getAlpha() > artist2TextView.getAlpha()) {
-			visibleText = artist1TextView;
-			invisibleText = artist2TextView;
+		if (mainTitleView1.getAlpha() > mainTitleView2.getAlpha()) {
+			visibleText = mainTitleView1;
+			invisibleText = mainTitleView2;
 		} else {
-			visibleText = artist2TextView;
-			invisibleText = artist1TextView;
+			visibleText = mainTitleView2;
+			invisibleText = mainTitleView1;
 		}
 
 		final int vOffset;

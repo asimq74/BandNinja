@@ -15,13 +15,13 @@ import com.asimq.artists.bandninja.viewmodels.SearchResultsViewModel;
 public class SearchResultsViewModelFactory implements ViewModelProvider.Factory {
 
 	private final Application application;
-	private final SearchResultsRepository searchResultsRepository;
 	private final BandItemRepository bandItemRepository;
+	private final SearchResultsRepository searchResultsRepository;
 
 	@Inject
 	public SearchResultsViewModelFactory(@NonNull Application application,
-										 @NonNull SearchResultsRepository searchResultsRepository,
-										 @NonNull BandItemRepository bandItemRepository) {
+			@NonNull SearchResultsRepository searchResultsRepository,
+			@NonNull BandItemRepository bandItemRepository) {
 		this.application = application;
 		this.searchResultsRepository = searchResultsRepository;
 		this.bandItemRepository = bandItemRepository;

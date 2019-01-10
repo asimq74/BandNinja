@@ -11,6 +11,7 @@ import com.asimq.artists.bandninja.MusicItemsListFragment;
 import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.ResultActivity;
 import com.asimq.artists.bandninja.cards.SliderAdapter;
+import com.asimq.artists.bandninja.viewmodels.AlbumDetailViewModel;
 import com.asimq.artists.bandninja.viewmodels.ArtistDetailViewModel;
 import com.asimq.artists.bandninja.viewmodels.SearchResultsViewModel;
 
@@ -40,6 +41,8 @@ public interface ApplicationComponent {
 	void inject(ResultActivity resultActivity);
 
 	void inject(SearchResultsViewModel searchResultsViewModel);
+
+	void inject(AlbumDetailViewModel albumDetailViewModel);
 
 	void inject(ArtistDetailViewModel artistDetailViewModel);
 

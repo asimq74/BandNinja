@@ -16,7 +16,6 @@ import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
-import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Menu;
@@ -175,8 +174,8 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
                     return;
                 }
 
-                Log.d(TAG, String.format("\n\ntop albums for %s (%s items)", artistName, topAlbumsWrapper.getTopalbums().getAlbums().size()));
-                for (Album album : topAlbumsWrapper.getTopalbums().getAlbums()) {
+                Log.d(TAG, String.format("\n\ntop albums for %s (%s items)", artistName, topAlbumsWrapper.getTopAlbums().getAlbums().size()));
+                for (Album album : topAlbumsWrapper.getTopAlbums().getAlbums()) {
                     Log.d(TAG, String.format("\t%s - %s\n", album.getName(), album.getArtist().getName()));
                 }
             }
