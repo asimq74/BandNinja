@@ -4,22 +4,22 @@ import com.google.gson.annotations.SerializedName;
 
 public class TopAlbumsWrapper {
     @SerializedName("topalbums")
-    private TopAlbums topalbums;
+    private TopAlbums topAlbums;
 
-    public TopAlbums getTopalbums ()
+    public TopAlbums getTopAlbums()
     {
-        return topalbums;
+        return topAlbums;
     }
 
-    public void setTopalbums (TopAlbums topalbums)
+    public void setTopAlbums(TopAlbums topAlbums)
     {
-        this.topalbums = topalbums;
+        this.topAlbums = topAlbums;
     }
 
     @Override
     public String toString() {
         return "TopAlbumsWrapper{" +
-                "\n\ttopalbums=" + topalbums +
+                "\n\ttopAlbums=" + topAlbums +
                 '}';
     }
 }

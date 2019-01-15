@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
                                                  xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+                                                 xmlns:tools="http://schemas.android.com/tools"
+                                                 android:layout_width="match_parent"
                                                  android:layout_height="match_parent"
                                                  android:fitsSystemWindows="true">
 
@@ -49,176 +49,23 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipChildren="false"
-        android:orientation="vertical"
-        android:paddingBottom="28dp"
-        android:paddingLeft="@dimen/list_side_margin"
-        android:paddingRight="@dimen/list_side_margin"
-        android:paddingTop="116dp">
-
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp">
-
-            <FrameLayout
-                android:id="@+id/mainTitleLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_toStartOf="@+id/blueTabLayout">
-
-                <TextView
-                    android:id="@+id/mainTitleView_1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    android:singleLine="false"
-                    tools:text="Del The Funkee Homosapien"/>
-
-                <TextView
-                    android:id="@+id/mainTitleView_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="24sp"
-                    android:maxLines="2"
-                    android:textStyle="bold"
-                    android:singleLine="false"/>
-
-            </FrameLayout>
-
-            <FrameLayout
-                android:id="@+id/blueTabLayout"
-                android:layout_width="85dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/temperature_background">
-
-                <TextSwitcher
-                    android:id="@+id/ts_temperature"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"/>
-
-            </FrameLayout>
-
-        </RelativeLayout>
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="210dp"
-            android:layout_marginStart="@dimen/recycler_view_left_offset"
-            android:layout_marginTop="18dp"
+            android:layout_height="match_parent"
             android:clipChildren="false"
-            android:overScrollMode="never"
-            app:viewUpdater="com.asimq.artists.bandninja.cards.CardsUpdater"/>
+            android:orientation="vertical"
+            android:paddingBottom="28dp"
+            android:paddingLeft="@dimen/list_side_margin"
+            android:paddingRight="@dimen/list_side_margin"
+            android:paddingTop="116dp">
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp">
-
-            <ImageView
-                android:layout_width="13dp"
-                android:layout_height="13dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="30dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/star"/>
-
-            <TextSwitcher
-                android:id="@+id/ts_place"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="@dimen/left_offset"/>
-
-        </FrameLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:animateLayoutChanges="true">
-
-            <ImageSwitcher
-                android:id="@+id/ts_map"
+            <fragment
+                android:id="@+id/musicItemsListFragment"
+                class="com.asimq.artists.bandninja.MusicItemsListFragment"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="wrap_content"/>
 
-            <View
-                android:id="@+id/gradient_top"
-                android:layout_width="match_parent"
-                android:layout_height="90dp"
-                android:background="@android:color/white"/>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:layout_below="@+id/gradient_top"
-                android:background="@drawable/gradient_map"/>
-
-            <TextSwitcher
-                android:id="@+id/ts_description"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:layout_marginStart="@dimen/left_offset"/>
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/ts_description"
-                android:layout_marginTop="10dp">
-
-                <ImageView
-                    android:layout_width="13dp"
-                    android:layout_height="13dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="30dp"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/clock"/>
-
-                <TextSwitcher
-                    android:id="@+id/ts_clock"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="@dimen/left_offset"/>
-
-            </FrameLayout>
-
-            <FrameLayout
-                android:id="@+id/green_dot"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <View
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:alpha="0.5"
-                    android:background="@drawable/green_dot_big"/>
-
-                <View
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:layout_gravity="center"
-                    android:background="@drawable/green_dot_small"/>
-
-            </FrameLayout>
-
-        </RelativeLayout>
-
-    </LinearLayout>
+        </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
@@ -226,6 +73,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+        app:srcCompat="@android:drawable/ic_dialog_email"/>
 
 </android.support.design.widget.CoordinatorLayout>

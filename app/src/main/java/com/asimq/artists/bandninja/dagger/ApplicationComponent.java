@@ -7,9 +7,11 @@ import android.content.Context;
 
 import com.asimq.artists.bandninja.MainActivity;
 import com.asimq.artists.bandninja.MainNavigationActivity;
+import com.asimq.artists.bandninja.MusicItemsListFragment;
 import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.ResultActivity;
 import com.asimq.artists.bandninja.cards.SliderAdapter;
+import com.asimq.artists.bandninja.viewmodels.AlbumDetailViewModel;
 import com.asimq.artists.bandninja.viewmodels.ArtistDetailViewModel;
 import com.asimq.artists.bandninja.viewmodels.SearchResultsViewModel;
 
@@ -34,9 +36,13 @@ public interface ApplicationComponent {
 
 	void inject(MainActivity mainActivity);
 
+	void inject(MusicItemsListFragment musicItemsListFragment);
+
 	void inject(ResultActivity resultActivity);
 
 	void inject(SearchResultsViewModel searchResultsViewModel);
+
+	void inject(AlbumDetailViewModel albumDetailViewModel);
 
 	void inject(ArtistDetailViewModel artistDetailViewModel);
 

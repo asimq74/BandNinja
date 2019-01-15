@@ -6,6 +6,8 @@ import android.app.Application;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 
+import com.asimq.artists.bandninja.repositories.AlbumInfoRepository;
+import com.asimq.artists.bandninja.repositories.AlbumInfoRepositoryDao;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.repositories.SearchResultsModelRepositoryDao;
 import com.asimq.artists.bandninja.repositories.SearchResultsRepository;
@@ -13,6 +15,7 @@ import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistTagDao;
 import com.asimq.artists.bandninja.room.database.BandItemDataSource;
 import com.asimq.artists.bandninja.room.database.BandItemDatabase;
+import com.asimq.artists.bandninja.viewmodelfactories.AlbumDetailViewModelFactory;
 import com.asimq.artists.bandninja.viewmodelfactories.ArtistDetailViewModelFactory;
 import com.asimq.artists.bandninja.viewmodelfactories.SearchResultsViewModelFactory;
 
@@ -39,8 +42,21 @@ public class ApplicationModule {
 
 	@Provides
 	@Singleton
+	public AlbumInfoRepository albumInfoRepository() {
+		return new AlbumInfoRepositoryDao();
+	}
+
+	@Provides
+	@Singleton
 	public BandItemRepository bandItemRepository(ArtistDataDao artistDataDao, ArtistTagDao artistTagDao) {
 		return new BandItemDataSource(artistDataDao, artistTagDao);
+	}
+
+	@Provides
+	@Singleton
+	AlbumDetailViewModelFactory provideAlbumDetailViewModelFactory(
+			AlbumInfoRepository albumInfoRepository) {
+		return new AlbumDetailViewModelFactory(mApplication, albumInfoRepository);
 	}
 
 	@Provides
@@ -56,14 +72,14 @@ public class ApplicationModule {
 
 	@Provides
 	@Singleton
-	public ArtistTagDao provideArtistTagDao(BandItemDatabase bandItemDatabase) {
-		return bandItemDatabase.artistTagDao();
+	ArtistDetailViewModelFactory provideArtistDetailViewModelFactory(BandItemRepository bandItemRepository) {
+		return new ArtistDetailViewModelFactory(mApplication, bandItemRepository);
 	}
 
 	@Provides
 	@Singleton
-	ArtistDetailViewModelFactory provideArtistDetailViewModelFactory(BandItemRepository bandItemRepository) {
-		return new ArtistDetailViewModelFactory(mApplication, bandItemRepository);
+	public ArtistTagDao provideArtistTagDao(BandItemDatabase bandItemDatabase) {
+		return bandItemDatabase.artistTagDao();
 	}
 
 	@Provides
@@ -80,7 +96,7 @@ public class ApplicationModule {
 	@Provides
 	@Singleton
 	SearchResultsViewModelFactory provideSearchResultsViewModelFactory(
-	        SearchResultsRepository searchResultsRepository, BandItemRepository bandItemRepository) {
+			SearchResultsRepository searchResultsRepository, BandItemRepository bandItemRepository) {
 		return new SearchResultsViewModelFactory(mApplication, searchResultsRepository, bandItemRepository);
 	}
 
