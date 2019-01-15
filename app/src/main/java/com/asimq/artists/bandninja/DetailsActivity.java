@@ -1,138 +1,111 @@
 package com.asimq.artists.bandninja;
 
-import android.animation.ObjectAnimator;
+import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
-import android.transition.Transition;
-import android.util.DisplayMetrics;
+import android.support.v7.graphics.Palette;
+import android.support.v7.widget.Toolbar;
+import android.transition.Slide;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
-import com.asimq.artists.bandninja.utils.DecodeBitmapTask;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
-public class DetailsActivity extends AppCompatActivity implements DecodeBitmapTask.Listener {
+public class DetailsActivity extends AppCompatActivity {
 
-	static final String BUNDLE_IMAGE_ID = "BUNDLE_IMAGE_ID";
-	private DecodeBitmapTask decodeBitmapTask;
-	private ImageView imageView;
+	public static final String EXTRA_IMAGE = "extraImage";
+	public static final String EXTRA_TITLE = "extraTitle";
+	private CollapsingToolbarLayout collapsingToolbarLayout;
 
-	private void addCardCorners() {
-		final CardView cardView = (CardView) findViewById(R.id.card);
-		cardView.setRadius(25f);
+	public static void navigate(AppCompatActivity activity, View transitionImage) {
+		Intent intent = new Intent(activity, DetailsActivity.class);
+//		intent.putExtra(EXTRA_IMAGE, viewModel.getImage());
+//		intent.putExtra(EXTRA_TITLE, viewModel.getText());
+
+		ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity,
+				transitionImage, EXTRA_IMAGE);
+		ActivityCompat.startActivity(activity, intent, options.toBundle());
 	}
 
-	private void loadFullSizeBitmap(int smallResId) {
-		int bigResId;
-		switch (smallResId) {
-			case R.drawable.p1:
-				bigResId = R.drawable.p1_big;
-				break;
-			case R.drawable.p2:
-				bigResId = R.drawable.p2_big;
-				break;
-			case R.drawable.p3:
-				bigResId = R.drawable.p3_big;
-				break;
-			case R.drawable.p4:
-				bigResId = R.drawable.p4_big;
-				break;
-			case R.drawable.p5:
-				bigResId = R.drawable.p5_big;
-				break;
-			default:
-				bigResId = R.drawable.p1_big;
-		}
-
-		final DisplayMetrics metrics = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getRealMetrics(metrics);
-
-		final int w = metrics.widthPixels;
-		final int h = metrics.heightPixels;
-
-		decodeBitmapTask = new DecodeBitmapTask(getResources(), bigResId, w, h, this);
-		decodeBitmapTask.execute();
-	}
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	@SuppressWarnings("ConstantConditions")
+	@Override protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		initActivityTransitions();
 		setContentView(R.layout.activity_details);
 
-		final int smallResId = getIntent().getIntExtra(BUNDLE_IMAGE_ID, -1);
-		if (smallResId == -1) {
-			finish();
-			return;
-		}
+		ViewCompat.setTransitionName(findViewById(R.id.app_bar_layout), EXTRA_IMAGE);
+		supportPostponeEnterTransition();
 
-		imageView = (ImageView) findViewById(R.id.image);
-		imageView.setImageResource(smallResId);
+		setSupportActionBar(findViewById(R.id.toolbar));
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-		imageView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				DetailsActivity.super.onBackPressed();
+		String itemTitle = getIntent().getStringExtra(EXTRA_TITLE);
+		collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+		collapsingToolbarLayout.setTitle(itemTitle);
+		collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
+
+		final ImageView image = (ImageView) findViewById(R.id.image);
+		Picasso.with(this).load(getIntent().getStringExtra(EXTRA_IMAGE)).into(image, new Callback() {
+			@Override public void onSuccess() {
+				Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
+				Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+					public void onGenerated(Palette palette) {
+						applyPalette(palette);
+					}
+				});
+			}
+
+			@Override public void onError() {
+
 			}
 		});
 
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-			loadFullSizeBitmap(smallResId);
-		} else {
-			getWindow().getSharedElementEnterTransition().addListener(new Transition.TransitionListener() {
+		TextView title = (TextView) findViewById(R.id.title);
+		title.setText(itemTitle);
+	}
 
-				private boolean isClosing = false;
-
-				@Override
-				public void onTransitionCancel(Transition transition) {
-				}
-
-				@Override
-				public void onTransitionEnd(Transition transition) {
-					if (!isClosing) {
-						isClosing = true;
-
-						removeCardCorners();
-						loadFullSizeBitmap(smallResId);
-					}
-				}
-
-				@Override
-				public void onTransitionPause(Transition transition) {
-				}
-
-				@Override
-				public void onTransitionResume(Transition transition) {
-				}
-
-				@Override
-				public void onTransitionStart(Transition transition) {
-					if (isClosing) {
-						addCardCorners();
-					}
-				}
-			});
+	@Override public boolean dispatchTouchEvent(MotionEvent motionEvent) {
+		try {
+			return super.dispatchTouchEvent(motionEvent);
+		} catch (NullPointerException e) {
+			return false;
 		}
 	}
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-
-		if (isFinishing() && decodeBitmapTask != null) {
-			decodeBitmapTask.cancel(true);
+	private void initActivityTransitions() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			Slide transition = new Slide();
+			transition.excludeTarget(android.R.id.statusBarBackground, true);
+			getWindow().setEnterTransition(transition);
+			getWindow().setReturnTransition(transition);
 		}
 	}
 
-	@Override
-	public void onPostExecuted(Bitmap bitmap) {
-		imageView.setImageBitmap(bitmap);
+	private void applyPalette(Palette palette) {
+		int primaryDark = getResources().getColor(R.color.colorPrimaryDark);
+		int primary = getResources().getColor(R.color.colorPrimary);
+		collapsingToolbarLayout.setContentScrimColor(palette.getMutedColor(primary));
+		collapsingToolbarLayout.setStatusBarScrimColor(palette.getDarkMutedColor(primaryDark));
+		updateBackground((FloatingActionButton) findViewById(R.id.fab), palette);
+		supportStartPostponedEnterTransition();
 	}
 
-	private void removeCardCorners() {
-		final CardView cardView = (CardView) findViewById(R.id.card);
-		ObjectAnimator.ofFloat(cardView, "radius", 0f).setDuration(50).start();
+	private void updateBackground(FloatingActionButton fab, Palette palette) {
+		int lightVibrantColor = palette.getLightVibrantColor(getResources().getColor(android.R.color.white));
+		int vibrantColor = palette.getVibrantColor(getResources().getColor(R.color.colorAccent));
+		fab.setRippleColor(lightVibrantColor);
+		fab.setBackgroundTintList(ColorStateList.valueOf(vibrantColor));
 	}
-
 }

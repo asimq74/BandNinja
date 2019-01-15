@@ -55,8 +55,6 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderCard> {
 	public void onBindViewHolder(SliderCard holder, int position) {
 		Artist artist = artists.get(position);
 		holder.setContent(context, artist);
-//		searchResultsViewModel.getArtistInfo(artist.getName()).observe(MainNavigationActivity.this,
-//				artistDetailedInfo -> populateTags(holder, artistDetailedInfo));
 		LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
 		Intent localIntent = new Intent("ARTIST_BOUND");
 		localIntent.putExtra("ARTIST_NAME", artist.getName());
