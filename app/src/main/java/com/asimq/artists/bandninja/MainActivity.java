@@ -37,6 +37,7 @@ import com.asimq.artists.bandninja.asynctasks.BaseSaveArtistTask;
 import com.asimq.artists.bandninja.cards.SliderAdapter;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
 import com.asimq.artists.bandninja.json.Artist;
+import com.asimq.artists.bandninja.json.Image;
 import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
@@ -436,6 +437,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private String getImageUrl(@NonNull Artist artist) {
+        for (Image image : artist.getImages()) {
+            if ("mega".equals(image.getSize())) {
+                return image.getText();
+            }
+        }
+        return "";
+    }
+
     private class OnCardClickListener implements View.OnClickListener {
 
         private final List<Artist> artists;
@@ -461,7 +471,7 @@ public class MainActivity extends AppCompatActivity {
             if (clickedPosition == activeCardPosition) {
                 final Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
                 Artist artist = artists.get(activeCardPosition);
-                intent.putExtra(DetailsActivity.EXTRA_IMAGE, artist.getUrl());
+                intent.putExtra(DetailsActivity.EXTRA_IMAGE, getImageUrl(artist));
                 intent.putExtra(DetailsActivity.EXTRA_TITLE, artist.getName());
 
                 final CardView cardView = (CardView) view;

@@ -29,15 +29,6 @@ public class DetailsActivity extends AppCompatActivity {
 	public static final String EXTRA_TITLE = "extraTitle";
 	private CollapsingToolbarLayout collapsingToolbarLayout;
 
-	public static void navigate(AppCompatActivity activity, View transitionImage) {
-		Intent intent = new Intent(activity, DetailsActivity.class);
-//		intent.putExtra(EXTRA_IMAGE, viewModel.getImage());
-//		intent.putExtra(EXTRA_TITLE, viewModel.getText());
-
-		ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity,
-				transitionImage, EXTRA_IMAGE);
-		ActivityCompat.startActivity(activity, intent, options.toBundle());
-	}
 
 	@SuppressWarnings("ConstantConditions")
 	@Override protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +36,8 @@ public class DetailsActivity extends AppCompatActivity {
 		initActivityTransitions();
 		setContentView(R.layout.activity_details);
 
-		ViewCompat.setTransitionName(findViewById(R.id.app_bar_layout), EXTRA_IMAGE);
-		supportPostponeEnterTransition();
+//		ViewCompat.setTransitionName(findViewById(R.id.app_bar_layout), EXTRA_IMAGE);
+//		supportPostponeEnterTransition();
 
 		setSupportActionBar(findViewById(R.id.toolbar));
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -57,7 +48,8 @@ public class DetailsActivity extends AppCompatActivity {
 		collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
 
 		final ImageView image = (ImageView) findViewById(R.id.image);
-		Picasso.with(this).load(getIntent().getStringExtra(EXTRA_IMAGE)).into(image, new Callback() {
+		String extraImageUrl = getIntent().getStringExtra(EXTRA_IMAGE);
+		Picasso.with(this).load(extraImageUrl).into(image, new Callback() {
 			@Override public void onSuccess() {
 				Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
 				Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
