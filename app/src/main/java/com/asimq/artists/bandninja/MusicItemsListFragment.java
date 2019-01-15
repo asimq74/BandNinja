@@ -41,6 +41,7 @@ import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistTagDao;
+import com.asimq.artists.bandninja.ui.Executable;
 import com.asimq.artists.bandninja.utils.DecodeBitmapTask;
 import com.asimq.artists.bandninja.viewmodelfactories.AlbumDetailViewModelFactory;
 import com.asimq.artists.bandninja.viewmodelfactories.SearchResultsViewModelFactory;
@@ -190,7 +191,7 @@ public class MusicItemsListFragment extends Fragment {
         });
     }
 
-    private void initRecyclerViewForArtists(@NonNull List<Artist> artists) {
+    private void initRecyclerViewForArtists(@NonNull List<Artist> artists, Executable<String> furtherAction) {
         if (null != sliderAdapter) {
             sliderAdapter.clear();
         }
@@ -201,7 +202,7 @@ public class MusicItemsListFragment extends Fragment {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    onActiveCardChange(artists);
+                    onActiveCardChange(artists, furtherAction);
                 }
             }
         });
@@ -212,7 +213,7 @@ public class MusicItemsListFragment extends Fragment {
         CARD_SNAP_HELPER.attachToRecyclerView(recyclerView);
     }
 
-    private void initRecyclerViewForAlbums(@NonNull List<Album> albums) {
+    private void initRecyclerViewForAlbums(@NonNull List<Album> albums, Executable<String> furtherAction) {
         if (null != sliderAdapter) {
             sliderAdapter.clear();
         }
@@ -224,14 +225,14 @@ public class MusicItemsListFragment extends Fragment {
         });
         sliderAdapter.notifyDataSetChanged();
         recyclerView.setAdapter(sliderAdapter);
-//        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//            @Override
-//            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-//                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-//                    onActiveCardChange(artists);
-//                }
-//            }
-//        });
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    onActiveCardChange(albums, furtherAction);
+                }
+            }
+        });
 
         recyclerView.setLayoutManager(new CardSliderLayoutManager(Objects.requireNonNull(getActivity())));
         layoutManger = (CardSliderLayoutManager) recyclerView.getLayoutManager();
@@ -239,12 +240,11 @@ public class MusicItemsListFragment extends Fragment {
         CARD_SNAP_HELPER.attachToRecyclerView(recyclerView);
     }
 
-    private void initSwitchers(@NonNull List<? extends BaseMusicItem> musicItems) {
+    private void initSwitchers(@NonNull List<? extends BaseMusicItem> musicItems, Executable<String> furtherActions) {
         String name = musicItems.get(0).getName();
         String mbid = musicItems.get(0).getMbid();
         Log.d(TAG, String.format("musicItem: %s mbid: %s", name, mbid));
-        searchResultsViewModel.getArtistInfo(name).observe(getActivity(),
-                artistDetailedInfo -> populateArtistInfo(artistDetailedInfo));
+				furtherActions.executeWith(name);
 
 //        temperatureSwitcher.removeAllViews();
 //        temperatureSwitcher.setFactory(new TextViewFactory(R.style.TemperatureTextView, true));
@@ -275,24 +275,24 @@ public class MusicItemsListFragment extends Fragment {
         };
     }
 
-    private void onActiveCardChange(List<Artist> artists) {
+    private void onActiveCardChange(List<? extends MusicItem> musicItems, Executable<String> furtherAction) {
         final int pos = layoutManger.getActiveCardPosition();
         if (pos == RecyclerView.NO_POSITION || pos == currentPosition) {
             return;
         }
 
-        onActiveCardChange(artists, pos);
+        onActiveCardChange(musicItems, pos, furtherAction);
     }
 
-    private void onActiveCardChange(List<Artist> artists, int pos) {
-        String artistName = artists.get(pos).getName();
-        String artistMbid = artists.get(pos).getMbid();
-        Log.d(TAG, String.format("artist: %s mbid: %s", artistName, artistMbid));
-        temperatureSwitcher.removeAllViews();
-        temperatureSwitcher.setFactory(new TextViewFactory(R.style.TemperatureTextView, true));
-        temperatureSwitcher.setCurrentText(artists.get(pos).getListeners() + "");
-        searchResultsViewModel.getArtistInfo(artistName).observe(getActivity(),
-                artistDetailedInfo -> populateArtistInfo(artistDetailedInfo));
+
+    private void onActiveCardChange(List<? extends MusicItem> musicItems, int pos, Executable<String> furtherAction) {
+        String name = musicItems.get(pos).getName();
+        String mbid = musicItems.get(pos).getMbid();
+        Log.d(TAG, String.format("name: %s mbid: %s", name, mbid));
+//        temperatureSwitcher.removeAllViews();
+//        temperatureSwitcher.setFactory(new TextViewFactory(R.style.TemperatureTextView, true));
+//        temperatureSwitcher.setCurrentText(musicItems.get(pos).getListeners() + "");
+        furtherAction.executeWith(name);
         int animH[] = new int[]{R.anim.slide_in_right, R.anim.slide_out_left};
         int animV[] = new int[]{R.anim.slide_in_top, R.anim.slide_out_bottom};
 
@@ -305,25 +305,25 @@ public class MusicItemsListFragment extends Fragment {
             animV[1] = R.anim.slide_out_top;
         }
 
-        setArtistText(artists.get(pos % artists.size()).getName(), left2right);
+        setArtistText(musicItems.get(pos % musicItems.size()).getName(), left2right);
 
         temperatureSwitcher.setInAnimation(getActivity(), animH[0]);
         temperatureSwitcher.setOutAnimation(getActivity(), animH[1]);
         //replace with progress bar
-//		temperatureSwitcher.setText(artists.get(pos % artists.size()).getName());
+//		temperatureSwitcher.setText(musicItems.get(pos % musicItems.size()).getName());
 
         placeSwitcher.setInAnimation(getActivity(), animV[0]);
         placeSwitcher.setOutAnimation(getActivity(), animV[1]);
 //replace with progress bar
-//		placeSwitcher.setText(artists.get(pos % artists.size()).getName());
+//		placeSwitcher.setText(musicItems.get(pos % musicItems.size()).getName());
 
         clockSwitcher.setInAnimation(getActivity(), animV[0]);
         clockSwitcher.setOutAnimation(getActivity(), animV[1]);
         // replace with progress bar
-//		clockSwitcher.setText(artists.get(pos % artists.size()).getName());
+//		clockSwitcher.setText(musicItems.get(pos % musicItems.size()).getName());
 
         // replace with progress bar
-//		descriptionsSwitcher.setText(artists.get(pos % artists.size()).getName());
+//		descriptionsSwitcher.setText(musicItems.get(pos % musicItems.size()).getName());
 
         showMap(maps[pos % maps.length]);
 
@@ -392,17 +392,23 @@ public class MusicItemsListFragment extends Fragment {
 
     private void populateArtists(List<Artist> artists) {
         blueTabLayout.setVisibility(View.GONE);
-        initRecyclerViewForArtists(artists);
+        initRecyclerViewForArtists(artists, params -> getObserve(params[0]));
         initMusicItemNameText(artists);
-        initSwitchers(artists);
+        initSwitchers(artists, params -> searchResultsViewModel.getArtistInfo(params[0]).observe(getActivity(),
+						artistDetailedInfo -> populateArtistInfo(artistDetailedInfo)));
         initGreenDot();
     }
 
-    private void populateAlbums(List<Album> albums) {
+	private void getObserve(String param) {
+		searchResultsViewModel.getArtistInfo(param).observe(getActivity(),
+				artistDetailedInfo -> populateArtistInfo(artistDetailedInfo));
+	}
+
+	private void populateAlbums(List<Album> albums) {
         blueTabLayout.setVisibility(View.GONE);
-        initRecyclerViewForAlbums(albums);
+        initRecyclerViewForAlbums(albums, (params) -> {});
 				initMusicItemNameText(albums);
-        initSwitchers(albums);
+        initSwitchers(albums, (params) -> {});
 //        initGreenDot();
     }
 
