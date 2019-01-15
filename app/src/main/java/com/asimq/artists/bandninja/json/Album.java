@@ -6,12 +6,12 @@ import android.provider.MediaStore.Images;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Album {
+public class Album extends BaseMusicItem {
 
 	@SerializedName("artist")
 	private Artist artist;
 	@SerializedName("image")
-	private List<Images> images;
+	private List<Image> images;
 	@SerializedName("mbid")
 	private String mbid;
 	@SerializedName("name")
@@ -25,7 +25,7 @@ public class Album {
 		return artist;
 	}
 
-	public List<Images> getImages() {
+	public List<Image> getImages() {
 		return images;
 	}
 
@@ -49,7 +49,7 @@ public class Album {
 		this.artist = artist;
 	}
 
-	public void setImages(List<Images> images) {
+	public void setImages(List<Image> images) {
 		this.images = images;
 	}
 

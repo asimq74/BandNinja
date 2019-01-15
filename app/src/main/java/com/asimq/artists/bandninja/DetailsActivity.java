@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -14,10 +15,20 @@ import android.view.MotionEvent;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.asimq.artists.bandninja.MusicItemsListFragment.OnDetailsInteractionListener;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-public class DetailsActivity extends AppCompatActivity {
+public class DetailsActivity extends AppCompatActivity implements OnDetailsInteractionListener {
+
+	@Override
+	public void onDisplayAlbumsByArtist(@NonNull String artistName) {
+		MusicItemsListFragment musicItemsListFragment = (MusicItemsListFragment)
+				getSupportFragmentManager().findFragmentById(R.id.musicItemsListFragment);
+		if (musicItemsListFragment != null) {
+			musicItemsListFragment.displayAlbumsByArtist(artistName);
+		}
+	}
 
 	public static final String EXTRA_IMAGE = "extraImage";
 	public static final String EXTRA_TITLE = "extraTitle";
@@ -87,8 +98,9 @@ public class DetailsActivity extends AppCompatActivity {
 			}
 		});
 
-		TextView title = (TextView) findViewById(R.id.title);
+		TextView title = findViewById(R.id.title);
 		title.setText(itemTitle);
+		onDisplayAlbumsByArtist(itemTitle);
 	}
 
 	private void updateBackground(FloatingActionButton fab, Palette palette) {

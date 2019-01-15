@@ -7,7 +7,7 @@ import android.support.annotation.NonNull;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Artist implements Comparable<Artist> {
+public class Artist extends BaseMusicItem implements Comparable<Artist> {
 
 	@SerializedName("bio")
 	@Expose

@@ -1,5 +1,7 @@
 package com.asimq.artists.bandninja.cards;
 
+import java.util.List;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.DrawableRes;
@@ -13,6 +15,7 @@ import android.widget.ImageView;
 import com.asimq.artists.bandninja.R;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.Image;
+import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.utils.DecodeBitmapTask;
 import com.squareup.picasso.Picasso;
 
@@ -35,13 +38,12 @@ public class SliderCard extends RecyclerView.ViewHolder implements DecodeBitmapT
 		}
 	}
 
-	private String getImageUrl(@NonNull Artist artist) {
-		for (Image image : artist.getImages()) {
-			if ("mega".equals(image.getSize())) {
-				return image.getText();
-			}
+	private String getImageUrl(@NonNull MusicItem musicItem) {
+		final List<Image> images = musicItem.getImages();
+		if (null == images || images.isEmpty()) {
+			return "";
 		}
-		return "";
+		return images.get(images.size() - 1).getText();
 	}
 
 	private void loadBitmap(@DrawableRes int resId) {
@@ -72,7 +74,8 @@ public class SliderCard extends RecyclerView.ViewHolder implements DecodeBitmapT
 		imageView.setImageBitmap(bitmap);
 	}
 
-	void setContent(Context context, Artist artist) {
+	void setContent(Context context, MusicItem musicItem) {
+		final String imageUrl = getImageUrl(musicItem);
 		if (viewWidth == 0) {
 			itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 				@Override
@@ -80,11 +83,11 @@ public class SliderCard extends RecyclerView.ViewHolder implements DecodeBitmapT
 					itemView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 					viewWidth = itemView.getWidth();
 					viewHeight = itemView.getHeight();
-					loadImageUrl(context, getImageUrl(artist));
+					loadImageUrl(context, imageUrl);
 				}
 			});
 		} else {
-			loadImageUrl(context, getImageUrl(artist));
+			loadImageUrl(context, imageUrl);
 		}
 	}
 

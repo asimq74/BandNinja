@@ -10,68 +10,51 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.asimq.artists.bandninja.MainNavigationActivity;
 import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.R;
 import com.asimq.artists.bandninja.asynctasks.BaseSaveArtistTask;
-import com.asimq.artists.bandninja.asynctasks.SaveArtistTask;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
 import com.asimq.artists.bandninja.json.Artist;
+import com.asimq.artists.bandninja.json.BaseMusicItem;
+import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 
 import javax.inject.Inject;
 
-public class SliderAdapter extends RecyclerView.Adapter<SliderCard> {
+public class SliderAdapter<T extends BaseMusicItem> extends RecyclerView.Adapter<SliderCard> {
 
 	private final Context context;
 	private final View.OnClickListener listener;
-	private final List<Artist> artists;
+	private final List<T> musicItems;
 	@Inject
 	ArtistDataDao artistDataDao;
 
-	public SliderAdapter(ApplicationComponent applicationComponent, List<Artist> artists,
+	public SliderAdapter(ApplicationComponent applicationComponent, List<T> musicItems,
 						 View.OnClickListener listener) {
 		this.context = applicationComponent.context();
-		this.artists = artists;
+		this.musicItems = musicItems;
 		this.listener = listener;
-		final MyApplication application = (MyApplication) context;
-		application.getApplicationComponent().inject(this);
 	}
 
 	public void clear() {
-		final int size = artists.size();
-		artists.clear();
+		final int size = musicItems.size();
+		musicItems.clear();
 		notifyItemRangeRemoved(0, size);
 	}
 
 	@Override
 	public int getItemCount() {
-		return artists.size();
+		return musicItems.size();
 	}
 
 	@Override
 	public void onBindViewHolder(SliderCard holder, int position) {
-		Artist artist = artists.get(position);
-		holder.setContent(context, artist);
-		LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-		Intent localIntent = new Intent("ARTIST_BOUND");
-		localIntent.putExtra("ARTIST_NAME", artist.getName());
-		localIntent.putExtra("ARTIST_MBID", artist.getMbid());
-		localBroadcastManager.sendBroadcast(localIntent);
+		MusicItem musicItem = musicItems.get(position);
+		holder.setContent(context, musicItem);
 	}
 
-	private void populateTags(SliderCard holder, Artist artistDetailedInfo) {
-		StringBuilder sb = new StringBuilder();
-		int count = 0;
-		final List<Tag> allTags = artistDetailedInfo.getTagWrapper().getTags();
-		for (Tag tag : allTags) {
-			sb.append(tag.getName()).append(count++ < (allTags.size() - 1) ? ", " : "");
-		}
-		ArtistData artistData = new ArtistData(artistDetailedInfo);
-		new BaseSaveArtistTask(artistDataDao).execute(artistData);
-	}
 
 	@Override
 	public SliderCard onCreateViewHolder(ViewGroup parent, int viewType) {

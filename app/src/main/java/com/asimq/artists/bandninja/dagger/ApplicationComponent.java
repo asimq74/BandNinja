@@ -45,6 +45,4 @@ public interface ApplicationComponent {
 	void inject(AlbumDetailViewModel albumDetailViewModel);
 
 	void inject(ArtistDetailViewModel artistDetailViewModel);
-
-	void inject(SliderAdapter sliderAdapter);
 }

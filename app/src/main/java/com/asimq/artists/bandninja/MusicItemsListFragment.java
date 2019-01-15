@@ -3,8 +3,6 @@ package com.asimq.artists.bandninja;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -21,6 +19,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
@@ -33,8 +32,11 @@ import android.widget.ViewSwitcher;
 import com.asimq.artists.bandninja.asynctasks.BaseSaveArtistTask;
 import com.asimq.artists.bandninja.cards.SliderAdapter;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
+import com.asimq.artists.bandninja.json.Album;
 import com.asimq.artists.bandninja.json.Artist;
+import com.asimq.artists.bandninja.json.BaseMusicItem;
 import com.asimq.artists.bandninja.json.Image;
+import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
@@ -111,17 +113,6 @@ public class MusicItemsListFragment extends Fragment {
     private int currentPosition;
     private DecodeBitmapTask decodeMapBitmapTask;
     private CardSliderLayoutManager layoutManger;
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (!"ARTIST_BOUND".equals(intent.getAction())) {
-                return;
-            }
-            String artistName = intent.getStringExtra("ARTIST_NAME");
-            String artistMbid = intent.getStringExtra("ARTIST_MBID");
-            Log.d(TAG, String.format("artist: %s mbid: %s", artistName, artistMbid));
-        }
-    };
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -152,21 +143,24 @@ public class MusicItemsListFragment extends Fragment {
     }
 
     protected void displaySearchResultsByArtist(@NonNull String artistName) {
-        searchResultsViewModel.getSearchResultsByArtist(artistName).observe(this, artists -> populateUI(artists));
+        searchResultsViewModel.getSearchResultsByArtist(artistName).observe(this, artists -> populateArtists(artists));
     }
+
 
     protected void displayAlbumsByArtist(@NonNull String artistName) {
-
+        albumDetailViewModel.getAlbumsByArtist(artistName).observe(this, albums -> {
+            populateAlbums(albums);
+        });
     }
 
-    private void initArtistNameText(@NonNull List<Artist> artists) {
-        String artistName = artists.get(0).getName();
+    private void initMusicItemNameText(@NonNull List<? extends MusicItem> musicItems) {
+        String musicItemName = musicItems.get(0).getName();
         artistAnimDuration = getResources().getInteger(R.integer.labels_animation_duration);
         artistOffset1 = getResources().getDimensionPixelSize(R.dimen.left_offset);
         artistOffset2 = getResources().getDimensionPixelSize(R.dimen.card_width);
         mainTitleView1.setX(artistOffset1);
         mainTitleView2.setX(artistOffset2);
-        mainTitleView1.setText(artistName);
+        mainTitleView1.setText(musicItemName);
         mainTitleView2.setAlpha(0f);
     }
 
@@ -196,11 +190,11 @@ public class MusicItemsListFragment extends Fragment {
         });
     }
 
-    private void initRecyclerView(@NonNull List<Artist> artists) {
+    private void initRecyclerViewForArtists(@NonNull List<Artist> artists) {
         if (null != sliderAdapter) {
             sliderAdapter.clear();
         }
-        sliderAdapter = new SliderAdapter(applicationComponent, artists, new OnCardClickListener(artists));
+        sliderAdapter = new SliderAdapter(applicationComponent, artists, new OnArtistCardClickedListener(artists));
         sliderAdapter.notifyDataSetChanged();
         recyclerView.setAdapter(sliderAdapter);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -218,20 +212,47 @@ public class MusicItemsListFragment extends Fragment {
         CARD_SNAP_HELPER.attachToRecyclerView(recyclerView);
     }
 
-    private void initSwitchers(@NonNull List<Artist> artists) {
-        String artistName = artists.get(0).getName();
-        String artistMbid = artists.get(0).getMbid();
-        Log.d(TAG, String.format("artist: %s mbid: %s", artistName, artistMbid));
-        searchResultsViewModel.getArtistInfo(artistName).observe(getActivity(),
+    private void initRecyclerViewForAlbums(@NonNull List<Album> albums) {
+        if (null != sliderAdapter) {
+            sliderAdapter.clear();
+        }
+        sliderAdapter = new SliderAdapter(applicationComponent, albums, new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+        sliderAdapter.notifyDataSetChanged();
+        recyclerView.setAdapter(sliderAdapter);
+//        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+//                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+//                    onActiveCardChange(artists);
+//                }
+//            }
+//        });
+
+        recyclerView.setLayoutManager(new CardSliderLayoutManager(Objects.requireNonNull(getActivity())));
+        layoutManger = (CardSliderLayoutManager) recyclerView.getLayoutManager();
+
+        CARD_SNAP_HELPER.attachToRecyclerView(recyclerView);
+    }
+
+    private void initSwitchers(@NonNull List<? extends BaseMusicItem> musicItems) {
+        String name = musicItems.get(0).getName();
+        String mbid = musicItems.get(0).getMbid();
+        Log.d(TAG, String.format("musicItem: %s mbid: %s", name, mbid));
+        searchResultsViewModel.getArtistInfo(name).observe(getActivity(),
                 artistDetailedInfo -> populateArtistInfo(artistDetailedInfo));
 
-        temperatureSwitcher.removeAllViews();
-        temperatureSwitcher.setFactory(new TextViewFactory(R.style.TemperatureTextView, true));
-        temperatureSwitcher.setCurrentText(artists.get(0).getListeners() + "");
+//        temperatureSwitcher.removeAllViews();
+//        temperatureSwitcher.setFactory(new TextViewFactory(R.style.TemperatureTextView, true));
+//        temperatureSwitcher.setCurrentText(musicItems.get(0).getListeners() + "");
 
         clockSwitcher.removeAllViews();
         clockSwitcher.setFactory(new TextViewFactory(R.style.ClockTextView, false));
-        clockSwitcher.setCurrentText(artists.get(0).getName());
+        clockSwitcher.setCurrentText(musicItems.get(0).getName());
 
         descriptionsSwitcher.removeAllViews();
         descriptionsSwitcher.setInAnimation(getActivity(), android.R.anim.fade_in);
@@ -367,17 +388,22 @@ public class MusicItemsListFragment extends Fragment {
         new BaseSaveArtistTask(artistDataDao).execute(artistData);
         searchResultsViewModel.getArtistInfo(artistData.getName()).observe(this,
                 artist -> processArtistInfo(artist));
-        albumDetailViewModel.getAlbumsByArtist(artistData.getName()).observe(this, albums -> {
-            Log.d(TAG, "albums: " + albums);
-        });
     }
 
-    private void populateUI(List<Artist> artists) {
+    private void populateArtists(List<Artist> artists) {
         blueTabLayout.setVisibility(View.GONE);
-        initRecyclerView(artists);
-        initArtistNameText(artists);
+        initRecyclerViewForArtists(artists);
+        initMusicItemNameText(artists);
         initSwitchers(artists);
         initGreenDot();
+    }
+
+    private void populateAlbums(List<Album> albums) {
+        blueTabLayout.setVisibility(View.GONE);
+        initRecyclerViewForAlbums(albums);
+				initMusicItemNameText(albums);
+        initSwitchers(albums);
+//        initGreenDot();
     }
 
     private void processArtistInfo(Artist artist) {
@@ -465,6 +491,13 @@ public class MusicItemsListFragment extends Fragment {
         void onSearchedForArtistName(@NonNull String artistName);
     }
 
+
+    public interface OnDetailsInteractionListener {
+        void onDisplayAlbumsByArtist(@NonNull String artistName);
+    }
+
+
+
     private class ImageViewFactory implements ViewSwitcher.ViewFactory {
 
         @Override
@@ -479,10 +512,10 @@ public class MusicItemsListFragment extends Fragment {
         }
     }
 
-    private class OnCardClickListener implements View.OnClickListener {
+    private class OnArtistCardClickedListener implements View.OnClickListener {
         private final List<Artist> artists;
 
-        public OnCardClickListener(List<Artist> artists) {
+        public OnArtistCardClickedListener(List<Artist> artists) {
             this.artists = artists;
         }
 
