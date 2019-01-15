@@ -83,7 +83,17 @@
                         android:layout_margin="@dimen/spacing_large"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 
+                    <fragment
+                        android:id="@+id/musicItemsListFragment"
+                        class="com.asimq.artists.bandninja.MusicItemsListFragment"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
                 </LinearLayout>
+
+
+
+
 
             </android.support.v7.widget.CardView>
 

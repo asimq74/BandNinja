@@ -155,6 +155,10 @@ public class MusicItemsListFragment extends Fragment {
         searchResultsViewModel.getSearchResultsByArtist(artistName).observe(this, artists -> populateUI(artists));
     }
 
+    protected void displayAlbumsByArtist(@NonNull String artistName) {
+
+    }
+
     private void initArtistNameText(@NonNull List<Artist> artists) {
         String artistName = artists.get(0).getName();
         artistAnimDuration = getResources().getInteger(R.integer.labels_animation_duration);
