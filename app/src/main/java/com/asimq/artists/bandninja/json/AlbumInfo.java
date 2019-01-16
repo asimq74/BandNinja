@@ -4,10 +4,10 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class Album extends BaseMusicItem {
+public class AlbumInfo extends BaseMusicItem {
 
     @SerializedName("artist")
-    private Artist artist;
+    private String artist;
     @SerializedName("image")
     private List<Image> images;
     @SerializedName("mbid")
@@ -49,11 +49,11 @@ public class Album extends BaseMusicItem {
         this.wiki = wiki;
     }
 
-    public Artist getArtist() {
+    public String getArtist() {
         return artist;
     }
 
-    public void setArtist(Artist artist) {
+    public void setArtist(String artist) {
         this.artist = artist;
     }
 

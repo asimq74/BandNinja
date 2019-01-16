@@ -6,13 +6,11 @@ import java.util.List;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.asimq.artists.bandninja.BuildConfig;
 import com.asimq.artists.bandninja.json.Album;
-import com.asimq.artists.bandninja.json.Artist;
-import com.asimq.artists.bandninja.json.ArtistWrapper;
-import com.asimq.artists.bandninja.json.ResultsWrapper;
+import com.asimq.artists.bandninja.json.AlbumInfo;
+import com.asimq.artists.bandninja.json.AlbumInfoWrapper;
 import com.asimq.artists.bandninja.json.TopAlbumsWrapper;
 import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
@@ -50,6 +48,29 @@ public class AlbumInfoRepositoryDao implements AlbumInfoRepository {
 			}
 		});
 		return albumsMutableLiveData;
+	}
+
+	@Override
+	public LiveData<AlbumInfo> getAlbumInfo(@NonNull String artistName, @NonNull String albumName) {
+		final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
+		final MutableLiveData<AlbumInfo> albumMutableLiveData = new MutableLiveData<>();
+		Call<AlbumInfoWrapper> albumInfoCall = service.getAlbumInfo("album.getinfo", artistName, albumName, API_KEY, DEFAULT_FORMAT);
+		albumInfoCall.enqueue(new Callback<AlbumInfoWrapper>() {
+			@Override
+			public void onResponse(Call<AlbumInfoWrapper> call, Response<AlbumInfoWrapper> response) {
+				final AlbumInfoWrapper albumInfoWrapper = response.body();
+				if (null == albumInfoWrapper) {
+					return;
+				}
+				albumMutableLiveData.setValue(albumInfoWrapper.getAlbumInfo());
+			}
+
+			@Override
+			public void onFailure(Call<AlbumInfoWrapper> call, Throwable t) {
+				albumMutableLiveData.setValue(new AlbumInfo());
+			}
+		});
+		return albumMutableLiveData;
 	}
 
 }
