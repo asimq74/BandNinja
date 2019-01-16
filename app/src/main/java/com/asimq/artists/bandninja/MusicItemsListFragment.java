@@ -393,6 +393,7 @@ public class MusicItemsListFragment extends Fragment {
 
     private void populateAlbumInfo(@NonNull AlbumInfo albumInfo) {
         Log.i(TAG, "albumInfo=" + albumInfo);
+        Log.i(TAG, "wiki=" + albumInfo.getWiki());
     }
 
     private void populateAlbums(List<Album> albums) {
