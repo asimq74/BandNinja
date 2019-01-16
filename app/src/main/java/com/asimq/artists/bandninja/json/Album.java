@@ -1,114 +1,121 @@
 package com.asimq.artists.bandninja.json;
 
-import com.google.gson.annotations.SerializedName;
-
 import java.util.List;
 
-public class Album extends BaseMusicItem {
+import android.support.annotation.NonNull;
 
-    @SerializedName("artist")
-    private Artist artist;
-    @SerializedName("image")
-    private List<Image> images;
-    @SerializedName("mbid")
-    private String mbid;
-    @SerializedName("name")
-    private String name;
-    @SerializedName("playcount")
-    private String playcount;
-    @SerializedName("url")
-    private String url;
-    @SerializedName("tracks")
-    private TrackWrapper trackWrapper;
-    @SerializedName("tags")
-    private TagWrapper tagWrapper;
-    @SerializedName("wiki")
-    private Wiki wiki;
+import com.google.gson.annotations.SerializedName;
 
-    public TrackWrapper getTrackWrapper() {
-        return trackWrapper;
-    }
+public class Album extends BaseMusicItem implements Comparable<Album> {
 
-    public void setTrackWrapper(TrackWrapper trackWrapper) {
-        this.trackWrapper = trackWrapper;
-    }
+	@SerializedName("artist")
+	private Artist artist;
+	@SerializedName("image")
+	private List<Image> images;
+	@SerializedName("mbid")
+	private String mbid;
+	@SerializedName("name")
+	private String name;
+	@SerializedName("playcount")
+	private int playcount;
+	@SerializedName("tags")
+	private TagWrapper tagWrapper;
+	@SerializedName("tracks")
+	private TrackWrapper trackWrapper;
+	@SerializedName("url")
+	private String url;
+	@SerializedName("wiki")
+	private Wiki wiki;
 
-    public TagWrapper getTagWrapper() {
-        return tagWrapper;
-    }
+	@Override
+	public int compareTo(@NonNull Album album) {
+		return album.getPlaycount() - getPlaycount();
+	}
 
-    public void setTagWrapper(TagWrapper tagWrapper) {
-        this.tagWrapper = tagWrapper;
-    }
+	public Artist getArtist() {
+		return artist;
+	}
 
-    public Wiki getWiki() {
-        return wiki;
-    }
+	public List<Image> getImages() {
+		return images;
+	}
 
-    public void setWiki(Wiki wiki) {
-        this.wiki = wiki;
-    }
+	public String getMbid() {
+		return mbid;
+	}
 
-    public Artist getArtist() {
-        return artist;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setArtist(Artist artist) {
-        this.artist = artist;
-    }
+	public int getPlaycount() {
+		return playcount;
+	}
 
-    public List<Image> getImages() {
-        return images;
-    }
+	public TagWrapper getTagWrapper() {
+		return tagWrapper;
+	}
 
-    public void setImages(List<Image> images) {
-        this.images = images;
-    }
+	public TrackWrapper getTrackWrapper() {
+		return trackWrapper;
+	}
 
-    public String getMbid() {
-        return mbid;
-    }
+	public String getUrl() {
+		return url;
+	}
 
-    public void setMbid(String mbid) {
-        this.mbid = mbid;
-    }
+	public Wiki getWiki() {
+		return wiki;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public void setArtist(Artist artist) {
+		this.artist = artist;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setImages(List<Image> images) {
+		this.images = images;
+	}
 
-    public String getPlaycount() {
-        return playcount;
-    }
+	public void setMbid(String mbid) {
+		this.mbid = mbid;
+	}
 
-    public void setPlaycount(String playcount) {
-        this.playcount = playcount;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public String getUrl() {
-        return url;
-    }
+	public void setPlaycount(int playcount) {
+		this.playcount = playcount;
+	}
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+	public void setTagWrapper(TagWrapper tagWrapper) {
+		this.tagWrapper = tagWrapper;
+	}
 
-    @Override
-    public String toString() {
-        return "Album{" +
-                "mbid='" + mbid + '\'' +
-                ", name='" + name + '\'' +
-                ", artist=" + artist +
-                ", images=" + images +
-                ", playcount='" + playcount + '\'' +
-                ", url='" + url + '\'' +
-                ", tagWrapper='" + tagWrapper + '\'' +
-                ", trackWrapper='" + trackWrapper + '\'' +
-                ", wiki='" + wiki + '\'' +
-                "}\n";
-    }
+	public void setTrackWrapper(TrackWrapper trackWrapper) {
+		this.trackWrapper = trackWrapper;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public void setWiki(Wiki wiki) {
+		this.wiki = wiki;
+	}
+
+	@Override
+	public String toString() {
+		return "Album{" +
+				"mbid='" + mbid + '\'' +
+				", name='" + name + '\'' +
+				", artist=" + artist +
+				", images=" + images +
+				", playcount='" + playcount + '\'' +
+				", url='" + url + '\'' +
+				", tagWrapper='" + tagWrapper + '\'' +
+				", trackWrapper='" + trackWrapper + '\'' +
+				", wiki='" + wiki + '\'' +
+				"}\n";
+	}
 }
