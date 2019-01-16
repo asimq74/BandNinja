@@ -47,6 +47,7 @@ import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.json.TagWrapper;
 import com.asimq.artists.bandninja.json.Wiki;
+import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistTagDao;
@@ -245,6 +246,8 @@ public class MusicItemsListFragment extends Fragment {
 	private SliderAdapter sliderAdapter;
 	@BindView(R.id.ts_temperature)
 	TextSwitcher temperatureSwitcher;
+	@Inject
+	BandItemRepository bandItemRepository;
 
 	public MusicItemsListFragment() {
 		// Required empty public constructor

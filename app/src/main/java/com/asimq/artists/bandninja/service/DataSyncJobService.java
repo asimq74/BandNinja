@@ -7,42 +7,76 @@ import javax.inject.Inject;
 import android.app.job.JobParameters;
 import android.app.job.JobService;
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.asimq.artists.bandninja.BuildConfig;
 import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
-import com.asimq.artists.bandninja.repositories.BandItemRepository;
+import com.asimq.artists.bandninja.json.Artist;
+import com.asimq.artists.bandninja.json.ArtistWrapper;
+import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
+import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
 import com.asimq.artists.bandninja.room.ArtistData;
+import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DataSyncJobService extends JobService {
 
 	private static final String TAG = DataSyncJobService.class.getSimpleName();
+	private ApplicationComponent applicationComponent;
+	@Inject
+	ArtistDataDao artistDataDao;
 	boolean isWorking = false;
 	boolean jobCancelled = false;
+	public static final String API_KEY = BuildConfig.LastFMApiKey;
+	public static final String DEFAULT_FORMAT = "json";
+	final Artist current = new Artist();
+
+	public void downloadArtistInfoToStorage(@NonNull String artistName) {
+		final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
+		Call<ArtistWrapper> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
+				API_KEY, DEFAULT_FORMAT);
+		artistInfoCall.enqueue(new Callback<ArtistWrapper>() {
+			@Override
+			public void onFailure(Call<ArtistWrapper> call, Throwable t) {
+				Log.e(TAG, "get artist info for " + artistName + " failed.");
+			}
+
+			@Override
+			public void onResponse(Call<ArtistWrapper> call, Response<ArtistWrapper> response) {
+				final ArtistWrapper artistWrapper = response.body();
+				if (artistWrapper == null) {
+					return ;
+				}
+				final ArtistData artistData = new ArtistData(artistWrapper.getArtist());
+				new Thread(() -> {
+					artistDataDao.insertArtist(artistData);
+					Log.d(TAG, String.format("updated artist info for %s %s", artistData.getName(), artistData.getMbid()));
+				}).start();
+			}
+		});
+
+	}
 
 	private void doWork(JobParameters jobParameters) {
 		// 10 seconds of working (1000*10ms)
-		for (int i = 0; i < 1000; i++) {
-			// If the job has been cancelled, stop working; the job will be rescheduled.
-			if (jobCancelled)
-				return;
-
-			try {
-				Thread.sleep(10);
-			} catch (Exception e) {
-			}
+		// If the job has been cancelled, stop working; the job will be rescheduled.
+		if (jobCancelled) return;
+		List<ArtistData> artistDatas = artistDataDao.fetchAllArtistDatas();
+		for (ArtistData artistData : artistDatas) {
+			downloadArtistInfoToStorage(artistData.getName());
 		}
-		LiveData<List<ArtistData>> mLiveArtistDatas =  bandItemRepository.getAllArtistData();
-		Log.d(TAG, "Job finished! " + mLiveArtistDatas.getValue());
+		List<ArtistData> artistDatasAfterDownload = artistDataDao.fetchAllArtistDatas();
+		Log.d(TAG, "Job finished! " + artistDatasAfterDownload.size() + " artists counted after download");
 		isWorking = false;
 		boolean needsReschedule = true;
 		jobFinished(jobParameters, needsReschedule);
 	}
-
-	private ApplicationComponent applicationComponent;
-
-	@Inject
-	BandItemRepository bandItemRepository;
 
 	// Called by the Android system when it's time to run the job
 	@Override

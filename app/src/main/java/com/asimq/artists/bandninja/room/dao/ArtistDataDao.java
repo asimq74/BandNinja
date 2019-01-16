@@ -16,11 +16,19 @@ public interface ArtistDataDao {
 
 	@Query("SELECT * from artists ORDER BY mbid ASC")
 	@NonNull
-	LiveData<List<ArtistData>> fetchAllArtists();
+	LiveData<List<ArtistData>> fetchAllArtistLiveDatas();
+
+	@Query("SELECT * from artists ORDER BY mbid ASC")
+	@NonNull
+	List<ArtistData> fetchAllArtistDatas();
 
 	@Query("SELECT * from artists where mbid = :mbid")
 	@NonNull
-	LiveData<ArtistData> fetchArtistById(@NonNull String mbid);
+	LiveData<ArtistData> fetchLiveArtistDataById(@NonNull String mbid);
+
+	@Query("SELECT * from artists where mbid = :mbid")
+	@NonNull
+	ArtistData fetchArtistDataById(@NonNull String mbid);
 
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	void insertArtist(@NonNull ArtistData artistData);

@@ -28,7 +28,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.asimq.artists.bandninja.asynctasks.SaveArtistTask;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.Image;
 import com.asimq.artists.bandninja.json.Tag;
@@ -117,7 +116,7 @@ public class MainNavigationActivity extends AppCompatActivity
 			holder.subtitleView.setText(sb);
 			holder.itemView.setOnClickListener((View v) -> {
 				ArtistData artistData = new ArtistData(artistDetailedInfo);
-				new SaveArtistTask(artistDataDao, MainNavigationActivity.this).execute(artistData);
+//				new SaveArtistTask(artistDataDao, MainNavigationActivity.this).execute(artistData);
 			});
 		}
 	}
