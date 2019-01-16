@@ -47,6 +47,11 @@
             android:name=".DetailsActivity"
             android:label="@string/title_activity_details">
         </activity>
+        <service
+            android:name=".service.DataSyncJobService"
+            android:label="Sync Band Info Service"
+            android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
     </application>
 
 </manifest>
