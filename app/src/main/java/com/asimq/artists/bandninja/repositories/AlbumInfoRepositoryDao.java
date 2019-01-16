@@ -14,6 +14,7 @@ import com.asimq.artists.bandninja.json.AlbumInfoWrapper;
 import com.asimq.artists.bandninja.json.TopAlbumsWrapper;
 import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
+import com.asimq.artists.bandninja.utils.Util;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -35,11 +36,13 @@ public class AlbumInfoRepositoryDao implements AlbumInfoRepository {
 			@Override
 			public void onResponse(Call<TopAlbumsWrapper> call, Response<TopAlbumsWrapper> response) {
 				final TopAlbumsWrapper topAlbumsWrapper = response.body();
+				List<Album> albums = topAlbumsWrapper.getTopAlbums().getAlbums();
 				if (null == topAlbumsWrapper || null == topAlbumsWrapper.getTopAlbums()
-						|| topAlbumsWrapper.getTopAlbums().getAlbums().isEmpty()) {
+						|| albums.isEmpty()) {
 					return;
 				}
-				albumsMutableLiveData.setValue(topAlbumsWrapper.getTopAlbums().getAlbums());
+				albums = Util.removeAllItemsWithoutMbid(albums);
+				albumsMutableLiveData.setValue(albums);
 			}
 
 			@Override

@@ -116,14 +116,6 @@ public class MusicItemsListFragment extends Fragment {
 			this.artists = artists;
 		}
 
-		private String getImageUrl(@NonNull Artist artist) {
-			for (Image image : artist.getImages()) {
-				if ("mega".equals(image.getSize())) {
-					return image.getText();
-				}
-			}
-			return "";
-		}
 
 		@Override
 		public void onClick(View view) {
@@ -142,7 +134,7 @@ public class MusicItemsListFragment extends Fragment {
 			if (clickedPosition == activeCardPosition) {
 				final Intent intent = new Intent(getActivity(), DetailsActivity.class);
 				Artist artist = artists.get(clickedPosition);
-				intent.putExtra(DetailsActivity.EXTRA_IMAGE, getImageUrl(artist));
+				intent.putExtra(DetailsActivity.EXTRA_IMAGE, Util.getImageUrl(artist));
 				intent.putExtra(DetailsActivity.EXTRA_TITLE, artist.getName());
 				final CardView cardView = (CardView) view;
 				final View sharedView = cardView.getChildAt(cardView.getChildCount() - 1);

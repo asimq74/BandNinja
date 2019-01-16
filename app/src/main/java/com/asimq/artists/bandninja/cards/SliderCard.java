@@ -17,6 +17,7 @@ import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.Image;
 import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.utils.DecodeBitmapTask;
+import com.asimq.artists.bandninja.utils.Util;
 import com.squareup.picasso.Picasso;
 
 public class SliderCard extends RecyclerView.ViewHolder implements DecodeBitmapTask.Listener {
@@ -36,14 +37,6 @@ public class SliderCard extends RecyclerView.ViewHolder implements DecodeBitmapT
 		if (task != null) {
 			task.cancel(true);
 		}
-	}
-
-	private String getImageUrl(@NonNull MusicItem musicItem) {
-		final List<Image> images = musicItem.getImages();
-		if (null == images || images.isEmpty()) {
-			return "";
-		}
-		return images.get(images.size() - 1).getText();
 	}
 
 	private void loadBitmap(@DrawableRes int resId) {
@@ -75,7 +68,7 @@ public class SliderCard extends RecyclerView.ViewHolder implements DecodeBitmapT
 	}
 
 	void setContent(Context context, MusicItem musicItem) {
-		final String imageUrl = getImageUrl(musicItem);
+		final String imageUrl = Util.getImageUrl(musicItem);
 		if (viewWidth == 0) {
 			itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 				@Override

@@ -14,6 +14,7 @@ import com.asimq.artists.bandninja.json.ArtistWrapper;
 import com.asimq.artists.bandninja.json.ResultsWrapper;
 import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
+import com.asimq.artists.bandninja.utils.Util;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -73,11 +74,12 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 				}
 
 				Log.i(TAG, "result: " + artistPojo.getResult());
-				final List<Artist> artists = artistPojo.getResult().getArtistmatches().getArtists();
+				List<Artist> artists = artistPojo.getResult().getArtistmatches().getArtists();
 				if (null == artists) {
 					artistMutableLiveData.setValue(null);
 					return;
 				}
+				artists = Util.removeAllItemsWithoutMbid(artists);
 				Collections.sort(artists);
 				artistMutableLiveData.setValue(artists);
 			}
