@@ -13,12 +13,19 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 import com.asimq.artists.bandninja.MusicItemsListFragment.OnFragmentInteractionListener;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistTagDao;
+import com.asimq.artists.bandninja.ui.CustomEditText;
+import com.asimq.artists.bandninja.ui.DrawableClickListener;
 import com.asimq.artists.bandninja.viewmodelfactories.SearchResultsViewModelFactory;
 
 import butterknife.BindView;
@@ -40,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
     SearchResultsViewModelFactory searchResultsViewModelFactory;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+    @BindView(R.id.searchByArtistEditView)
+    CustomEditText searchByArtistEditTextView;
 
     @Override
     public void onAttachFragment(Fragment fragment) {
@@ -59,6 +68,30 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         applicationComponent = application.getApplicationComponent();
         applicationComponent.inject(this);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        searchByArtistEditTextView.setDrawableClickListener(target -> {
+            switch (target) {
+                case RIGHT:
+                    onSearchedForArtistName(searchByArtistEditTextView.getText().toString());
+                    break;
+
+                case LEFT:
+                    searchByArtistEditTextView.getText().clear();
+                    hideKeyboard();
+                    break;
+                default:
+                    break;
+            }
+        });
+        searchByArtistEditTextView.setOnKeyListener((v, keyCode, event) -> {
+            // If the event is a key-down event on the "enter" button
+            if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+                    (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                onSearchedForArtistName(searchByArtistEditTextView.getText().toString());
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
@@ -68,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconified(false);
+//        searchView.setIconified(false);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextChange(String s) {
@@ -92,6 +125,16 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         if (musicItemsListFragment != null) {
             musicItemsListFragment.displaySearchResultsByArtist(artistName);
         }
+        hideKeyboard();
+    }
+
+    private void hideKeyboard() {
+        InputMethodManager inputManager =
+                (InputMethodManager) this.
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow(
+                this.getCurrentFocus().getWindowToken(),
+                InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
 }

@@ -12,6 +12,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
@@ -321,7 +322,16 @@ public class MusicItemsListFragment extends Fragment {
 		layoutManger = (CardSliderLayoutManager) recyclerView.getLayoutManager();
 
 		CARD_SNAP_HELPER.attachToRecyclerView(recyclerView);
+		recyclerView.post(new Runnable() {
+			@Override
+			public void run() {
+				// Call smooth scroll
+				recyclerView.smoothScrollToPosition(sliderAdapter.getItemCount() - 1);
+			}
+		});
 	}
+
+
 
 	private void initSwitchers(@NonNull List<? extends MusicItem> musicItems, Executable<String> furtherAction) {
 		final MusicItem musicItem = musicItems.get(0);
