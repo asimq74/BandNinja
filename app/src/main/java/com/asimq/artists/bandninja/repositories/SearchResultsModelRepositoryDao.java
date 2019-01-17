@@ -79,7 +79,7 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 					artistMutableLiveData.setValue(null);
 					return;
 				}
-				artists = Util.removeAllItemsWithoutMbid(artists);
+				artists = Util.removeAllItemsWithoutMbidOrImages(artists);
 				Collections.sort(artists);
 				artistMutableLiveData.setValue(artists);
 			}

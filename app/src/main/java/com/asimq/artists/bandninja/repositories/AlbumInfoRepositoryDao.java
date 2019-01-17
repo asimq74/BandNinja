@@ -31,7 +31,8 @@ public class AlbumInfoRepositoryDao implements AlbumInfoRepository {
 	public LiveData<List<Album>> getAlbums(@NonNull String artistName) {
 		final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
 		final MutableLiveData<List<Album>> albumsMutableLiveData = new MutableLiveData<>();
-		Call<TopAlbumsWrapper> topAlbumsWrapperCall = service.getTopAlbums("artist.getTopAlbums", artistName, API_KEY, DEFAULT_FORMAT, PAGES);
+		Call<TopAlbumsWrapper> topAlbumsWrapperCall
+				= service.getTopAlbums("artist.getTopAlbums", artistName, API_KEY, DEFAULT_FORMAT, PAGES);
 		topAlbumsWrapperCall.enqueue(new Callback<TopAlbumsWrapper>() {
 			@Override
 			public void onResponse(Call<TopAlbumsWrapper> call, Response<TopAlbumsWrapper> response) {
@@ -41,7 +42,7 @@ public class AlbumInfoRepositoryDao implements AlbumInfoRepository {
 						|| albums.isEmpty()) {
 					return;
 				}
-				albums = Util.removeAllItemsWithoutMbid(albums);
+				albums = Util.removeAllItemsWithoutMbidOrImages(albums);
 				albumsMutableLiveData.setValue(albums);
 			}
 

@@ -13,7 +13,7 @@ public class Album extends BaseMusicItem implements Comparable<Album> {
 	@SerializedName("image")
 	private List<Image> images;
 	@SerializedName("mbid")
-	private String mbid;
+	private String mbid = "";
 	@SerializedName("name")
 	private String name;
 	@SerializedName("playcount")

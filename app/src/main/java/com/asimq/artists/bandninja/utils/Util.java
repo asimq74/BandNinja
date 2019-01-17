@@ -31,12 +31,27 @@ public class Util {
 		return images.get(images.size() - 1).getText();
 	}
 
-	public static List removeAllItemsWithoutMbid(List<? extends MusicItem> musicItems) {
-		return Util.removeNullUsingIterator(musicItems, item -> (null == item.getMbid() || item.getMbid().isEmpty()));
+	public static List removeAllItemsWithoutMbidOrImages(List<? extends MusicItem> musicItems) {
+		return Util.removeUsingIterator(musicItems, item ->
+				(null == item.getMbid() || item.getMbid().isEmpty())
+				&& (!containsImageUrls(item.getImages()))
+		);
+	}
+
+	public static boolean containsImageUrls(List<Image> images) {
+		if (null == images || images.isEmpty()) {
+			return false;
+		}
+		for (Image image : images) {
+			if (!image.getText().isEmpty()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// Generic function to remove Null Using Iterator
-	public static <T> List<T> removeNullUsingIterator(List<T> l, Predicate<T> p)
+	public static <T> List<T> removeUsingIterator(List<T> l, Predicate<T> p)
 	{
 
 		// Create an iterator from the l

@@ -5,13 +5,13 @@ import com.google.gson.annotations.SerializedName;
 public class Bio
 {
     @SerializedName("content")
-    private String content;
+    private String content = "";
     @SerializedName("summary")
-    private String summary;
+    private String summary = "";
     @SerializedName("links")
-    private LinkWrapper linkWrapper;
+    private LinkWrapper linkWrapper = new LinkWrapper();
     @SerializedName("published")
-    private String published;
+    private String published = "";
 
     public String getContent ()
     {

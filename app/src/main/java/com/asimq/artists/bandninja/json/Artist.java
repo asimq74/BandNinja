@@ -1,9 +1,11 @@
 package com.asimq.artists.bandninja.json;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.support.annotation.NonNull;
 
+import com.asimq.artists.bandninja.room.ArtistData;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -11,9 +13,9 @@ public class Artist extends BaseMusicItem implements Comparable<Artist> {
 
 	@SerializedName("bio")
 	@Expose
-	private Bio bio;
+	private Bio bio = new Bio();
 	@SerializedName("image")
-	private List<Image> images;
+	private List<Image> images = new ArrayList<>();
 	@SerializedName("listeners")
 	private int listeners;
 	@SerializedName("mbid")
@@ -35,6 +37,19 @@ public class Artist extends BaseMusicItem implements Comparable<Artist> {
 	private TagWrapper tagWrapper;
 	@SerializedName("url")
 	private String url;
+
+	public Artist() {
+	}
+
+	public Artist(@NonNull ArtistData artistData) {
+		this.mbid = artistData.getMbid();
+		this.name = artistData.getName();
+		this.bio.setSummary(artistData.getBio());
+		this.bio.setContent(artistData.getBio());
+		Image image = new Image();
+		image.setText(artistData.getImage());
+		this.getImages().add(image);
+	}
 
 	@Override
 	public int compareTo(@NonNull Artist artist) {

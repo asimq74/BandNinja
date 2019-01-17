@@ -12,7 +12,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
@@ -21,8 +20,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -43,7 +40,6 @@ import com.asimq.artists.bandninja.json.Album;
 import com.asimq.artists.bandninja.json.AlbumInfo;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.BaseMusicItem;
-import com.asimq.artists.bandninja.json.Image;
 import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.json.TagWrapper;
@@ -92,7 +88,8 @@ public class MusicItemsListFragment extends Fragment {
 	 */
 	public interface OnFragmentInteractionListener {
 
-		// TODO: Update argument type and name
+		void onDisplayArtistsFromStorage(@NonNull List<Artist> artists);
+
 		void onSearchedForArtistName(@NonNull String artistName);
 	}
 
@@ -117,7 +114,6 @@ public class MusicItemsListFragment extends Fragment {
 		public OnArtistCardClickedListener(List<Artist> artists) {
 			this.artists = artists;
 		}
-
 
 		@Override
 		public void onClick(View view) {
@@ -214,6 +210,8 @@ public class MusicItemsListFragment extends Fragment {
 	private int artistOffset2;
 	@Inject
 	ArtistTagDao artistTagDao;
+	@Inject
+	BandItemRepository bandItemRepository;
 	@BindView(R.id.blueTabLayout)
 	View blueTabLayout;
 	@BindView(R.id.ts_clock)
@@ -247,8 +245,6 @@ public class MusicItemsListFragment extends Fragment {
 	private SliderAdapter sliderAdapter;
 	@BindView(R.id.ts_temperature)
 	TextSwitcher temperatureSwitcher;
-	@Inject
-	BandItemRepository bandItemRepository;
 
 	public MusicItemsListFragment() {
 		// Required empty public constructor
@@ -268,6 +264,10 @@ public class MusicItemsListFragment extends Fragment {
 
 	protected void displayAlbumsByArtist(@NonNull String artistName) {
 		albumDetailViewModel.getAlbumsByArtist(artistName).observe(this, this::populateAlbums);
+	}
+
+	protected void displayArtistsFromStorage(@NonNull List<Artist> artists) {
+		populateArtists(artists);
 	}
 
 	protected void displaySearchResultsByArtist(@NonNull String artistName) {
@@ -322,16 +322,14 @@ public class MusicItemsListFragment extends Fragment {
 		layoutManger = (CardSliderLayoutManager) recyclerView.getLayoutManager();
 
 		CARD_SNAP_HELPER.attachToRecyclerView(recyclerView);
-		recyclerView.post(new Runnable() {
-			@Override
-			public void run() {
-				// Call smooth scroll
-				recyclerView.smoothScrollToPosition(sliderAdapter.getItemCount() - 1);
-			}
-		});
+//		recyclerView.post(new Runnable() {
+//			@Override
+//			public void run() {
+//				// Call smooth scroll
+//				recyclerView.smoothScrollToPosition(sliderAdapter.getItemCount() - 1);
+//			}
+//		});
 	}
-
-
 
 	private void initSwitchers(@NonNull List<? extends MusicItem> musicItems, Executable<String> furtherAction) {
 		final MusicItem musicItem = musicItems.get(0);
