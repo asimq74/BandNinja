@@ -5,6 +5,8 @@ import java.util.List;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MediatorLiveData;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 
 import com.asimq.artists.bandninja.json.Artist;
@@ -20,12 +22,18 @@ public class SearchResultsViewModel extends AndroidViewModel {
 	private LiveData<Artist> mLiveArtist;
 	private LiveData<List<ArtistTag>> mLiveArtistTags;
 
+
 	public SearchResultsViewModel(@NonNull Application application,
 								  @NonNull SearchResultsRepository searchResultsRepository,
 								  @NonNull BandItemRepository bandItemRepository) {
 		super(application);
 		this.searchResultsRepository = searchResultsRepository;
 		this.bandItemRepository = bandItemRepository;
+	}
+
+
+	public LiveData<Boolean> getArtistsRefreshingMutableLiveData() {
+		return searchResultsRepository.getArtistsRefreshingMutableLiveData();
 	}
 
 	public LiveData<List<Artist>> getSearchResultsByArtist(@NonNull String artistQuery) {

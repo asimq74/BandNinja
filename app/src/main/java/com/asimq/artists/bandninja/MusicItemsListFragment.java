@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageSwitcher;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
@@ -450,8 +451,22 @@ public class MusicItemsListFragment extends Fragment {
 				.get(SearchResultsViewModel.class);
 		albumDetailViewModel = ViewModelProviders.of(this, albumDetailViewModelFactory)
 				.get(AlbumDetailViewModel.class);
+		searchResultsViewModel.getArtistsRefreshingMutableLiveData().observe(this, loading -> {
+			if (loading) {
+				progressBar.setVisibility(View.VISIBLE);
+				recyclerView.setVisibility(View.GONE);
+				Log.d(TAG, "loading progress began...");
+				return;
+			}
+			progressBar.setVisibility(View.GONE);
+			recyclerView.setVisibility(View.VISIBLE);
+			Log.d(TAG, "loading progress ended...");
+		});
 		return view;
 	}
+
+	@BindView(R.id.progressBar)
+	ProgressBar progressBar;
 
 	@Override
 	public void onDetach() {

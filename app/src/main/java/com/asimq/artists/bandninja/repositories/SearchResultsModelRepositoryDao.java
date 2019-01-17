@@ -5,6 +5,8 @@ import java.util.List;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -25,7 +27,15 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 	public static final String API_KEY = BuildConfig.LastFMApiKey;
 	public static final String DEFAULT_FORMAT = "json";
 	public static final int SEARCH_RESULTS_LIMIT = 10;
+
 	final String TAG = this.getClass().getSimpleName();
+
+	private MutableLiveData<Boolean> artistsRefreshingMutableLiveData = new MutableLiveData<>();
+
+	@Override
+	public LiveData<Boolean> getArtistsRefreshingMutableLiveData() {
+		return artistsRefreshingMutableLiveData;
+	}
 
 	@Override
 	public LiveData<Artist> getArtistInfo(@NonNull String artistName) {
@@ -53,6 +63,7 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 
 	@Override
 	public LiveData<List<Artist>> getSearchResultsByArtist(@NonNull String query) {
+		artistsRefreshingMutableLiveData.setValue(true);
 		final MutableLiveData<List<Artist>> artistMutableLiveData = new MutableLiveData<>();
 		Log.d(TAG, "onQueryTextSubmit: query->" + query);
 		final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
@@ -84,6 +95,7 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 				artistMutableLiveData.setValue(artists);
 			}
 		});
+		artistsRefreshingMutableLiveData.setValue(false);
 		return artistMutableLiveData;
 	}
 }

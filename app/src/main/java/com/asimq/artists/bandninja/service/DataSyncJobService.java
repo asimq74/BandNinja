@@ -1,6 +1,7 @@
 package com.asimq.artists.bandninja.service;
 
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
@@ -8,6 +9,7 @@ import android.app.job.JobParameters;
 import android.app.job.JobService;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -16,6 +18,7 @@ import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.ArtistWrapper;
+import com.asimq.artists.bandninja.remote.retrofit.BackgroundRetrofitClientInstance;
 import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
 import com.asimq.artists.bandninja.room.ArtistData;
@@ -35,10 +38,9 @@ public class DataSyncJobService extends JobService {
 	boolean jobCancelled = false;
 	public static final String API_KEY = BuildConfig.LastFMApiKey;
 	public static final String DEFAULT_FORMAT = "json";
-	final Artist current = new Artist();
 
 	public void downloadArtistInfoToStorage(@NonNull String artistName) {
-		final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
+		final GetArtists service = BackgroundRetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
 		Call<ArtistWrapper> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
 				API_KEY, DEFAULT_FORMAT);
 		artistInfoCall.enqueue(new Callback<ArtistWrapper>() {
@@ -54,23 +56,28 @@ public class DataSyncJobService extends JobService {
 					return ;
 				}
 				final ArtistData artistData = new ArtistData(artistWrapper.getArtist());
-				new Thread(() -> {
-					artistDataDao.insertArtist(artistData);
-					Log.d(TAG, String.format("updated artist info for %s %s", artistData.getName(), artistData.getMbid()));
-				}).start();
+				artistDataDao.insertArtist(artistData);
+				Log.d(TAG, String.format("updated artist info for %s %s", artistData.getName(), artistData.getMbid()));
 			}
 		});
 
 	}
 
-	private void doWork(JobParameters jobParameters) {
-		// 10 seconds of working (1000*10ms)
-		// If the job has been cancelled, stop working; the job will be rescheduled.
-		if (jobCancelled) return;
-		List<ArtistData> artistDatas = artistDataDao.fetchAllArtistDatas();
-		for (ArtistData artistData : artistDatas) {
-			downloadArtistInfoToStorage(artistData.getName());
+	class UpdateArtistTask extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			List<ArtistData> artistDatas = artistDataDao.fetchAllArtistDatas();
+			for (ArtistData artistData : artistDatas) {
+				downloadArtistInfoToStorage(artistData.getName());
+			}
+			return null;
 		}
+	}
+
+	private void doWork(JobParameters jobParameters) {
+		if (jobCancelled) return;
+		new UpdateArtistTask().executeOnExecutor(Executors.newSingleThreadExecutor());
 		List<ArtistData> artistDatasAfterDownload = artistDataDao.fetchAllArtistDatas();
 		Log.d(TAG, "Job finished! " + artistDatasAfterDownload.size() + " artists counted after download");
 		isWorking = false;
@@ -103,10 +110,15 @@ public class DataSyncJobService extends JobService {
 	}
 
 	private void startWorkOnNewThread(final JobParameters jobParameters) {
-		new Thread(new Runnable() {
-			public void run() {
-				doWork(jobParameters);
-			}
-		}).start();
+		new SyncDataTask().executeOnExecutor(Executors.newSingleThreadExecutor(), jobParameters);
+	}
+
+	class SyncDataTask extends AsyncTask<JobParameters, Void, Void> {
+
+		@Override
+		protected Void doInBackground(JobParameters... jobParameters) {
+			doWork(jobParameters[0]);
+			return null;
+		}
 	}
 }
