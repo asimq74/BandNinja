@@ -8,10 +8,13 @@ import javax.inject.Inject;
 
 import android.app.SearchManager;
 import android.app.job.JobParameters;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -26,11 +29,15 @@ import android.view.inputmethod.InputMethodManager;
 import com.asimq.artists.bandninja.MusicItemsListFragment.OnFragmentInteractionListener;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
 import com.asimq.artists.bandninja.json.Artist;
+import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistTagDao;
 import com.asimq.artists.bandninja.ui.CustomEditText;
 import com.asimq.artists.bandninja.viewmodelfactories.SearchResultsViewModelFactory;
+import com.asimq.artists.bandninja.viewmodelfactories.TagDetailViewModelFactory;
+import com.asimq.artists.bandninja.viewmodels.AlbumDetailViewModel;
+import com.asimq.artists.bandninja.viewmodels.TagDetailViewModel;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -53,6 +60,9 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 	SearchResultsViewModelFactory searchResultsViewModelFactory;
 	@BindView(R.id.toolbar)
 	Toolbar toolbar;
+	@Inject
+	TagDetailViewModelFactory tagDetailViewModelFactory;
+	private TagDetailViewModel tagDetailViewModel;
 
 	private void hideKeyboard() {
 		InputMethodManager inputManager =
@@ -80,12 +90,24 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 		final MyApplication application = (MyApplication) getApplicationContext();
 		applicationComponent = application.getApplicationComponent();
 		applicationComponent.inject(this);
+		tagDetailViewModel = ViewModelProviders.of(this, tagDetailViewModelFactory)
+				.get(TagDetailViewModel.class);
 		setSupportActionBar(toolbar);
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
 		setUpSearchByArtistView();
 		considerDisplayingArtistsFromStorage();
 	}
 
+	@Override
+	protected void onResumeFragments() {
+		super.onResumeFragments();
+		tagDetailViewModel.getTopTags().observe(this, new Observer<List<Tag>>() {
+			@Override
+			public void onChanged(@Nullable List<Tag> tags) {
+				Log.d(TAG, "tags: " + tags);
+			}
+		});
+	}
 
 	@Override
 	public void onDisplayArtistsFromStorage(@NonNull List<Artist> artists) {

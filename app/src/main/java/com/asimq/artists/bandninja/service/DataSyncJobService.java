@@ -7,8 +7,6 @@ import javax.inject.Inject;
 
 import android.app.job.JobParameters;
 import android.app.job.JobService;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -16,11 +14,9 @@ import android.util.Log;
 import com.asimq.artists.bandninja.BuildConfig;
 import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
-import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.ArtistWrapper;
 import com.asimq.artists.bandninja.remote.retrofit.BackgroundRetrofitClientInstance;
-import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
-import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
+import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 
@@ -40,7 +36,7 @@ public class DataSyncJobService extends JobService {
 	public static final String DEFAULT_FORMAT = "json";
 
 	public void downloadArtistInfoToStorage(@NonNull String artistName) {
-		final GetArtists service = BackgroundRetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
+		final GetMusicInfo service = BackgroundRetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
 		Call<ArtistWrapper> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
 				API_KEY, DEFAULT_FORMAT);
 		artistInfoCall.enqueue(new Callback<ArtistWrapper>() {

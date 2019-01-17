@@ -5,8 +5,6 @@ import java.util.List;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.os.Handler;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -14,7 +12,7 @@ import com.asimq.artists.bandninja.BuildConfig;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.ArtistWrapper;
 import com.asimq.artists.bandninja.json.ResultsWrapper;
-import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
+import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
 import com.asimq.artists.bandninja.utils.Util;
 
@@ -39,7 +37,7 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 
 	@Override
 	public LiveData<Artist> getArtistInfo(@NonNull String artistName) {
-		final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
+		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
 		final MutableLiveData<Artist> artistInfoMutableLiveData = new MutableLiveData<>();
 		Call<ArtistWrapper> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
 				API_KEY, DEFAULT_FORMAT);
@@ -66,7 +64,7 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 		artistsRefreshingMutableLiveData.setValue(true);
 		final MutableLiveData<List<Artist>> artistMutableLiveData = new MutableLiveData<>();
 		Log.d(TAG, "onQueryTextSubmit: query->" + query);
-		final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
+		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
 		Call<ResultsWrapper> call = service.getArtists("artist.search", query,
 				API_KEY, DEFAULT_FORMAT, SEARCH_RESULTS_LIMIT);
 		call.enqueue(new Callback<ResultsWrapper>() {

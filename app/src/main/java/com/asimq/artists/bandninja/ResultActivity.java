@@ -30,7 +30,7 @@ import com.asimq.artists.bandninja.json.Album;
 import com.asimq.artists.bandninja.json.ArtistWrapper;
 import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.json.TopAlbumsWrapper;
-import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
+import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.ui.HeaderView;
 import com.asimq.artists.bandninja.viewmodelfactories.ArtistDetailViewModelFactory;
@@ -113,7 +113,7 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
         fab.setBackgroundTintList(ColorStateList.valueOf(vibrantColor));
     }
 
-    private void getAlbumInfo(final String artistName, final GetArtists service) {
+    private void getAlbumInfo(final String artistName, final GetMusicInfo service) {
         Call<ArtistWrapper> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
                 API_KEY, DEFAULT_FORMAT);
         artistInfoCall.enqueue(new Callback<ArtistWrapper>() {
@@ -136,7 +136,7 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
         });
     }
 
-    private void getArtistTagInfo(final String mbid, final GetArtists service) {
+    private void getArtistTagInfo(final String mbid, final GetMusicInfo service) {
         Call<Tag[]> artistTagInfoCall = service.getTagByArtistId("artist.getTag", mbid, API_KEY, "RJ", DEFAULT_FORMAT);
         artistTagInfoCall.enqueue(new Callback<Tag[]>() {
 
@@ -157,7 +157,7 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
         });
     }
 
-    private void getTopAlbumInfo(final ArtistWrapper artistWrapper, GetArtists service, final String artistName) {
+    private void getTopAlbumInfo(final ArtistWrapper artistWrapper, GetMusicInfo service, final String artistName) {
         Call<TopAlbumsWrapper> topAlbumsPojoCall = service.getTopAlbums("artist.gettopalbums", artistName,
                 API_KEY, DEFAULT_FORMAT, 1);
         topAlbumsPojoCall.enqueue(new Callback<TopAlbumsWrapper>() {
@@ -245,7 +245,7 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
     @Override
     protected void onResume() {
         super.onResume();
-//		final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
+//		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
 //		Call<ResultsWrapper> call = service.getArtists("artist.search", "The Cult",
 //				API_KEY, DEFAULT_FORMAT);
 //		call.enqueue(new Callback<ResultsWrapper>() {

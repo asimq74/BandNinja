@@ -12,7 +12,7 @@ import com.asimq.artists.bandninja.json.Album;
 import com.asimq.artists.bandninja.json.AlbumInfo;
 import com.asimq.artists.bandninja.json.AlbumInfoWrapper;
 import com.asimq.artists.bandninja.json.TopAlbumsWrapper;
-import com.asimq.artists.bandninja.remote.retrofit.GetArtists;
+import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
 import com.asimq.artists.bandninja.utils.Util;
 
@@ -29,7 +29,7 @@ public class AlbumInfoRepositoryDao implements AlbumInfoRepository {
 
 	@Override
 	public LiveData<List<Album>> getAlbums(@NonNull String artistName) {
-		final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
+		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
 		final MutableLiveData<List<Album>> albumsMutableLiveData = new MutableLiveData<>();
 		Call<TopAlbumsWrapper> topAlbumsWrapperCall
 				= service.getTopAlbums("artist.getTopAlbums", artistName, API_KEY, DEFAULT_FORMAT, PAGES);
@@ -56,7 +56,7 @@ public class AlbumInfoRepositoryDao implements AlbumInfoRepository {
 
 	@Override
 	public LiveData<AlbumInfo> getAlbumInfo(@NonNull String artistName, @NonNull String albumName) {
-		final GetArtists service = RetrofitClientInstance.getRetrofitInstance().create(GetArtists.class);
+		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
 		final MutableLiveData<AlbumInfo> albumMutableLiveData = new MutableLiveData<>();
 		Call<AlbumInfoWrapper> albumInfoCall = service.getAlbumInfo("album.getinfo", artistName, albumName, API_KEY, DEFAULT_FORMAT);
 		albumInfoCall.enqueue(new Callback<AlbumInfoWrapper>() {
