@@ -131,7 +131,8 @@ public class MusicItemsListFragment extends Fragment {
 
 			final int clickedPosition = recyclerView.getChildAdapterPosition(view);
 			if (clickedPosition == activeCardPosition) {
-				final Intent intent = new Intent(getActivity(), DetailsActivity.class);
+//				final Intent intent = new Intent(getActivity(), DetailsActivity.class);
+				final Intent intent = new Intent(getActivity(), ConnectionActivity.class);
 				Artist artist = artists.get(clickedPosition);
 				intent.putExtra(DetailsActivity.EXTRA_IMAGE, Util.getImageUrl(artist));
 				intent.putExtra(DetailsActivity.EXTRA_TITLE, artist.getName());

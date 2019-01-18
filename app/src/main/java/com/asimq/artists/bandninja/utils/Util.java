@@ -15,29 +15,6 @@ import com.asimq.artists.bandninja.json.MusicItem;
 
 public class Util {
 
-	public static void populateHTMLForSwitcher(@NonNull TextSwitcher switcher, @NonNull String content) {
-		switcher.setCurrentText(Html.fromHtml(content
-				.replaceAll("(\n)", "<br />")
-				.replaceAll("(\r)", "<br />")));
-		TextView tv = (TextView) switcher.getCurrentView();
-		tv.setMovementMethod(LinkMovementMethod.getInstance());
-	}
-
-	public static String getImageUrl(@NonNull MusicItem musicItem) {
-		final List<Image> images = musicItem.getImages();
-		if (null == images || images.isEmpty()) {
-			return "";
-		}
-		return images.get(images.size() - 1).getText();
-	}
-
-	public static List removeAllItemsWithoutMbidOrImages(List<? extends MusicItem> musicItems) {
-		return Util.removeUsingIterator(musicItems, item ->
-				(null == item.getMbid() || item.getMbid().isEmpty())
-				&& (!containsImageUrls(item.getImages()))
-		);
-	}
-
 	public static boolean containsImageUrls(List<Image> images) {
 		if (null == images || images.isEmpty()) {
 			return false;
@@ -50,9 +27,45 @@ public class Util {
 		return false;
 	}
 
+	public static String getImageUrl(@NonNull MusicItem musicItem) {
+		final List<Image> images = musicItem.getImages();
+		if (null == images || images.isEmpty()) {
+			return "";
+		}
+		return images.get(images.size() - 1).getText();
+	}
+
+	public static void populateHTMLForSwitcher(@NonNull TextSwitcher switcher, @NonNull String content) {
+		switcher.setCurrentText(Html.fromHtml(content
+				.replaceAll("(\n)", "<br />")
+				.replaceAll("(\r)", "<br />")));
+		TextView tv = (TextView) switcher.getCurrentView();
+		tv.setMovementMethod(LinkMovementMethod.getInstance());
+	}
+
+	public static List removeAllItemsWithoutMbidOrImages(List<? extends MusicItem> musicItems) {
+		if (android.os.Build.VERSION.SDK_INT < 24) {
+			// Create an iterator from the l
+			Iterator<? extends MusicItem> itr = musicItems.iterator();
+
+			while (itr.hasNext()) {
+				MusicItem item = itr.next();
+				// Checking for Predicate condition
+				if ((null == item.getMbid() || item.getMbid().isEmpty())
+						&& (!containsImageUrls(item.getImages()))) {
+					itr.remove();
+				}
+			}
+			return musicItems;
+		}
+		return Util.removeUsingIterator(musicItems, item ->
+				(null == item.getMbid() || item.getMbid().isEmpty())
+						&& (!containsImageUrls(item.getImages()))
+		);
+	}
+
 	// Generic function to remove Null Using Iterator
-	public static <T> List<T> removeUsingIterator(List<T> l, Predicate<T> p)
-	{
+	public static <T> List<T> removeUsingIterator(List<T> l, Predicate<T> p) {
 
 		// Create an iterator from the l
 		Iterator<T> itr = l.iterator();
