@@ -23,8 +23,43 @@ public class TagModelRepositoryDao implements TagModelRepository {
 
 	final String TAG = this.getClass().getSimpleName();
 
+	static class TagsContainer {
+		final List<Tag> tags;
+
+		public TagsContainer(List<Tag> tags) {
+			this.tags = tags;
+		}
+
+		public List<Tag> getTags() {
+			return tags;
+		}
+	}
+
 	@Override
-	public LiveData<List<Tag>> getTopTags() {
+	public List<Tag> getTopTags() {
+		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
+		final TagsContainer tagsContainer = new TagsContainer(new ArrayList<>());
+		Call<TopTagsWrapper> artistInfoCall = service.getTopTags("tag.getTopTags", API_KEY, DEFAULT_FORMAT);
+		artistInfoCall.enqueue(new Callback<TopTagsWrapper>() {
+			@Override
+			public void onFailure(Call<TopTagsWrapper> call, Throwable t) {
+				return;
+			}
+
+			@Override
+			public void onResponse(Call<TopTagsWrapper> call, Response<TopTagsWrapper> response) {
+				final TopTagsWrapper topTagsWrapper = response.body();
+				if (topTagsWrapper == null || topTagsWrapper.getToptags().getTags().isEmpty()) {
+					return;
+				}
+				tagsContainer.getTags().addAll(topTagsWrapper.getToptags().getTags());
+			}
+		});
+		return tagsContainer.getTags();
+	}
+
+	@Override
+	public LiveData<List<Tag>> getTopTagsLiveData() {
 		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
 		final MutableLiveData<List<Tag>> topTagsMutableLiveData = new MutableLiveData<>();
 		Call<TopTagsWrapper> artistInfoCall = service.getTopTags("tag.getTopTags", API_KEY, DEFAULT_FORMAT);

@@ -7,10 +7,7 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.support.annotation.NonNull;
 
-import com.asimq.artists.bandninja.json.Album;
-import com.asimq.artists.bandninja.json.AlbumInfo;
 import com.asimq.artists.bandninja.json.Tag;
-import com.asimq.artists.bandninja.repositories.AlbumInfoRepository;
 import com.asimq.artists.bandninja.repositories.TagModelRepository;
 
 public class TagDetailViewModel extends AndroidViewModel {
@@ -24,7 +21,7 @@ public class TagDetailViewModel extends AndroidViewModel {
 	}
 
 	public LiveData<List<Tag>> getTopTags() {
-		mLiveAllTags = tagModelRepository.getTopTags();
+		mLiveAllTags = tagModelRepository.getTopTagsLiveData();
 		return mLiveAllTags;
 	}
 

@@ -11,6 +11,7 @@ import com.asimq.artists.bandninja.json.TopTagsWrapper;
 
 public interface TagModelRepository {
 
-	LiveData<List<Tag>> getTopTags();
+	LiveData<List<Tag>> getTopTagsLiveData();
 
+	List<Tag> getTopTags();
 }

@@ -44,7 +44,7 @@ public interface GetMusicInfo {
 			@Query("api_key") String api_key, @Query("format") String format,
 			@Query("page") int page);
 
-	//    method=tag.getTopTags&api_key=06aec4c91800f972d32c0d702c003bd5&format=json
+	//    method=tag.getTopTagsLiveData&api_key=06aec4c91800f972d32c0d702c003bd5&format=json
 	@GET("/2.0/")
 	Call<TopTagsWrapper> getTopTags(@Query("method") String method, @Query("api_key") String api_key,
 			@Query("format") String format);
