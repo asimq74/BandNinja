@@ -1,12 +1,18 @@
 package com.asimq.artists.bandninja.utils;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Predicate;
 
+import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 import android.support.annotation.NonNull;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 
@@ -14,6 +20,24 @@ import com.asimq.artists.bandninja.json.Image;
 import com.asimq.artists.bandninja.json.MusicItem;
 
 public class Util {
+
+	public static String getPostalCode(Context context, double latitude, double longitude) {
+		StringBuilder result = new StringBuilder();
+		try {
+			Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+			List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+			if (addresses.size() > 0) {
+				Address address = addresses.get(0);
+//                result.append(address.getLocality()).append("\n");
+//                result.append(address.getCountryName());
+				result.append(address.getPostalCode());
+			}
+		} catch (IOException e) {
+			Log.e("tag", e.getMessage());
+		}
+
+		return result.toString();
+	}
 
 	public static boolean containsImageUrls(List<Image> images) {
 		if (null == images || images.isEmpty()) {

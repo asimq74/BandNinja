@@ -23,16 +23,15 @@
     <string name="title_activity_settings">Settings</string>
     <string name="display_name_key">display_name_key</string>
     <string name="favorite_genre_key">favorite_genre_key</string>
+    <string name="location_switch_key">location_switch_key</string>
 
     <!-- Strings related to Settings -->
 
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>
 
-    <string name="pref_title_social_recommendations">Enable social recommendations</string>
-    <string name="pref_description_social_recommendations">Recommendations for people to contact
-        based on your message history
-    </string>
+    <string name="pref_title_location">Enable location</string>
+    <string name="pref_description_location">Enable location to recieve customized ads</string>
 
     <string name="pref_title_display_name">Display name</string>
     <string name="pref_default_display_name">John Smith</string>

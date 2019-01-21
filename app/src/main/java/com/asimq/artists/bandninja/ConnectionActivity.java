@@ -204,6 +204,9 @@ public class ConnectionActivity extends AppCompatActivity implements GoogleApiCl
 						}
 					}
 
+				} else {
+
+					startLocationUpdates();
 				}
 
 				break;
