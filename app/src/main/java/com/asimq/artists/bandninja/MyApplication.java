@@ -6,7 +6,6 @@ import android.content.Context;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
 import com.asimq.artists.bandninja.dagger.ApplicationModule;
 import com.asimq.artists.bandninja.dagger.DaggerApplicationComponent;
-import com.asimq.artists.bandninja.service.ServiceUtil;
 
 /**
  * Base Application Class
@@ -32,7 +31,7 @@ public class MyApplication extends Application {
 				.applicationModule(new ApplicationModule(this))
 				.build();
 		applicationComponent.inject(this);
-		ServiceUtil.scheduleJob(this);
+//		ServiceUtil.scheduleJob(this);
 	}
 
 }

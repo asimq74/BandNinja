@@ -11,6 +11,7 @@ import com.asimq.artists.bandninja.MusicItemsListFragment;
 import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.ResultActivity;
 import com.asimq.artists.bandninja.cards.SliderAdapter;
+import com.asimq.artists.bandninja.service.BandDataSyncAsyncTask;
 import com.asimq.artists.bandninja.service.DataSyncJobService;
 import com.asimq.artists.bandninja.ui.CustomMultiSelectListPreference;
 import com.asimq.artists.bandninja.viewmodels.AlbumDetailViewModel;
@@ -51,4 +52,6 @@ public interface ApplicationComponent {
 	void inject(DataSyncJobService dataSyncJobService);
 
 	void inject(CustomMultiSelectListPreference customMultiSelectListPreference);
+
+	void inject(BandDataSyncAsyncTask bandDataSyncAsyncTask);
 }

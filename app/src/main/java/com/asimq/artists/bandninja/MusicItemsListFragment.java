@@ -12,12 +12,10 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -222,21 +220,17 @@ public class MusicItemsListFragment extends Fragment {
 	@BindView(R.id.ts_description)
 	TextSwitcher descriptionsSwitcher;
 	private final int[][] dotCoords = new int[5][2];
-	@BindView(R.id.green_dot)
-	View greenDot;
 	private CardSliderLayoutManager layoutManger;
 	OnFragmentInteractionListener mCallback;
 	@BindView(R.id.mainTitleView_1)
 	TextView mainTitleView1;
 	@BindView(R.id.mainTitleView_2)
 	TextView mainTitleView2;
-	private DecodeBitmapTask.Listener mapLoadListener;
-	@BindView(R.id.ts_map)
-	ImageSwitcher mapSwitcher;
-	private final int[] maps = {R.drawable.map_paris, R.drawable.map_seoul, R.drawable.map_london, R.drawable.map_beijing};
 	@BindView(R.id.ts_place)
 	TextSwitcher placeSwitcher;
 	private final Executable<String> albumInfoObservable = createAlbumInfoObservable();
+	@BindView(R.id.progressBar)
+	ProgressBar progressBar;
 	@BindView(R.id.recycler_view)
 	RecyclerView recyclerView;
 	private SearchResultsViewModel searchResultsViewModel;
@@ -357,17 +351,6 @@ public class MusicItemsListFragment extends Fragment {
 		descriptionsSwitcher.setOutAnimation(getActivity(), android.R.anim.fade_out);
 		descriptionsSwitcher.setFactory(new TextViewFactory(R.style.DescriptionTextView, false));
 		descriptionsSwitcher.setCurrentText("");
-
-		mapSwitcher.removeAllViews();
-		mapSwitcher.setInAnimation(getActivity(), R.anim.fade_in);
-		mapSwitcher.setOutAnimation(getActivity(), R.anim.fade_out);
-		mapSwitcher.setFactory(new ImageViewFactory());
-		mapSwitcher.setImageResource(maps[0]);
-
-		mapLoadListener = bitmap -> {
-			((ImageView) mapSwitcher.getNextView()).setImageBitmap(bitmap);
-			mapSwitcher.showNext();
-		};
 	}
 
 	private void onActiveCardChange(List<? extends MusicItem> musicItems, Executable<String> furtherAction) {
@@ -405,28 +388,12 @@ public class MusicItemsListFragment extends Fragment {
 
 		temperatureSwitcher.setInAnimation(getActivity(), animH[0]);
 		temperatureSwitcher.setOutAnimation(getActivity(), animH[1]);
-		//replace with progress bar
-//		temperatureSwitcher.setText(musicItems.get(pos % musicItems.size()).getName());
 
 		placeSwitcher.setInAnimation(getActivity(), animV[0]);
 		placeSwitcher.setOutAnimation(getActivity(), animV[1]);
-//replace with progress bar
-//		placeSwitcher.setText(musicItems.get(pos % musicItems.size()).getName());
 
 		clockSwitcher.setInAnimation(getActivity(), animV[0]);
 		clockSwitcher.setOutAnimation(getActivity(), animV[1]);
-		// replace with progress bar
-//		clockSwitcher.setText(musicItems.get(pos % musicItems.size()).getName());
-
-		// replace with progress bar
-//		descriptionsSwitcher.setText(musicItems.get(pos % musicItems.size()).getName());
-
-		showMap(maps[pos % maps.length]);
-
-		ViewCompat.animate(greenDot)
-				.translationX(dotCoords[pos % dotCoords.length][0])
-				.translationY(dotCoords[pos % dotCoords.length][1])
-				.start();
 
 		currentPosition = pos;
 	}
@@ -464,9 +431,6 @@ public class MusicItemsListFragment extends Fragment {
 		});
 		return view;
 	}
-
-	@BindView(R.id.progressBar)
-	ProgressBar progressBar;
 
 	@Override
 	public void onDetach() {
@@ -581,15 +545,4 @@ public class MusicItemsListFragment extends Fragment {
 		mCallback = onFragmentInteractionListener;
 	}
 
-	private void showMap(@DrawableRes int resId) {
-		if (decodeMapBitmapTask != null) {
-			decodeMapBitmapTask.cancel(true);
-		}
-
-		final int w = mapSwitcher.getWidth();
-		final int h = mapSwitcher.getHeight();
-
-		decodeMapBitmapTask = new DecodeBitmapTask(getResources(), resId, w, h, mapLoadListener);
-		decodeMapBitmapTask.execute();
-	}
 }
