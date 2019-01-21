@@ -49,7 +49,7 @@ import java.util.HashSet;
 public class SettingsActivity extends PreferenceActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
     final String TAG = this.getClass().getSimpleName();
-    GoogleApiClient mGoogleApiClient;
+    private GoogleApiClient mGoogleApiClient;
     Location mLocation;
     private LocationRequest mLocationRequest;
     private ArrayList<String> permissions = new ArrayList();
@@ -105,8 +105,10 @@ public class SettingsActivity extends PreferenceActivity implements GoogleApiCli
             Toast.makeText(getApplicationContext(), "Enable Permissions", Toast.LENGTH_LONG).show();
         }
 
-        LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, mLocationRequest, this);
+        if (null != mGoogleApiClient && mGoogleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(
+                    mGoogleApiClient, mLocationRequest, this);
+        }
 
     }
 
@@ -374,7 +376,7 @@ public class SettingsActivity extends PreferenceActivity implements GoogleApiCli
 
 
     public void stopLocationUpdates() {
-        if (mGoogleApiClient.isConnected()) {
+        if (null != mGoogleApiClient && mGoogleApiClient.isConnected()) {
             LocationServices.FusedLocationApi
                     .removeLocationUpdates(mGoogleApiClient, this);
             mGoogleApiClient.disconnect();

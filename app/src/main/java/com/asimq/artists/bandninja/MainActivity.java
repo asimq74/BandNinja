@@ -36,6 +36,9 @@ import com.asimq.artists.bandninja.utils.Util;
 import com.asimq.artists.bandninja.viewmodelfactories.SearchResultsViewModelFactory;
 import com.asimq.artists.bandninja.viewmodelfactories.TagDetailViewModelFactory;
 import com.asimq.artists.bandninja.viewmodels.TagDetailViewModel;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.Gson;
 
@@ -108,9 +111,12 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+        loadAd();
         setUpSearchByArtistView();
         considerDisplayingArtistsFromStorage();
     }
+
+    AdView adView;
 
     @Override
     protected void onStart() {
@@ -122,6 +128,60 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
             String postalCode = Util.getPostalCode(this, mLocation.getLatitude(), mLocation.getLongitude());
             locationView.setText(postalCode);
         }
+
+    }
+
+    private void loadAd() {
+        AdRequest adRequest;
+        if (null == mLocation) {
+            adRequest = new AdRequest.Builder()
+                    .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                    .addTestDevice("D64BF957D55963D6B121A98C94BEBA22")
+                    .build();
+        } else {
+            adRequest = new AdRequest.Builder()
+                    .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                    .addTestDevice("D64BF957D55963D6B121A98C94BEBA22")
+                    .setLocation(mLocation)
+                    .build();
+        }
+
+        adView = findViewById(R.id.ad_view);
+        adView.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                // Code to be executed when when the user is about to return
+                // to the app after tapping on an ad.
+                Log.i(TAG, "Ad closed");
+            }
+
+            @Override
+            public void onAdFailedToLoad(int errorCode) {
+                // Code to be executed when an ad request fails.
+                Log.i(TAG, "Ad failed to load errorCode=" + errorCode);
+            }
+
+            @Override
+            public void onAdLeftApplication() {
+                // Code to be executed when the user has left the app.
+                Log.i(TAG, "Ad left the application");
+            }
+
+            @Override
+            public void onAdLoaded() {
+                // Code to be executed when an ad finishes loading.
+                Log.i(TAG, "Ad finished loading");
+            }
+
+            @Override
+            public void onAdOpened() {
+                // Code to be executed when an ad opens an overlay that
+                // covers the screen.
+                Log.i(TAG, "Ad opened");
+            }
+        });
+//        // Start loading the ad in the background.
+        adView.loadAd(adRequest);
     }
 
     @Override
@@ -170,13 +230,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
     @Override
     protected void onResumeFragments() {
         super.onResumeFragments();
-//		considerCheckingLocationPermissions();
-        tagDetailViewModel.getTopTags().observe(this, new Observer<List<Tag>>() {
-            @Override
-            public void onChanged(@Nullable List<Tag> tags) {
-                Log.d(TAG, "tags: " + tags);
-            }
-        });
+//        tagDetailViewModel.getTopTags().observe(this, tags -> Log.d(TAG, "tags: " + tags));
     }
 
     @Override
