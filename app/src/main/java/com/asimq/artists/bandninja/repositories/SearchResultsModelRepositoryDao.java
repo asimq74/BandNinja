@@ -1,5 +1,6 @@
 package com.asimq.artists.bandninja.repositories;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import com.asimq.artists.bandninja.BuildConfig;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.ArtistWrapper;
 import com.asimq.artists.bandninja.json.ResultsWrapper;
+import com.asimq.artists.bandninja.json.TopArtistsByTagWrapper;
 import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
 import com.asimq.artists.bandninja.utils.Util;
@@ -29,6 +31,37 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 	final String TAG = this.getClass().getSimpleName();
 
 	private MutableLiveData<Boolean> artistsRefreshingMutableLiveData = new MutableLiveData<>();
+
+	@Override
+	public LiveData<List<Artist>> getTopArtistsByTag(@NonNull String tag) {
+		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
+		final MutableLiveData<List<Artist>> artistMutableLiveData = new MutableLiveData<>();
+		Call<TopArtistsByTagWrapper> artistInfoByTagCall = service.getArtistByTag("tag.gettopartists", tag,
+				API_KEY, DEFAULT_FORMAT);
+		artistInfoByTagCall.enqueue(new Callback<TopArtistsByTagWrapper>() {
+			@Override
+			public void onResponse(Call<TopArtistsByTagWrapper> call, Response<TopArtistsByTagWrapper> response) {
+				final TopArtistsByTagWrapper topArtistsByTagWrapper = response.body();
+				if (topArtistsByTagWrapper == null) {
+					return;
+				}
+				List<Artist> artists = topArtistsByTagWrapper.getTopArtists().getArtists();
+				if (null == artists) {
+					artistMutableLiveData.setValue(null);
+					return;
+				}
+				artists = Util.removeAllItemsWithoutMbidOrImages(artists);
+				Collections.sort(artists);
+				artistMutableLiveData.setValue(artists);
+			}
+
+			@Override
+			public void onFailure(Call<TopArtistsByTagWrapper> call, Throwable t) {
+				artistMutableLiveData.setValue(new ArrayList<>());
+			}
+		});
+		return artistMutableLiveData;
+	}
 
 	@Override
 	public LiveData<Boolean> getArtistsRefreshingMutableLiveData() {

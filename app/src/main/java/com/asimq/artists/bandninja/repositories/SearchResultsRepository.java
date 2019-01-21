@@ -14,4 +14,6 @@ public interface SearchResultsRepository {
 	LiveData<Artist> getArtistInfo(@NonNull String artistName);
 
 	LiveData<Boolean> getArtistsRefreshingMutableLiveData();
+
+	LiveData<List<Artist>> getTopArtistsByTag(@NonNull String tag);
 }

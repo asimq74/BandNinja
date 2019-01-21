@@ -6,6 +6,7 @@ import com.asimq.artists.bandninja.json.ResultsWrapper;
 import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.json.TagWrapper;
 import com.asimq.artists.bandninja.json.TopAlbumsWrapper;
+import com.asimq.artists.bandninja.json.TopArtistsByTagWrapper;
 import com.asimq.artists.bandninja.json.TopTagsWrapper;
 
 import retrofit2.Call;
@@ -47,5 +48,10 @@ public interface GetMusicInfo {
 	//    method=tag.getTopTagsLiveData&api_key=06aec4c91800f972d32c0d702c003bd5&format=json
 	@GET("/2.0/")
 	Call<TopTagsWrapper> getTopTags(@Query("method") String method, @Query("api_key") String api_key,
+			@Query("format") String format);
+
+//	http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&tag=alternative&api_key=key&format=json
+	@GET("/2.0/")
+	Call<TopArtistsByTagWrapper> getArtistByTag(@Query("method") String method, @Query("tag") String tag, @Query("api_key") String api_key,
 			@Query("format") String format);
 }

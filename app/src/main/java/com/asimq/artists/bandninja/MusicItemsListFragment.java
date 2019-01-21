@@ -87,9 +87,12 @@ public class MusicItemsListFragment extends Fragment {
 	 */
 	public interface OnFragmentInteractionListener {
 
-		void onDisplayArtistsFromStorage(@NonNull List<Artist> artists);
+		void onDisplayArtistList(@NonNull List<Artist> artists);
 
 		void onSearchedForArtistName(@NonNull String artistName);
+
+		void onDisplayingArtistsByTag(@NonNull String tag);
+
 	}
 
 	private class ImageViewFactory implements ViewSwitcher.ViewFactory {
@@ -465,6 +468,10 @@ public class MusicItemsListFragment extends Fragment {
 		new BaseSaveArtistTask(artistDataDao).execute(artistData);
 		searchResultsViewModel.getArtistInfo(artistData.getName()).observe(this,
 				artist -> processArtistInfo(artist));
+	}
+
+	protected void populateArtistsByTag(@NonNull String tag) {
+		searchResultsViewModel.getTopArtistsByTag(tag).observe(this, this::populateArtists);
 	}
 
 	private void populateArtists(List<Artist> artists) {

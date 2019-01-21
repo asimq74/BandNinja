@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 		protected void onPostExecute(List<Artist> artists) {
 			super.onPostExecute(artists);
 			if (!artists.isEmpty()) {
-				onDisplayArtistsFromStorage(artists);
+				onDisplayArtistList(artists);
 			}
 		}
 	}
@@ -119,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 	private void considerDisplayingArtistsFromStorage() {
 		new ConsiderDisplayingArtistsFromStorageTask().executeOnExecutor(Executors.newSingleThreadExecutor(), artistDataDao);
 	}
+
 
 	private void hideKeyboard() {
 		InputMethodManager inputManager =
@@ -209,6 +210,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 		loadAd();
 		setUpSearchByArtistView();
 		considerDisplayingArtistsFromStorage();
+		onDisplayingArtistsByTag("alternative");
 	}
 
 	@Override
@@ -236,11 +238,20 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 	}
 
 	@Override
-	public void onDisplayArtistsFromStorage(@NonNull List<Artist> artists) {
+	public void onDisplayArtistList(@NonNull List<Artist> artists) {
 		MusicItemsListFragment musicItemsListFragment = (MusicItemsListFragment)
 				getSupportFragmentManager().findFragmentById(R.id.musicItemsListFragment);
 		if (musicItemsListFragment != null) {
 			musicItemsListFragment.displayArtistsFromStorage(artists);
+		}
+	}
+
+	@Override
+	public void onDisplayingArtistsByTag(@NonNull String tag) {
+		MusicItemsListFragment musicItemsListFragment = (MusicItemsListFragment)
+				getSupportFragmentManager().findFragmentById(R.id.musicItemsListFragment);
+		if (musicItemsListFragment != null) {
+			musicItemsListFragment.populateArtistsByTag(tag);
 		}
 	}
 
