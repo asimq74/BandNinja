@@ -3,6 +3,7 @@ package com.asimq.artists.bandninja;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -36,9 +37,16 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.asimq.artists.bandninja.json.AlbumInfo;
 import com.asimq.artists.bandninja.room.ArtistData;
+import com.asimq.artists.bandninja.room.TrackData;
+import com.asimq.artists.bandninja.room.dao.TrackDataDao;
 import com.asimq.artists.bandninja.ui.HeaderView;
+import com.asimq.artists.bandninja.utils.Util;
+import com.asimq.artists.bandninja.utils.Util.Entities;
+import com.asimq.artists.bandninja.viewmodelfactories.AlbumDetailViewModelFactory;
 import com.asimq.artists.bandninja.viewmodelfactories.ArtistDetailViewModelFactory;
+import com.asimq.artists.bandninja.viewmodels.AlbumDetailViewModel;
 import com.asimq.artists.bandninja.viewmodels.ArtistDetailViewModel;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -122,6 +130,7 @@ public class ArticleDetailActivity extends AppCompatActivity
 	@BindView(R.id.float_header_view)
 	HeaderView floatHeaderView;
 	private ArtistData globalArtistData = new ArtistData();
+	private AlbumInfo globalAlbumInfo = new AlbumInfo();
 	private boolean isHideToolbarView = false;
 	;
 	@BindView(R.id.body_text_recycler_view)
@@ -163,6 +172,10 @@ public class ArticleDetailActivity extends AppCompatActivity
 		mySnackbar.setActionTextColor(Color.WHITE);
 		mySnackbar.show();
 	}
+
+	private AlbumDetailViewModel albumDetailViewModel;
+	@Inject
+	AlbumDetailViewModelFactory albumDetailViewModelFactory;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -223,7 +236,13 @@ public class ArticleDetailActivity extends AppCompatActivity
 		super.onStart();
 		artistDetailViewModel = ViewModelProviders.of(this, artistDetailViewModelFactory)
 				.get(ArtistDetailViewModel.class);
-		artistDetailViewModel.getArtistDetail(mbId).observe(this, artistData -> populateInitialView(artistData));
+		albumDetailViewModel = ViewModelProviders.of(this, albumDetailViewModelFactory)
+				.get(AlbumDetailViewModel.class);
+		if (Entities.ARTIST.name().equals(entityType)) {
+			artistDetailViewModel.getArtistDetail(mbId).observe(this, artistData -> populateInitialView(artistData));
+		} else if (Entities.ALBUM.name().equals(entityType)) {
+			albumDetailViewModel.getAlbumInfo(mbId).observe(this, albumInfo -> populateInitialView(albumInfo));
+		}
 	}
 
 	private Date parsePublishedDate(String dateString) {
@@ -245,7 +264,6 @@ public class ArticleDetailActivity extends AppCompatActivity
 	}
 
 	private void populateInitialView(@NonNull ArtistData artistData) {
-		if (artistData != null) {
 			globalArtistData = artistData;
 			publishedDate = "";
 			toolbarHeaderView.bindTo(artistData.getName(), publishedDate, publishedDate);
@@ -271,9 +289,38 @@ public class ArticleDetailActivity extends AppCompatActivity
 			});
 			progressBar.setVisibility(View.GONE);
 			cardView.setVisibility(View.VISIBLE);
-		}
 	}
 
+	private void populateInitialView(@NonNull AlbumInfo albumInfo) {
+			globalAlbumInfo = albumInfo;
+			toolbarHeaderView.bindTo(albumInfo.getName(), albumInfo.getArtist(), albumInfo.getReleaseDate());
+			floatHeaderView.bindTo(albumInfo.getName(), albumInfo.getArtist(), albumInfo.getReleaseDate());
+			final ImageView photoView = findViewById(R.id.photo);
+			final String photoUrl = Util.getImageUrl(albumInfo);
+			Picasso.with(ArticleDetailActivity.this).load(photoUrl).into(photoView, new Callback() {
+				@Override
+				public void onError() {
+					Log.e(TAG, "error loading photoView with url: " + photoUrl);
+				}
+
+				private void onGenerated(Palette palette) {
+					applyPalette(palette);
+				}
+
+				@Override
+				public void onSuccess() {
+					Bitmap bitmap = ((BitmapDrawable) photoView.getDrawable()).getBitmap();
+					Palette.from(bitmap).generate(this::onGenerated);
+					final String body = null != albumInfo.getWiki() ? albumInfo.getWiki().getContent() : "";
+					trackDataDao.fetchLiveTrackDatas(mbId).observe(ArticleDetailActivity.this, trackDatas -> Log.d(TAG, "trackDatas: " + trackDatas));
+					populateBody(body);
+				}
+			});
+			progressBar.setVisibility(View.GONE);
+			cardView.setVisibility(View.VISIBLE);
+	}
+	@Inject
+	TrackDataDao trackDataDao;
 	private void populateUI(@NonNull String[] paragraphs) {
 		Adapter adapter = new Adapter(paragraphs);
 		adapter.setHasStableIds(true);

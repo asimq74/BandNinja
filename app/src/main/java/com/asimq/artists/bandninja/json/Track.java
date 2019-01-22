@@ -7,16 +7,16 @@ public class Track {
 
     @SerializedName("name")
     @Expose
-    private String name;
+    private String name = "";
     @SerializedName("url")
     @Expose
-    private String url;
+    private String url = "";
     @SerializedName("duration")
     @Expose
-    private String duration;
+    private String duration = "";
     @SerializedName("artist")
     @Expose
-    private Artist artist;
+    private Artist artist = new Artist();
 
     public String getName() {
         return name;

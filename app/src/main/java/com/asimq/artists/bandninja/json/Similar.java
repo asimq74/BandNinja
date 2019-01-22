@@ -2,11 +2,12 @@ package com.asimq.artists.bandninja.json;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Similar {
     @SerializedName("artist")
-    private List<Artist> artists;
+    private List<Artist> artists = new ArrayList<>();
 
     public List<Artist> getArtists()
     {

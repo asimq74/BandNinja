@@ -6,10 +6,10 @@ import com.google.gson.annotations.SerializedName;
 public class Tag {
     @SerializedName("name")
     @Expose
-    private String name;
+    private String name = "";
     @SerializedName("url")
     @Expose
-    private String url;
+    private String url = "";
 
     public String getName ()
     {

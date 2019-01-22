@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.ArtistTag;
+import com.asimq.artists.bandninja.room.TrackData;
 
 public interface BandItemRepository {
 
@@ -29,5 +30,15 @@ public interface BandItemRepository {
 	void saveArtistTag(@NonNull ArtistTag artistTag);
 
 	void saveMultipleArtistTags(@NonNull List<ArtistTag> artistTagList);
+
+
+	List<TrackData> getTrackDatas(@NonNull String mbid);
+
+	LiveData<List<TrackData>> getTrackLiveDatas(@NonNull String mbid);
+
+
+	void saveTrackData(@NonNull TrackData trackData);
+
+	void saveMultipleTrackDatas(@NonNull List<TrackData> trackDatas);
 
 }

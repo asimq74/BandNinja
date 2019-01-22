@@ -14,4 +14,6 @@ public interface AlbumInfoRepository {
     LiveData<List<Album>> getAlbums(@NonNull String artistName);
 
     LiveData<AlbumInfo> getAlbumInfo(@NonNull String artistName, @NonNull String albumName);
+
+    LiveData<AlbumInfo> getAlbumInfo(@NonNull String mbId);
 }

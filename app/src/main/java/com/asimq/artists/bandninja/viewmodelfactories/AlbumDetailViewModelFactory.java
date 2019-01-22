@@ -8,26 +8,26 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import com.asimq.artists.bandninja.repositories.AlbumInfoRepository;
-import com.asimq.artists.bandninja.repositories.BandItemRepository;
-import com.asimq.artists.bandninja.repositories.SearchResultsRepository;
+import com.asimq.artists.bandninja.room.dao.TrackDataDao;
 import com.asimq.artists.bandninja.viewmodels.AlbumDetailViewModel;
-import com.asimq.artists.bandninja.viewmodels.SearchResultsViewModel;
 
 @Singleton
 public class AlbumDetailViewModelFactory implements ViewModelProvider.Factory {
 
-	private final Application application;
 	private final AlbumInfoRepository albumInfoRepository;
+	private final Application application;
+	private final TrackDataDao trackDataDao;
 
 	@Inject
-	public AlbumDetailViewModelFactory(@NonNull Application application,
-										 @NonNull AlbumInfoRepository albumInfoRepository) {
+	public AlbumDetailViewModelFactory(@NonNull Application application, @NonNull AlbumInfoRepository albumInfoRepository,
+			@NonNull TrackDataDao trackDataDao) {
 		this.application = application;
 		this.albumInfoRepository = albumInfoRepository;
+		this.trackDataDao = trackDataDao;
 	}
 
 	@Override
 	public AlbumDetailViewModel create(@NonNull Class modelClass) {
-		return new AlbumDetailViewModel(application, albumInfoRepository);
+		return new AlbumDetailViewModel(application, albumInfoRepository, trackDataDao);
 	}
 }

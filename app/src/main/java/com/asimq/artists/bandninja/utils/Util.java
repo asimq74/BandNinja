@@ -21,22 +21,8 @@ import com.asimq.artists.bandninja.json.MusicItem;
 
 public class Util {
 
-	public static String getPostalCode(Context context, double latitude, double longitude) {
-		StringBuilder result = new StringBuilder();
-		try {
-			Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-			List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
-			if (addresses.size() > 0) {
-				Address address = addresses.get(0);
-//                result.append(address.getLocality()).append("\n");
-//                result.append(address.getCountryName());
-				result.append(address.getPostalCode());
-			}
-		} catch (IOException e) {
-			Log.e("tag", e.getMessage());
-		}
-
-		return result.toString();
+	public enum Entities {
+		ARTIST, ALBUM, GENRE
 	}
 
 	public static boolean containsImageUrls(List<Image> images) {
@@ -59,6 +45,24 @@ public class Util {
 		return images.get(images.size() - 1).getText();
 	}
 
+	public static String getPostalCode(Context context, double latitude, double longitude) {
+		StringBuilder result = new StringBuilder();
+		try {
+			Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+			List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+			if (addresses.size() > 0) {
+				Address address = addresses.get(0);
+//                result.append(address.getLocality()).append("\n");
+//                result.append(address.getCountryName());
+				result.append(address.getPostalCode());
+			}
+		} catch (IOException e) {
+			Log.e("tag", e.getMessage());
+		}
+
+		return result.toString();
+	}
+
 	public static void populateHTMLForSwitcher(@NonNull TextSwitcher switcher, @NonNull String content) {
 		switcher.setCurrentText(Html.fromHtml(content
 				.replaceAll("(\n)", "<br />")
@@ -66,7 +70,6 @@ public class Util {
 		TextView tv = (TextView) switcher.getCurrentView();
 		tv.setMovementMethod(LinkMovementMethod.getInstance());
 	}
-
 
 	public static List removeAllItemsWithoutMbidOrImages(List<? extends MusicItem> musicItems) {
 		if (android.os.Build.VERSION.SDK_INT < 24) {

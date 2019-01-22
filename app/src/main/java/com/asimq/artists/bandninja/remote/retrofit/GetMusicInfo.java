@@ -21,6 +21,11 @@ public interface GetMusicInfo {
 			@Query("album") String album, @Query("api_key") String api_key,
 			@Query("format") String format);
 
+	//	/2.0/?method=album.getinfo&api_key=YOUR_API_KEY&artist=Cher&album=Believe&format=json
+	@GET("/2.0/")
+	Call<AlbumInfoWrapper> getAlbumInfo(@Query("method") String method, @Query("mbid") String mbId,
+			@Query("api_key") String api_key, @Query("format") String format);
+
 	//    /2.0/?method=artist.getinfo&artist=Cher&api_key=YOUR_API_KEY&format=json
 	@GET("/2.0/")
 	Call<ArtistWrapper> getArtistInfo(@Query("method") String method, @Query("artist") String artist,

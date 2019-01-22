@@ -15,6 +15,7 @@ import com.asimq.artists.bandninja.repositories.TagModelRepository;
 import com.asimq.artists.bandninja.repositories.TagModelRepositoryDao;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistTagDao;
+import com.asimq.artists.bandninja.room.dao.TrackDataDao;
 import com.asimq.artists.bandninja.room.database.BandItemDataSource;
 import com.asimq.artists.bandninja.room.database.BandItemDatabase;
 import com.asimq.artists.bandninja.viewmodelfactories.AlbumDetailViewModelFactory;
@@ -51,21 +52,15 @@ public class ApplicationModule {
 
 	@Provides
 	@Singleton
-	public TagModelRepository tagModelRepository() {
-		return new TagModelRepositoryDao();
-	}
-
-	@Provides
-	@Singleton
-	public BandItemRepository bandItemRepository(ArtistDataDao artistDataDao, ArtistTagDao artistTagDao) {
-		return new BandItemDataSource(artistDataDao, artistTagDao);
+	public BandItemRepository bandItemRepository(ArtistDataDao artistDataDao, ArtistTagDao artistTagDao, TrackDataDao trackDataDao) {
+		return new BandItemDataSource(artistDataDao, artistTagDao, trackDataDao);
 	}
 
 	@Provides
 	@Singleton
 	AlbumDetailViewModelFactory provideAlbumDetailViewModelFactory(
-			AlbumInfoRepository albumInfoRepository) {
-		return new AlbumDetailViewModelFactory(mApplication, albumInfoRepository);
+			AlbumInfoRepository albumInfoRepository, TrackDataDao trackDataDao) {
+		return new AlbumDetailViewModelFactory(mApplication, albumInfoRepository, trackDataDao);
 	}
 
 	@Provides
@@ -117,8 +112,20 @@ public class ApplicationModule {
 
 	@Provides
 	@Singleton
+	public TrackDataDao provideTrackDataDao(BandItemDatabase bandItemDatabase) {
+		return bandItemDatabase.trackDataDao();
+	}
+
+	@Provides
+	@Singleton
 	public SearchResultsRepository searchResultsRepository() {
 		return new SearchResultsModelRepositoryDao();
+	}
+
+	@Provides
+	@Singleton
+	public TagModelRepository tagModelRepository() {
+		return new TagModelRepositoryDao();
 	}
 
 }

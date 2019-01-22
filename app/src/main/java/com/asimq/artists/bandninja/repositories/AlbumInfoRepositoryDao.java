@@ -54,6 +54,31 @@ public class AlbumInfoRepositoryDao implements AlbumInfoRepository {
 		return albumsMutableLiveData;
 	}
 
+
+	@Override
+	public LiveData<AlbumInfo> getAlbumInfo(@NonNull String mbId) {
+		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
+		final MutableLiveData<AlbumInfo> albumMutableLiveData = new MutableLiveData<>();
+		Call<AlbumInfoWrapper> albumInfoCall = service.getAlbumInfo("album.getinfo", mbId, API_KEY, DEFAULT_FORMAT);
+		albumInfoCall.enqueue(new Callback<AlbumInfoWrapper>() {
+			@Override
+			public void onResponse(Call<AlbumInfoWrapper> call, Response<AlbumInfoWrapper> response) {
+				final AlbumInfoWrapper albumInfoWrapper = response.body();
+				if (null == albumInfoWrapper) {
+					return;
+				}
+				albumMutableLiveData.setValue(albumInfoWrapper.getAlbumInfo());
+			}
+
+			@Override
+			public void onFailure(Call<AlbumInfoWrapper> call, Throwable t) {
+				albumMutableLiveData.setValue(new AlbumInfo());
+			}
+		});
+		return albumMutableLiveData;
+	}
+
+
 	@Override
 	public LiveData<AlbumInfo> getAlbumInfo(@NonNull String artistName, @NonNull String albumName) {
 		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);

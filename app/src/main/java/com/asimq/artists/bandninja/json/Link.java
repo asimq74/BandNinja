@@ -4,11 +4,11 @@ import com.google.gson.annotations.SerializedName;
 
 public class Link {
     @SerializedName("#text")
-    private String text;
+    private String text = "";
     @SerializedName("rel")
-    private String rel;
+    private String rel = "";
     @SerializedName("href")
-    private String href;
+    private String href = "";
 
     public String getText() {
         return text;

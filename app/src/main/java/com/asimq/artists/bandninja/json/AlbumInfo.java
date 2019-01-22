@@ -1,5 +1,6 @@
 package com.asimq.artists.bandninja.json;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
@@ -7,25 +8,25 @@ import com.google.gson.annotations.SerializedName;
 public class AlbumInfo extends BaseMusicItem {
 
 	@SerializedName("artist")
-	private String artist;
+	private String artist = "";
 	@SerializedName("image")
-	private List<Image> images;
+	private List<Image> images = new ArrayList<>();
 	@SerializedName("mbid")
-	private String mbid;
+	private String mbid = "";
 	@SerializedName("name")
-	private String name;
+	private String name = "";
 	@SerializedName("playcount")
-	private String playcount;
+	private String playcount = "";
 	@SerializedName("releasedate")
-	private String releaseDate;
+	private String releaseDate = "";
 	@SerializedName("tags")
-	private TagWrapper tagWrapper;
+	private TagWrapper tagWrapper = new TagWrapper();
 	@SerializedName("tracks")
-	private TrackWrapper trackWrapper;
+	private TrackWrapper trackWrapper = new TrackWrapper();
 	@SerializedName("url")
-	private String url;
+	private String url = "";
 	@SerializedName("wiki")
-	private Wiki wiki;
+	private Wiki wiki = new Wiki();
 
 	public String getReleaseDate() {
 		return releaseDate;

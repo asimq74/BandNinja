@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 public class LinkWrapper
 {
     @SerializedName("link")
-    private Link link;
+    private Link link = new Link();
 
     public Link getLink ()
     {

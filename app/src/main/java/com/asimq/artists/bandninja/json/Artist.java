@@ -17,26 +17,26 @@ public class Artist extends BaseMusicItem implements Comparable<Artist> {
 	@SerializedName("image")
 	private List<Image> images = new ArrayList<>();
 	@SerializedName("listeners")
-	private int listeners;
+	private int listeners = 0;
 	@SerializedName("mbid")
-	private String mbid;
+	private String mbid = "";
 	@SerializedName("name")
-	private String name;
+	private String name = "";
 	@SerializedName("ontour")
-	private String ontour;
+	private String ontour = "";
 	@SerializedName("similar")
 	@Expose
-	private Similar similar;
+	private Similar similar = new Similar();
 	@SerializedName("stats")
 	@Expose
-	private Stats stats;
+	private Stats stats = new Stats();
 	@SerializedName("streamable")
-	private String streamable;
+	private String streamable = "";
 	@SerializedName("tags")
 	@Expose
-	private TagWrapper tagWrapper;
+	private TagWrapper tagWrapper = new TagWrapper();
 	@SerializedName("url")
-	private String url;
+	private String url = "";
 
 	public Artist() {
 	}

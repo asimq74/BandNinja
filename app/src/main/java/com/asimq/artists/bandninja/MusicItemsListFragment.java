@@ -1,5 +1,6 @@
 package com.asimq.artists.bandninja;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +34,7 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.asimq.artists.bandninja.asynctasks.BaseSaveArtistTask;
+import com.asimq.artists.bandninja.asynctasks.SaveTracksTask;
 import com.asimq.artists.bandninja.cards.SliderAdapter;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
 import com.asimq.artists.bandninja.json.Album;
@@ -42,14 +44,18 @@ import com.asimq.artists.bandninja.json.BaseMusicItem;
 import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.json.TagWrapper;
+import com.asimq.artists.bandninja.json.Track;
 import com.asimq.artists.bandninja.json.Wiki;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.ArtistData;
+import com.asimq.artists.bandninja.room.TrackData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistTagDao;
+import com.asimq.artists.bandninja.room.dao.TrackDataDao;
 import com.asimq.artists.bandninja.ui.Executable;
 import com.asimq.artists.bandninja.utils.DecodeBitmapTask;
 import com.asimq.artists.bandninja.utils.Util;
+import com.asimq.artists.bandninja.utils.Util.Entities;
 import com.asimq.artists.bandninja.viewmodelfactories.AlbumDetailViewModelFactory;
 import com.asimq.artists.bandninja.viewmodelfactories.SearchResultsViewModelFactory;
 import com.asimq.artists.bandninja.viewmodels.AlbumDetailViewModel;
@@ -210,6 +216,8 @@ public class MusicItemsListFragment extends Fragment {
 	ArtistDataDao artistDataDao;
 	private int artistOffset1;
 	private int artistOffset2;
+	@Inject
+	TrackDataDao trackDataDao;
 	@Inject
 	ArtistTagDao artistTagDao;
 	@Inject
@@ -451,6 +459,14 @@ public class MusicItemsListFragment extends Fragment {
 	private void populateAlbumInfo(@NonNull AlbumInfo albumInfo) {
 		Log.i(TAG, "albumInfo=" + albumInfo);
 		Log.i(TAG, "wiki=" + albumInfo.getWiki());
+//		List<TrackData> trackDatas = new ArrayList<>();
+//		for (Track track : albumInfo.getTrackWrapper().getTracks()) {
+//			TrackData trackData = new TrackData(track);
+//			trackData.updateAlbumInfo(albumInfo);
+//			trackDatas.add(trackData);
+//		}
+//		new SaveTracksTask(trackDataDao).execute(trackDatas);
+		albumDetailViewModel.saveTracks(albumInfo);
 		processAlbumInfo(albumInfo);
 	}
 
@@ -493,7 +509,7 @@ public class MusicItemsListFragment extends Fragment {
 		descriptionsSwitcher.setFactory(new TextViewFactory(R.style.DescriptionTextView, false));
 		final Wiki wiki = albumInfo.getWiki();
 		if (null != wiki) {
-			Util.populateHTMLForSwitcher(descriptionsSwitcher, wiki.getContent());
+			updateDescriptionsSwitcher(albumInfo.getMbid(), wiki.getSummary(), Entities.ALBUM);
 			clockSwitcher.removeAllViews();
 			clockSwitcher.setFactory(new TextViewFactory(R.style.ClockTextView, false));
 			clockSwitcher.setCurrentText(wiki.getPublished());
@@ -506,13 +522,15 @@ public class MusicItemsListFragment extends Fragment {
 		placeSwitcher.removeAllViews();
 		placeSwitcher.setFactory(new TextViewFactory(R.style.PlaceTextView, false));
 		placeSwitcher.setCurrentText(tagsText);
+		updateDescriptionsSwitcher(artist.getMbid(), artist.getBio().getSummary(), Entities.ARTIST);
+	}
 
+	private void updateDescriptionsSwitcher(String mbid, String text, Entities type) {
 		descriptionsSwitcher.removeAllViews();
 		descriptionsSwitcher.setInAnimation(getActivity(), android.R.anim.fade_in);
 		descriptionsSwitcher.setOutAnimation(getActivity(), android.R.anim.fade_out);
 		descriptionsSwitcher.setFactory(new TextViewFactory(R.style.DescriptionTextView, false));
-		final String summary = artist.getBio().getSummary();
-		StringBuilder abbreviatedSummaryBuilder = new StringBuilder(summary.length() > 100 ? summary.substring(0, 100) : summary);
+		StringBuilder abbreviatedSummaryBuilder = new StringBuilder(text.length() > 100 ? text.substring(0, 100) : text);
 		abbreviatedSummaryBuilder.append("\n").append("Read More...");
 		Util.populateHTMLForSwitcher(descriptionsSwitcher, abbreviatedSummaryBuilder.toString());
 		TextView tv = (TextView) descriptionsSwitcher.getCurrentView();
@@ -521,8 +539,8 @@ public class MusicItemsListFragment extends Fragment {
 				@Override
 				public void onClick(View v) {
 					Intent articleDetailIntent = new Intent(getActivity(), ArticleDetailActivity.class);
-					articleDetailIntent.putExtra(ArticleDetailActivity.MBID, artist.getMbid());
-					articleDetailIntent.putExtra(ArticleDetailActivity.ENTITY_TYPE, "ARTIST");
+					articleDetailIntent.putExtra(ArticleDetailActivity.MBID, mbid);
+					articleDetailIntent.putExtra(ArticleDetailActivity.ENTITY_TYPE, type.name());
 					startActivity(articleDetailIntent);
 				}
 			});;
