@@ -1,11 +1,8 @@
 package com.asimq.artists.bandninja.cards;
 
-import java.util.List;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.DrawableRes;
-import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -13,8 +10,6 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
 import com.asimq.artists.bandninja.R;
-import com.asimq.artists.bandninja.json.Artist;
-import com.asimq.artists.bandninja.json.Image;
 import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.utils.DecodeBitmapTask;
 import com.asimq.artists.bandninja.utils.Util;

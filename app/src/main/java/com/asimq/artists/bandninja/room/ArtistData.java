@@ -29,7 +29,7 @@ public class ArtistData {
 		this.mbid = artist.getMbid();
 		this.name = artist.getName();
 		this.image = Util.getImageUrl(artist);
-		this.bio = artist.getBio().getSummary();
+		this.bio = artist.getBio().getContent();
 	}
 
 	public String getBio() {

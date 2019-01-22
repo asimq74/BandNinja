@@ -14,10 +14,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -91,9 +89,9 @@ public class MusicItemsListFragment extends Fragment {
 
 		void onDisplayArtistList(@NonNull List<Artist> artists);
 
-		void onSearchedForArtistName(@NonNull String artistName);
-
 		void onDisplayingArtistsByTag(@NonNull String tag);
+
+		void onSearchedForArtistName(@NonNull String artistName);
 
 	}
 
@@ -434,32 +432,6 @@ public class MusicItemsListFragment extends Fragment {
 			recyclerView.setVisibility(View.VISIBLE);
 			Log.d(TAG, "loading progress ended...");
 		});
-		TabLayout tabLayout = (TabLayout) view.findViewById(R.id.tab_layout);
-		tabLayout.addTab(tabLayout.newTab().setText("Tab 1"));
-		tabLayout.addTab(tabLayout.newTab().setText("Tab 2"));
-		tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-
-		final ViewPager viewPager = view.findViewById(R.id.pager);
-		final PagerAdapter adapter = new PagerAdapter
-				(getChildFragmentManager(), tabLayout.getTabCount());
-		viewPager.setAdapter(adapter);
-		viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-		tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-			@Override
-			public void onTabSelected(TabLayout.Tab tab) {
-				viewPager.setCurrentItem(tab.getPosition());
-			}
-
-			@Override
-			public void onTabUnselected(TabLayout.Tab tab) {
-
-			}
-
-			@Override
-			public void onTabReselected(TabLayout.Tab tab) {
-
-			}
-		});
 		return view;
 	}
 
@@ -498,15 +470,15 @@ public class MusicItemsListFragment extends Fragment {
 				artist -> processArtistInfo(artist));
 	}
 
-	protected void populateArtistsByTag(@NonNull String tag) {
-		searchResultsViewModel.getTopArtistsByTag(tag).observe(this, this::populateArtists);
-	}
-
 	private void populateArtists(List<Artist> artists) {
 		blueTabLayout.setVisibility(View.GONE);
 		initRecyclerView(artists, artistInfoObservable, new OnArtistCardClickedListener(artists));
 		initMusicItemNameText(artists);
 		initSwitchers(artists, artistInfoObservable);
+	}
+
+	protected void populateArtistsByTag(@NonNull String tag) {
+		searchResultsViewModel.getTopArtistsByTag(tag).observe(this, this::populateArtists);
 	}
 
 	private void processAlbumInfo(@NonNull AlbumInfo albumInfo) {
@@ -539,9 +511,22 @@ public class MusicItemsListFragment extends Fragment {
 		descriptionsSwitcher.setInAnimation(getActivity(), android.R.anim.fade_in);
 		descriptionsSwitcher.setOutAnimation(getActivity(), android.R.anim.fade_out);
 		descriptionsSwitcher.setFactory(new TextViewFactory(R.style.DescriptionTextView, false));
-		Util.populateHTMLForSwitcher(descriptionsSwitcher, artist.getBio().getSummary());
-		Util.populateHTMLForSwitcher(descriptionsSwitcher, artist.getBio().getContent());
-		getActivity().findViewById(R.id.description_layout).setVisibility(View.GONE);
+		final String summary = artist.getBio().getSummary();
+		StringBuilder abbreviatedSummaryBuilder = new StringBuilder(summary.length() > 100 ? summary.substring(0, 100) : summary);
+		abbreviatedSummaryBuilder.append("\n").append("Read More...");
+		Util.populateHTMLForSwitcher(descriptionsSwitcher, abbreviatedSummaryBuilder.toString());
+		TextView tv = (TextView) descriptionsSwitcher.getCurrentView();
+		if (tv.getText().toString().length()>0) {
+			tv.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Intent articleDetailIntent = new Intent(getActivity(), ArticleDetailActivity.class);
+					articleDetailIntent.putExtra(ArticleDetailActivity.MBID, artist.getMbid());
+					articleDetailIntent.putExtra(ArticleDetailActivity.ENTITY_TYPE, "ARTIST");
+					startActivity(articleDetailIntent);
+				}
+			});;
+		}
 	}
 
 	private void setArtistText(String text, boolean left2right) {

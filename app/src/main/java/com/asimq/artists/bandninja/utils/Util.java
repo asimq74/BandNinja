@@ -67,6 +67,7 @@ public class Util {
 		tv.setMovementMethod(LinkMovementMethod.getInstance());
 	}
 
+
 	public static List removeAllItemsWithoutMbidOrImages(List<? extends MusicItem> musicItems) {
 		if (android.os.Build.VERSION.SDK_INT < 24) {
 			// Create an iterator from the l

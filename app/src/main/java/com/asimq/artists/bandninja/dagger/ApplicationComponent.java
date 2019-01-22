@@ -5,6 +5,7 @@ import javax.inject.Singleton;
 import android.app.Application;
 import android.content.Context;
 
+import com.asimq.artists.bandninja.ArticleDetailActivity;
 import com.asimq.artists.bandninja.MainActivity;
 import com.asimq.artists.bandninja.MainNavigationActivity;
 import com.asimq.artists.bandninja.MusicItemsListFragment;
@@ -54,4 +55,6 @@ public interface ApplicationComponent {
 	void inject(CustomMultiSelectListPreference customMultiSelectListPreference);
 
 	void inject(BandDataSyncAsyncTask bandDataSyncAsyncTask);
+
+	void inject(ArticleDetailActivity articleDetailActivity);
 }
