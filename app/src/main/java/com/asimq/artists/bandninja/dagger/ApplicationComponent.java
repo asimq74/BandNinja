@@ -6,18 +6,19 @@ import android.app.Application;
 import android.content.Context;
 
 import com.asimq.artists.bandninja.ArticleDetailActivity;
+import com.asimq.artists.bandninja.widget.BandAppWidgetProvider;
 import com.asimq.artists.bandninja.MainActivity;
 import com.asimq.artists.bandninja.MainNavigationActivity;
 import com.asimq.artists.bandninja.MusicItemsListFragment;
 import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.ResultActivity;
-import com.asimq.artists.bandninja.cards.SliderAdapter;
 import com.asimq.artists.bandninja.service.BandDataSyncAsyncTask;
 import com.asimq.artists.bandninja.service.DataSyncJobService;
 import com.asimq.artists.bandninja.ui.CustomMultiSelectListPreference;
 import com.asimq.artists.bandninja.viewmodels.AlbumDetailViewModel;
 import com.asimq.artists.bandninja.viewmodels.ArtistDetailViewModel;
 import com.asimq.artists.bandninja.viewmodels.SearchResultsViewModel;
+import com.asimq.artists.bandninja.widget.TopArtistsAppWidgetRemoteViewsFactory;
 
 import dagger.Component;
 
@@ -57,5 +58,10 @@ public interface ApplicationComponent {
 	void inject(BandDataSyncAsyncTask bandDataSyncAsyncTask);
 
 	void inject(ArticleDetailActivity articleDetailActivity);
+
+	void inject(BandAppWidgetProvider bandAppWidgetProvider);
+
+	void inject(TopArtistsAppWidgetRemoteViewsFactory topArtistsAppWidgetRemoteViewsFactory);
+
 
 }

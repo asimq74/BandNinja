@@ -24,6 +24,7 @@ import java.util.function.Predicate;
 public class Util {
 
     private static List<String> BLOCKED_TAGS = Arrays.asList("albums I own", "favorite albums");
+    public static final String PREFS_WIDGET_TITLE = "PREFS_WIDGET_TITLE";
 
     @NonNull
     public static String getTagsAsString(@NonNull List<Tag> tags) {
