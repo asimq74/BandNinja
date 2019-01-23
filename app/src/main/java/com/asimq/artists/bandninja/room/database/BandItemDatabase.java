@@ -3,14 +3,19 @@ package com.asimq.artists.bandninja.room.database;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.RoomDatabase;
 
+import com.asimq.artists.bandninja.room.AlbumData;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.ArtistTag;
+import com.asimq.artists.bandninja.room.TagData;
 import com.asimq.artists.bandninja.room.TrackData;
+import com.asimq.artists.bandninja.room.dao.AlbumDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistTagDao;
+import com.asimq.artists.bandninja.room.dao.TagDataDao;
 import com.asimq.artists.bandninja.room.dao.TrackDataDao;
 
-@Database(entities = {ArtistData.class, ArtistTag.class, TrackData.class}, version = 5, exportSchema = false)
+@Database(entities = {ArtistData.class, ArtistTag.class, TrackData.class, AlbumData.class,
+		TagData.class}, version = 7, exportSchema = false)
 public abstract class BandItemDatabase extends RoomDatabase {
 
 	public abstract ArtistDataDao artistDataDao();
@@ -18,4 +23,8 @@ public abstract class BandItemDatabase extends RoomDatabase {
 	public abstract ArtistTagDao artistTagDao();
 
 	public abstract TrackDataDao trackDataDao();
+
+	public abstract AlbumDataDao albumDataDao();
+
+	public abstract TagDataDao tagDataDao();
 }

@@ -5,13 +5,24 @@ import android.preference.MultiSelectListPreference;
 import android.util.AttributeSet;
 
 import com.asimq.artists.bandninja.BuildConfig;
+import com.asimq.artists.bandninja.MyApplication;
+import com.asimq.artists.bandninja.asynctasks.SaveTagDataTask;
+import com.asimq.artists.bandninja.dagger.ApplicationComponent;
 import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.json.TopTagsWrapper;
 import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
+import com.asimq.artists.bandninja.repositories.BandItemRepository;
+import com.asimq.artists.bandninja.room.TagData;
+import com.asimq.artists.bandninja.room.dao.TagDataDao;
+import com.asimq.artists.bandninja.viewmodelfactories.ArtistDetailViewModelFactory;
+import com.asimq.artists.bandninja.viewmodels.ArtistDetailViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+
+import javax.inject.Inject;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -23,8 +34,15 @@ public class CustomMultiSelectListPreference extends MultiSelectListPreference {
     public static final String DEFAULT_FORMAT = "json";
     final String TAG = this.getClass().getSimpleName();
 
+    @Inject
+    BandItemRepository bandItemRepository;
+    private ApplicationComponent applicationComponent;
+
     public CustomMultiSelectListPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
+        final MyApplication application = (MyApplication) context.getApplicationContext();
+        applicationComponent = application.getApplicationComponent();
+        applicationComponent.inject(this);
         final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
         final TagsContainer tagsContainer = new TagsContainer(new ArrayList<>());
         Call<TopTagsWrapper> artistInfoCall = service.getTopTags("tag.getTopTags", API_KEY, DEFAULT_FORMAT);
@@ -42,6 +60,11 @@ public class CustomMultiSelectListPreference extends MultiSelectListPreference {
                     return;
                 }
                 tagsContainer.getTags().addAll(tags);
+                List<TagData> tagDatas = new ArrayList<>();
+                for (Tag tag: tags) {
+                    tagDatas.add(new TagData(tag));
+                }
+                new SaveTagDataTask(bandItemRepository).executeOnExecutor(Executors.newSingleThreadExecutor(), tagDatas);
                 List<CharSequence> tagCharSequences = new ArrayList<>();
                 for (Tag tag : tags) {
                     tagCharSequences.add(tag.getName());

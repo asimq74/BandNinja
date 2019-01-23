@@ -3,22 +3,15 @@ package com.asimq.artists.bandninja.cards;
 import java.util.List;
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.R;
-import com.asimq.artists.bandninja.asynctasks.BaseSaveArtistTask;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
-import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.BaseMusicItem;
 import com.asimq.artists.bandninja.json.MusicItem;
-import com.asimq.artists.bandninja.json.Tag;
-import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 
 import javax.inject.Inject;

@@ -57,4 +57,5 @@ public interface ApplicationComponent {
 	void inject(BandDataSyncAsyncTask bandDataSyncAsyncTask);
 
 	void inject(ArticleDetailActivity articleDetailActivity);
+
 }

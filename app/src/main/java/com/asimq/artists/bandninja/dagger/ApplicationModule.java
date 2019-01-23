@@ -13,8 +13,10 @@ import com.asimq.artists.bandninja.repositories.SearchResultsModelRepositoryDao;
 import com.asimq.artists.bandninja.repositories.SearchResultsRepository;
 import com.asimq.artists.bandninja.repositories.TagModelRepository;
 import com.asimq.artists.bandninja.repositories.TagModelRepositoryDao;
+import com.asimq.artists.bandninja.room.dao.AlbumDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistTagDao;
+import com.asimq.artists.bandninja.room.dao.TagDataDao;
 import com.asimq.artists.bandninja.room.dao.TrackDataDao;
 import com.asimq.artists.bandninja.room.database.BandItemDataSource;
 import com.asimq.artists.bandninja.room.database.BandItemDatabase;
@@ -52,15 +54,20 @@ public class ApplicationModule {
 
 	@Provides
 	@Singleton
-	public BandItemRepository bandItemRepository(ArtistDataDao artistDataDao, ArtistTagDao artistTagDao, TrackDataDao trackDataDao) {
-		return new BandItemDataSource(artistDataDao, artistTagDao, trackDataDao);
+	public BandItemRepository bandItemRepository(ArtistDataDao artistDataDao,
+												 ArtistTagDao artistTagDao,
+												 TrackDataDao trackDataDao,
+												 AlbumDataDao albumDataDao,
+												 TagDataDao tagDataDao) {
+		return new BandItemDataSource(artistDataDao, artistTagDao, trackDataDao, albumDataDao, tagDataDao);
 	}
 
 	@Provides
 	@Singleton
 	AlbumDetailViewModelFactory provideAlbumDetailViewModelFactory(
-			AlbumInfoRepository albumInfoRepository, TrackDataDao trackDataDao) {
-		return new AlbumDetailViewModelFactory(mApplication, albumInfoRepository, trackDataDao);
+			AlbumInfoRepository albumInfoRepository, TrackDataDao trackDataDao,
+			AlbumDataDao albumDataDao) {
+		return new AlbumDetailViewModelFactory(mApplication, albumInfoRepository, trackDataDao, albumDataDao);
 	}
 
 	@Provides
@@ -76,8 +83,20 @@ public class ApplicationModule {
 
 	@Provides
 	@Singleton
+	public AlbumDataDao provideAlbumDataDao(BandItemDatabase bandItemDatabase) {
+		return bandItemDatabase.albumDataDao();
+	}
+
+	@Provides
+	@Singleton
 	ArtistDetailViewModelFactory provideArtistDetailViewModelFactory(BandItemRepository bandItemRepository) {
 		return new ArtistDetailViewModelFactory(mApplication, bandItemRepository);
+	}
+
+	@Provides
+	@Singleton
+	public TagDataDao provideTagDataDao(BandItemDatabase bandItemDatabase) {
+		return bandItemDatabase.tagDataDao();
 	}
 
 	@Provides
