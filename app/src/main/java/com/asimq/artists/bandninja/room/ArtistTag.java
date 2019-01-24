@@ -27,9 +27,9 @@ public class ArtistTag {
     @PrimaryKey
     @NonNull
     @ColumnInfo(name = "name")
-    private String name;
+    private String name = "";
     @ColumnInfo(name = "url")
-    private String url;
+    private String url = "";
     @ColumnInfo(name = "artistDataMbId")
     public final String artistDataMbId;
 

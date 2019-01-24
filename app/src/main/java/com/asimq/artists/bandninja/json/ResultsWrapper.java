@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 public class ResultsWrapper
 {
     @SerializedName("results")
-    private Result result;
+    private Result result = new Result();
 
     public Result getResult ()
     {

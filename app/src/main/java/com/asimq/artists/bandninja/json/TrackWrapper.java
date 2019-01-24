@@ -9,7 +9,7 @@ public class TrackWrapper {
 
     @SerializedName("track")
     @Expose
-    private List<Track> tracks = new ArrayList<Track>();
+    private List<Track> tracks = new ArrayList<>();
 
     public List<Track> getTracks() {
         return tracks;

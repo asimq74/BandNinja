@@ -1,5 +1,6 @@
 package com.asimq.artists.bandninja.json;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
@@ -9,7 +10,7 @@ public class TopArtists
 {
     @SerializedName("artist")
     @Expose
-    private List<Artist> artists = null;
+    private List<Artist> artists = new ArrayList<>();
 
 
     public List<Artist> getArtists() {

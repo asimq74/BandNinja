@@ -7,7 +7,7 @@ public class TopArtistsByTagWrapper
 {
     @SerializedName("topartists")
     @Expose
-    private TopArtists topArtists;
+    private TopArtists topArtists = new TopArtists();
 
     public TopArtists getTopArtists() {
         return topArtists;

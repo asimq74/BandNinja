@@ -2,11 +2,12 @@ package com.asimq.artists.bandninja.json;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TopAlbums {
     @SerializedName("album")
-    private List<Album> albums;
+    private List<Album> albums = new ArrayList<>();
 
     public List<Album> getAlbums()
     {

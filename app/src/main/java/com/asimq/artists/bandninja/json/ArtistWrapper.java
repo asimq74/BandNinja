@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class ArtistWrapper {
     @SerializedName("artist")
-    private Artist artist;
+    private Artist artist = new Artist();
 
     public Artist getArtist ()
     {

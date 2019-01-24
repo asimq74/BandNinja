@@ -4,9 +4,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class Image {
     @SerializedName("#text")
-    private String text;
+    private String text = "";
     @SerializedName("size")
-    private String size;
+    private String size = "";
 
     public String getText() {
         return text;

@@ -4,9 +4,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class Stats {
     @SerializedName("listeners")
-    private String listeners;
+    private String listeners = "";
     @SerializedName("playcount")
-    private String playcount;
+    private String playcount = "";
 
     public String getListeners() {
         return listeners;

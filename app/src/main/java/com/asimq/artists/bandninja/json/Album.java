@@ -1,5 +1,6 @@
 package com.asimq.artists.bandninja.json;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.support.annotation.NonNull;
@@ -9,23 +10,23 @@ import com.google.gson.annotations.SerializedName;
 public class Album extends BaseMusicItem implements Comparable<Album> {
 
 	@SerializedName("artist")
-	private Artist artist;
+	private Artist artist = new Artist();
 	@SerializedName("image")
-	private List<Image> images;
+	private List<Image> images = new ArrayList<>();
 	@SerializedName("mbid")
 	private String mbid = "";
 	@SerializedName("name")
-	private String name;
+	private String name = "";
 	@SerializedName("playcount")
 	private int playcount;
 	@SerializedName("tags")
-	private TagWrapper tagWrapper;
+	private TagWrapper tagWrapper = new TagWrapper();
 	@SerializedName("tracks")
-	private TrackWrapper trackWrapper;
+	private TrackWrapper trackWrapper = new TrackWrapper();
 	@SerializedName("url")
-	private String url;
+	private String url = "";
 	@SerializedName("wiki")
-	private Wiki wiki;
+	private Wiki wiki = new Wiki();
 
 	@Override
 	public int compareTo(@NonNull Album album) {

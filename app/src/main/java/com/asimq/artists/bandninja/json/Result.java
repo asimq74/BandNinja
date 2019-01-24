@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 public class Result
 {
     @SerializedName("artistmatches")
-    private ArtistMatches artistmatches;
+    private ArtistMatches artistmatches = new ArtistMatches();
 
     public ArtistMatches getArtistmatches ()
     {

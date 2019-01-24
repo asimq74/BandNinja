@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class AlbumInfoWrapper {
     @SerializedName("album")
-    private AlbumInfo albumInfo;
+    private AlbumInfo albumInfo = new AlbumInfo();
 
     public AlbumInfo getAlbumInfo() {
         return albumInfo;
