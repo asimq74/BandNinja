@@ -1,7 +1,9 @@
 package com.asimq.artists.bandninja;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
@@ -14,6 +16,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -25,7 +28,14 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListPopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -207,10 +217,58 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 
 		setSupportActionBar(toolbar);
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+		toolbar.setNavigationOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Toast.makeText(getApplicationContext(),"your icon was clicked",Toast.LENGTH_SHORT).show();
+				listPopupWindow = new ListPopupWindow(
+						MainActivity.this);
+				final String[] popupMenuItems = getPopupMenuItems();
+				listPopupWindow.setAdapter(new ArrayAdapter<>(
+						MainActivity.this,
+						R.layout.popup_menu_list_item, popupMenuItems));
+				listPopupWindow.setAnchorView(toolbar);
+				listPopupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
+				listPopupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+
+				listPopupWindow.setModal(true);
+				listPopupWindow.setOnItemClickListener(new OnItemClickListener() {
+					@Override
+					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+						Toast.makeText(getApplicationContext(), popupMenuItems[position] + " was clicked",Toast.LENGTH_SHORT).show();
+					}
+				});
+				listPopupWindow.show();
+			}
+
+		});
+
 		loadAd();
 		setUpSearchByArtistView();
 		considerDisplayingArtistsFromStorage();
 		onDisplayingArtistsByTag("alternative");
+	}
+
+	ListPopupWindow listPopupWindow;
+
+	private String[] getPopupMenuItems() {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		Set<String> favoriteGenres = prefs.getStringSet(getString(R.string.favorite_genre_key), new HashSet<>());
+		List<String> popupMenuItems = new ArrayList<>();
+		popupMenuItems.add("Top Artists");
+		if (favoriteGenres.isEmpty()) {
+			popupMenuItems.add("Top Artists By Genre");
+		}
+		popupMenuItems.add("Top Albums");
+		for (String genre : favoriteGenres) {
+			if (!genre.isEmpty()) {
+				String capitalGenre = genre.substring(0, 1).toUpperCase() + genre.substring(1);
+				popupMenuItems.add(String.format("Top Artists in %s", capitalGenre));
+			}
+		}
+		String[] items = new String[popupMenuItems.size()];
+		return popupMenuItems.toArray(items);
 	}
 
 	@Override

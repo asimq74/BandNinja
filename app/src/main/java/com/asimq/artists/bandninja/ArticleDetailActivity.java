@@ -24,6 +24,7 @@ import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -136,6 +137,12 @@ public class ArticleDetailActivity extends AppCompatActivity
         appBarLayout.addOnOffsetChangedListener(this);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
         if (savedInstanceState == null) {
             if (getIntent() != null && getIntent().getExtras() != null) {
                 mbId = getIntent().getStringExtra(MBID);

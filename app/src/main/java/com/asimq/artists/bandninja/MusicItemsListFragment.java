@@ -72,7 +72,6 @@ public class MusicItemsListFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     public final CardSnapHelper CARD_SNAP_HELPER = new CardSnapHelper();
     final String TAG = this.getClass().getSimpleName();
-    private final int[][] dotCoords = new int[5][2];
     @Inject
     AlbumDetailViewModelFactory albumDetailViewModelFactory;
     @Inject
@@ -339,8 +338,7 @@ public class MusicItemsListFragment extends Fragment {
     private void populateAlbums(List<Album> albums) {
         if (albums.isEmpty()) return;
         blueTabLayout.setVisibility(View.GONE);
-        initRecyclerView(albums, albumInfoObservable, view -> {
-        });
+        initRecyclerView(albums, albumInfoObservable, new OnAlbumCardClickedListener(albums));
         initMusicItemNameText(albums);
         initSwitchers(albums, albumInfoObservable);
     }
@@ -489,6 +487,47 @@ public class MusicItemsListFragment extends Fragment {
             return imageView;
         }
     }
+
+
+    private class OnAlbumCardClickedListener implements View.OnClickListener {
+
+        private final List<Album> albums;
+
+        public OnAlbumCardClickedListener(List<Album> albums) {
+            this.albums = albums;
+        }
+
+        @Override
+        public void onClick(View view) {
+            final CardSliderLayoutManager lm = (CardSliderLayoutManager) recyclerView.getLayoutManager();
+
+            if (lm.isSmoothScrolling()) {
+                return;
+            }
+
+            final int activeCardPosition = lm.getActiveCardPosition();
+            if (activeCardPosition == RecyclerView.NO_POSITION) {
+                return;
+            }
+
+            final int clickedPosition = recyclerView.getChildAdapterPosition(view);
+            if (clickedPosition == activeCardPosition) {
+                Album album = albums.get(clickedPosition);
+                Intent articleDetailIntent = new Intent(getActivity(), ArticleDetailActivity.class);
+                articleDetailIntent.putExtra(ArticleDetailActivity.MBID, album.getMbid());
+                articleDetailIntent.putExtra(ArticleDetailActivity.ENTITY_TYPE, Entities.ALBUM.name());
+                final CardView cardView = (CardView) view;
+                final View sharedView = cardView.getChildAt(cardView.getChildCount() - 1);
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                    Objects.requireNonNull(getActivity()), sharedView, DetailsActivity.EXTRA_IMAGE);
+                startActivity(articleDetailIntent, options.toBundle());
+            } else if (clickedPosition > activeCardPosition) {
+                recyclerView.smoothScrollToPosition(clickedPosition);
+            }
+        }
+    }
+
+
 
     private class OnArtistCardClickedListener implements View.OnClickListener {
 
