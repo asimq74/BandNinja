@@ -59,8 +59,6 @@ public interface ApplicationComponent {
 
 	void inject(ArticleDetailActivity articleDetailActivity);
 
-	void inject(BandAppWidgetProvider bandAppWidgetProvider);
-
 	void inject(TopArtistsAppWidgetRemoteViewsFactory topArtistsAppWidgetRemoteViewsFactory);
 
 

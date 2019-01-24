@@ -32,6 +32,7 @@
     <dimen name="bandninja_widget_minResizeHeight">300dp</dimen>
     <dimen name="bandninja_widget_minResizeWidth">200dp</dimen>
     <dimen name="bandninja_widget_icon_dimension">100dp</dimen>
+    <dimen name="bandninja_widget_list_item_minHeight">52dp</dimen>
 
     <!--
 Refer to App Widget Documentation for margin information

@@ -27,7 +27,7 @@ public class BandAppWidgetProvider extends AppWidgetProvider {
 	static final String TAG = BandAppWidgetProvider.class.getSimpleName();
 
 	public static void handleActionViewArtists(@NonNull final Context context) {
-		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context.getApplicationContext());
 		int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, BandAppWidgetProvider.class));
 		appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widgetListView);
 		appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.titleTextView);
@@ -77,17 +77,6 @@ public class BandAppWidgetProvider extends AppWidgetProvider {
 
 	@Override
 	public void onDisabled(Context context) {
-		super.onEnabled(context);
-		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-		Intent intent = new Intent(context, AlarmManagerBroadcastReceiver.class);
-		PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, 0);
-		//After after 3 seconds
-		am.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
-				10000, pi);
-	}
-
-	@Override
-	public void onEnabled(Context context) {
 		Toast.makeText(context, "onDisabled():last widget instance removed", Toast.LENGTH_SHORT).show();
 		Intent intent = new Intent(context, AlarmManagerBroadcastReceiver.class);
 		PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
@@ -97,19 +86,28 @@ public class BandAppWidgetProvider extends AppWidgetProvider {
 	}
 
 	@Override
+	public void onEnabled(Context context) {
+		super.onEnabled(context);
+		Toast.makeText(context, "onEnabled():attempting to get widget", Toast.LENGTH_SHORT).show();
+		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		Intent intent = new Intent(context, AlarmManagerBroadcastReceiver.class);
+		PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, 0);
+		//After after 3 seconds
+		am.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+				10000, pi);
+	}
+
+	@Override
 	public void onReceive(final Context context, Intent intent) {
 		final String action = intent.getAction();
 		if (action.equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
-			handleActionViewArtists(context);
+			handleActionViewArtists(context.getApplicationContext());
 		}
 		super.onReceive(context, intent);
 	}
 
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-		final MyApplication application = (MyApplication) context.getApplicationContext();
-		(application).getApplicationComponent().inject(BandAppWidgetProvider.this);
-
 		// There may be multiple widgets active, so update all of them
 		for (int appWidgetId : appWidgetIds) {
 			updateAppWidget(context, appWidgetManager, appWidgetId);

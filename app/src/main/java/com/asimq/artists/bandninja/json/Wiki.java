@@ -7,13 +7,13 @@ public class Wiki {
 
     @SerializedName("published")
     @Expose
-    private String published;
+    private String published = "";
     @SerializedName("summary")
     @Expose
-    private String summary;
+    private String summary = "";
     @SerializedName("content")
     @Expose
-    private String content;
+    private String content = "";
 
     public String getPublished() {
         return published;
