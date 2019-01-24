@@ -21,8 +21,6 @@ public class SliderAdapter<T extends BaseMusicItem> extends RecyclerView.Adapter
 	private final Context context;
 	private final View.OnClickListener listener;
 	private final List<T> musicItems;
-	@Inject
-	ArtistDataDao artistDataDao;
 
 	public SliderAdapter(ApplicationComponent applicationComponent, List<T> musicItems,
 						 View.OnClickListener listener) {

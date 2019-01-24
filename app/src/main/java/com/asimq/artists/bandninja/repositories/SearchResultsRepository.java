@@ -6,6 +6,9 @@ import android.arch.lifecycle.LiveData;
 import android.support.annotation.NonNull;
 
 import com.asimq.artists.bandninja.json.Artist;
+import com.asimq.artists.bandninja.json.ArtistsWrapper;
+
+import retrofit2.Call;
 
 public interface SearchResultsRepository {
 
@@ -16,4 +19,6 @@ public interface SearchResultsRepository {
 	LiveData<Boolean> getArtistsRefreshingMutableLiveData();
 
 	LiveData<List<Artist>> getTopArtistsByTag(@NonNull String tag);
+
+	LiveData<List<Artist>> getTopArtists();
 }

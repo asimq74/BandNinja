@@ -140,6 +140,14 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="@dimen/left_offset"/>
 
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/tracksRecyclerView"
+                android:visibility="gone"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="@dimen/left_offset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
         </FrameLayout>
 
     </RelativeLayout>

@@ -81,20 +81,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <com.google.android.gms.ads.AdView
-                android:id="@+id/ad_view"
-                android:padding="@dimen/list_side_margin"
-                android:layout_margin="@dimen/list_side_margin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                ads:adSize="BANNER"
-                ads:adUnitId="@string/banner_ad_unit_id" />
-
             <fragment
                 android:id="@+id/musicItemsListFragment"
                 class="com.asimq.artists.bandninja.MusicItemsListFragment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+
+                <com.google.android.gms.ads.AdView
+                    android:id="@+id/ad_view"
+                    android:padding="@dimen/list_side_margin"
+                    android:layout_margin="@dimen/list_side_margin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    ads:adSize="BANNER"
+                    ads:adUnitId="@string/banner_ad_unit_id" />
+
+            </LinearLayout>
 
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
@@ -103,7 +107,8 @@
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
+        android:layout_gravity="bottom|end"
         app:srcCompat="@android:drawable/ic_dialog_email" />
+
 </android.support.design.widget.CoordinatorLayout>

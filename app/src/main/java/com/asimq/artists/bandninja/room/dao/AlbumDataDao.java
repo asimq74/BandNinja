@@ -20,6 +20,10 @@ public interface AlbumDataDao {
 	@NonNull
 	List<AlbumData> fetchAlbumDatas(@NonNull String mbid);
 
+	@Query("SELECT * from albums limit 10")
+	@NonNull
+	LiveData<List<AlbumData>> fetchLiveAlbumDatas();
+
 	@Query("SELECT * from albums where mbid = :mbid")
 	@NonNull
 	LiveData<List<AlbumData>> fetchLiveAlbumDatas(@NonNull String mbid);

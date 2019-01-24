@@ -120,6 +120,7 @@ public class DetailsActivity extends AppCompatActivity implements OnDetailsInter
 		onDisplayAlbumsByArtist(itemTitle);
 	}
 
+
 	@Override
 	public void onDisplayAlbumsByArtist(@NonNull String artistName) {
 		MusicItemsListFragment musicItemsListFragment = (MusicItemsListFragment)

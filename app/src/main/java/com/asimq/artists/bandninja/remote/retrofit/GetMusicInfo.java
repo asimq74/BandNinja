@@ -1,7 +1,10 @@
 package com.asimq.artists.bandninja.remote.retrofit;
 
+import android.provider.MediaStore.Audio.Artists;
+
 import com.asimq.artists.bandninja.json.AlbumInfoWrapper;
 import com.asimq.artists.bandninja.json.ArtistWrapper;
+import com.asimq.artists.bandninja.json.ArtistsWrapper;
 import com.asimq.artists.bandninja.json.ResultsWrapper;
 import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.json.TagWrapper;
@@ -35,6 +38,11 @@ public interface GetMusicInfo {
 	@GET("/2.0/")
 	Call<ResultsWrapper> getArtists(@Query("method") String method, @Query("artist") String artist,
 			@Query("api_key") String api_key, @Query("format") String format, @Query("limit") int limit);
+
+	//	/2.0/?method=artist.search&artist=cher&api_key=YOUR_API_KEY&format=json
+	@GET("/2.0/")
+	Call<ArtistsWrapper> getTopArtists(@Query("method") String method, @Query("api_key") String api_key,
+			@Query("format") String format, @Query("limit") int limit);
 
 	@GET("/2.0/")
 	Call<Tag[]> getTagByArtistId(@Query("method") String method, @Query("mbid") String mbid,

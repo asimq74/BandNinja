@@ -58,4 +58,9 @@ public class SearchResultsViewModel extends AndroidViewModel {
 		mLiveArtists = searchResultsRepository.getTopArtistsByTag(tag);
 		return mLiveArtists;
 	}
+
+	public LiveData<List<Artist>> getTopArtists() {
+		mLiveArtists = searchResultsRepository.getTopArtists();
+		return mLiveArtists;
+	}
 }

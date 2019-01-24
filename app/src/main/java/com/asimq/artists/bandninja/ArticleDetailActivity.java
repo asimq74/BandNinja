@@ -62,6 +62,8 @@ public class ArticleDetailActivity extends AppCompatActivity
 
     public static final String ENTITY_TYPE = "ENTITY_TYPE";
     public static final String MBID = "MBID";
+    public static final String ARTIST = "ARTIST";
+    public static final String ALBUM = "ALBUM";
     private final String TAG = this.getClass().getSimpleName();
     @BindView(R.id.app_bar_layout)
     AppBarLayout appBarLayout;
@@ -89,9 +91,10 @@ public class ArticleDetailActivity extends AppCompatActivity
     private String entityType = "ARTIST";
     ;
     private ArtistData globalArtistData = new ArtistData();
-    private AlbumInfo globalAlbumInfo = new AlbumInfo();
     private boolean isHideToolbarView = false;
     private String mbId = "";
+    private String artistName = "";
+    private String albumName = "";
     private String publishedDate = "";
     private SnackBarListener snackBarListener = new SnackBarListener();
     private AlbumDetailViewModel albumDetailViewModel;
@@ -147,10 +150,14 @@ public class ArticleDetailActivity extends AppCompatActivity
             if (getIntent() != null && getIntent().getExtras() != null) {
                 mbId = getIntent().getStringExtra(MBID);
                 entityType = getIntent().getStringExtra(ENTITY_TYPE);
+                artistName = getIntent().getStringExtra(ARTIST);
+                albumName = getIntent().getStringExtra(ALBUM);
             }
         } else {
             mbId = savedInstanceState.getString(MBID);
             entityType = savedInstanceState.getString(ENTITY_TYPE);
+            artistName = savedInstanceState.getString(ARTIST);
+            albumName = getIntent().getStringExtra(ALBUM);
         }
     }
 
@@ -181,6 +188,8 @@ public class ArticleDetailActivity extends AppCompatActivity
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(MBID, mbId);
         outState.putString(ENTITY_TYPE, entityType);
+        outState.putString(ARTIST, artistName);
+        outState.putString(ALBUM, albumName);
         super.onSaveInstanceState(outState);
     }
 
@@ -194,7 +203,11 @@ public class ArticleDetailActivity extends AppCompatActivity
         if (Entities.ARTIST.name().equals(entityType)) {
             artistDetailViewModel.getArtistDetail(mbId).observe(this, artistData -> populateInitialView(artistData));
         } else if (Entities.ALBUM.name().equals(entityType)) {
-            albumDetailViewModel.getAlbumInfo(mbId).observe(this, albumInfo -> populateInitialView(albumInfo));
+            if (mbId.isEmpty()) {
+                albumDetailViewModel.getAlbumInfo(artistName, albumName).observe(this, albumInfo -> populateInitialView(albumInfo));
+            } else {
+                albumDetailViewModel.getAlbumInfo(mbId).observe(this, albumInfo -> populateInitialView(albumInfo));
+            }
         }
     }
 
@@ -245,11 +258,11 @@ public class ArticleDetailActivity extends AppCompatActivity
     }
 
     private void populateInitialView(@NonNull AlbumInfo albumInfo) {
-        globalAlbumInfo = albumInfo;
         toolbarHeaderView.bindTo(albumInfo.getName(), albumInfo.getArtist(), albumInfo.getReleaseDate());
         floatHeaderView.bindTo(albumInfo.getName(), albumInfo.getArtist(), albumInfo.getReleaseDate());
         final ImageView photoView = findViewById(R.id.photo);
         final String photoUrl = Util.getImageUrl(albumInfo);
+        if (photoUrl.isEmpty()) return;
         Picasso.with(ArticleDetailActivity.this).load(photoUrl).into(photoView, new Callback() {
             @Override
             public void onError() {
@@ -282,7 +295,7 @@ public class ArticleDetailActivity extends AppCompatActivity
         adapter.setHasStableIds(true);
         mRecyclerView.setAdapter(adapter);
         StaggeredGridLayoutManager sglm =
-                new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
+            new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(sglm);
     }
 

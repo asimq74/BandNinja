@@ -16,6 +16,13 @@
     <string name="logoDescription">Application Logo</string>
     <string name="band_widget">Band Ninja Widget</string>
 
+    <string name="readMore">Read More...</string>
+    <string name="summaryUnavailable">Summary Unavailable</string>
+
+    <string name="topArtists">Top Artists</string>
+    <string name="topArtistsByGenre">Top Artists By Genre</string>
+    <string name="topAlbums">Top Albums</string>
+
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.support.annotation.NonNull;
 
+import com.asimq.artists.bandninja.room.AlbumData;
 import com.google.gson.annotations.SerializedName;
 
 public class Album extends BaseMusicItem implements Comparable<Album> {
@@ -27,6 +28,21 @@ public class Album extends BaseMusicItem implements Comparable<Album> {
 	private String url = "";
 	@SerializedName("wiki")
 	private Wiki wiki = new Wiki();
+
+	public Album() {
+	}
+
+	public Album(@NonNull AlbumData albumData) {
+		this.mbid = albumData.getMbid();
+		this.name = albumData.getName();
+		this.artist.setName(albumData.getArtist());
+		Image image = new Image();
+		image.setText(albumData.getImage());
+		this.images.add(image);
+		this.url = albumData.getUrl();
+		this.wiki.setContent(albumData.getWiki());
+		this.wiki.setSummary(albumData.getSummary());
+	}
 
 	@Override
 	public int compareTo(@NonNull Album album) {

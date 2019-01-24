@@ -12,6 +12,7 @@ import android.util.Log;
 import com.asimq.artists.bandninja.BuildConfig;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.ArtistWrapper;
+import com.asimq.artists.bandninja.json.ArtistsWrapper;
 import com.asimq.artists.bandninja.json.ResultsWrapper;
 import com.asimq.artists.bandninja.json.TopArtistsByTagWrapper;
 import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;
@@ -31,6 +32,37 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 	final String TAG = this.getClass().getSimpleName();
 
 	private MutableLiveData<Boolean> artistsRefreshingMutableLiveData = new MutableLiveData<>();
+
+	@Override
+	public LiveData<List<Artist>> getTopArtists() {
+		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
+		final MutableLiveData<List<Artist>> artistMutableLiveData = new MutableLiveData<>();
+		Call<ArtistsWrapper> topArtistsCall = service.getTopArtists("chart.gettopartists", API_KEY, DEFAULT_FORMAT,
+				SEARCH_RESULTS_LIMIT);
+		topArtistsCall.enqueue(new Callback<ArtistsWrapper>() {
+			@Override
+			public void onResponse(Call<ArtistsWrapper> call, Response<ArtistsWrapper> response) {
+				final ArtistsWrapper artistsWrapper = response.body();
+				if (artistsWrapper == null) {
+					return;
+				}
+				List<Artist> artists = artistsWrapper.getTopArtists().getArtists();
+				if (null == artists) {
+					artistMutableLiveData.setValue(new ArrayList<>());
+					return;
+				}
+				artists = Util.removeAllItemsWithoutMbidOrImages(artists);
+				Collections.sort(artists);
+				artistMutableLiveData.setValue(artists);
+			}
+
+			@Override
+			public void onFailure(Call<ArtistsWrapper> call, Throwable t) {
+				artistMutableLiveData.setValue(new ArrayList<>());
+			}
+		});
+		return artistMutableLiveData;
+	}
 
 	@Override
 	public LiveData<List<Artist>> getTopArtistsByTag(@NonNull String tag) {
