@@ -337,6 +337,7 @@ public class MusicItemsListFragment extends Fragment {
     }
 
     private void populateAlbums(List<Album> albums) {
+        if (albums.isEmpty()) return;
         blueTabLayout.setVisibility(View.GONE);
         initRecyclerView(albums, albumInfoObservable, view -> {
         });
@@ -350,7 +351,8 @@ public class MusicItemsListFragment extends Fragment {
                 artist -> processArtistInfo(artist));
     }
 
-    private void populateArtists(List<Artist> artists) {
+    private void populateArtists(@NonNull List<Artist> artists) {
+        if (artists.isEmpty()) return;
         blueTabLayout.setVisibility(View.GONE);
         initRecyclerView(artists, artistInfoObservable, new OnArtistCardClickedListener(artists));
         initMusicItemNameText(artists);
