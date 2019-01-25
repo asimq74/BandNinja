@@ -26,6 +26,14 @@ public interface ArtistDataDao {
 	@NonNull
 	LiveData<ArtistData> fetchLiveArtistDataById(@NonNull String mbid);
 
+	@Query("SELECT * from artists where name = :name")
+	@NonNull
+	LiveData<ArtistData> fetchLiveArtistDataByName(@NonNull String name);
+
+	@Query("SELECT * from artists where name = :name")
+	@NonNull
+	ArtistData fetchArtistDataByName(@NonNull String name);
+
 	@Query("SELECT * from artists where mbid = :mbid")
 	@NonNull
 	ArtistData fetchArtistDataById(@NonNull String mbid);

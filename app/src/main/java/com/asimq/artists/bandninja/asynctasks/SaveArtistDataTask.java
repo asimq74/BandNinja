@@ -20,7 +20,7 @@ public class SaveArtistDataTask extends AsyncTask<ArtistData, Void, ArtistData> 
 	@Override
 	protected ArtistData doInBackground(ArtistData... params) {
 		final ArtistData data = params[0];
-		if (null == data.getMbid()) {
+		if (null == data.getMbid() && null == data.getName()) {
 			return new ArtistData();
 		}
 		repository.saveArtist(data);

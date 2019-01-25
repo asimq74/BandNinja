@@ -17,7 +17,8 @@
     <string name="artistOrAlbumImageDescription">The artist or album image will be placed here</string>
     <string name="searchIconImageDescription">Click this image to search</string>
     <string name="closeImageDescription">Click this image to clear the search box</string>
-
+    <string name="updateDataServiceFailedCheckConnection">Update Data Service failed, please check Internet connection</string>
+    <string name="updateDataServiceSuccessful">Update Data Service was successful</string>
     <string name="informationUnavailable">Information Unavailable at this time</string>
     <string name="locationServicesRequireGooglePlay">Please Install Google Play Services</string>
     <string name="locationServicesRequireInternet">Please Check your Internet Connection</string>

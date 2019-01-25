@@ -2,25 +2,28 @@ package com.asimq.artists.bandninja.room;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.utils.Util;
 
-@Entity(tableName = "artists")
+@Entity(tableName = "artists", primaryKeys = {"name", "mbid"})
 public class ArtistData {
 
 	@ColumnInfo(name = "bio")
 	private String bio = "";
 	@ColumnInfo(name = "image")
 	private String image = "";
+	@ColumnInfo(name = "listeners")
+	private int listeners = 0;
 	@NonNull
-	@PrimaryKey
 	@ColumnInfo(name = "mbid")
 	private String mbid = "";
+	@NonNull
 	@ColumnInfo(name = "name")
 	private String name = "";
+	@ColumnInfo(name = "tagsText")
+	private String tagsText = "";
 
 	public ArtistData() {
 	}
@@ -30,6 +33,8 @@ public class ArtistData {
 		this.name = artist.getName();
 		this.image = Util.getImageUrl(artist);
 		this.bio = artist.getBio().getContent();
+		this.tagsText = Util.getTagsAsString(artist.getTagWrapper().getTags());
+		this.listeners = artist.getListeners();
 	}
 
 	public String getBio() {
@@ -38,6 +43,10 @@ public class ArtistData {
 
 	public String getImage() {
 		return image;
+	}
+
+	public int getListeners() {
+		return listeners;
 	}
 
 	@NonNull
@@ -49,12 +58,20 @@ public class ArtistData {
 		return name;
 	}
 
+	public String getTagsText() {
+		return tagsText;
+	}
+
 	public void setBio(String bio) {
 		this.bio = bio;
 	}
 
 	public void setImage(String image) {
 		this.image = image;
+	}
+
+	public void setListeners(int listeners) {
+		this.listeners = listeners;
 	}
 
 	public void setMbid(@NonNull String mbid) {
@@ -65,12 +82,18 @@ public class ArtistData {
 		this.name = name;
 	}
 
+	public void setTagsText(String tagsText) {
+		this.tagsText = tagsText;
+	}
+
 	@Override
 	public String toString() {
 		return "ArtistData {" +
 				"mbid='" + mbid + '\'' +
 				", name='" + name + '\'' +
 				", images=" + image +
+				", tagsText=" + tagsText +
+				", listeners=" + listeners +
 				", bio=" + bio +
 				'}';
 	}

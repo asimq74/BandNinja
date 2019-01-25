@@ -7,6 +7,7 @@ import com.asimq.artists.bandninja.ArticleDetailActivity;
 import com.asimq.artists.bandninja.MainActivity;
 import com.asimq.artists.bandninja.MusicItemsListFragment;
 import com.asimq.artists.bandninja.MyApplication;
+import com.asimq.artists.bandninja.repositories.SearchResultsModelRepositoryDao;
 import com.asimq.artists.bandninja.service.BandDataSyncAsyncTask;
 import com.asimq.artists.bandninja.service.DataSyncJobService;
 import com.asimq.artists.bandninja.ui.CustomMultiSelectListPreference;
@@ -53,6 +54,8 @@ public interface ApplicationComponent {
     void inject(ArticleDetailActivity articleDetailActivity);
 
     void inject(TopArtistsAppWidgetRemoteViewsFactory topArtistsAppWidgetRemoteViewsFactory);
+
+    void inject(SearchResultsModelRepositoryDao searchResultsModelRepositoryDao);
 
 
 }

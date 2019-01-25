@@ -26,4 +26,7 @@ public interface TagDataDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertMultipleTagDatas(@NonNull List<TagData> tagDatas);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertTagData(@NonNull TagData tagDatas);
 }

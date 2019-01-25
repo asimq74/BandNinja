@@ -6,6 +6,7 @@ import java.util.List;
 import android.support.annotation.NonNull;
 
 import com.asimq.artists.bandninja.room.ArtistData;
+import com.asimq.artists.bandninja.utils.Util;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -49,6 +50,8 @@ public class Artist extends BaseMusicItem implements Comparable<Artist> {
 		Image image = new Image();
 		image.setText(artistData.getImage());
 		this.getImages().add(image);
+		this.getTagWrapper().setTags(Util.getTagsFromString(artistData.getTagsText()));
+		this.listeners = artistData.getListeners();
 	}
 
 	@Override

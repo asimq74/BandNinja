@@ -15,8 +15,8 @@ import com.asimq.artists.bandninja.viewmodels.SearchResultsViewModel;
 public class SearchResultsViewModelFactory implements ViewModelProvider.Factory {
 
 	private final Application application;
-	private final BandItemRepository bandItemRepository;
 	private final SearchResultsRepository searchResultsRepository;
+	private final BandItemRepository bandItemRepository;
 
 	@Inject
 	public SearchResultsViewModelFactory(@NonNull Application application,

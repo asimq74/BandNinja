@@ -9,25 +9,26 @@ import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.support.annotation.NonNull;
 
-import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.TrackData;
 
 @Dao
 public interface TrackDataDao {
 
-
-	@Query("SELECT * from tracks where albumId = :mbid ORDER BY number ASC")
+	@Query("SELECT * from tracks")
 	@NonNull
-	List<TrackData> fetchTrackDatas(@NonNull String mbid);
+	List<TrackData> fetchAllTrackDatas();
 
 	@Query("SELECT * from tracks where albumId = :mbid ORDER BY number ASC")
 	@NonNull
 	LiveData<List<TrackData>> fetchLiveTrackDatas(@NonNull String mbid);
 
-
-	@Insert(onConflict = OnConflictStrategy.REPLACE)
-	void insertTrackData(@NonNull TrackData trackData);
+	@Query("SELECT * from tracks where albumId = :mbid ORDER BY number ASC")
+	@NonNull
+	List<TrackData> fetchTrackDatas(@NonNull String mbid);
 
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	void insertMultipleTrackDatas(@NonNull List<TrackData> trackDatas);
+
+	@Insert(onConflict = OnConflictStrategy.REPLACE)
+	void insertTrackData(@NonNull TrackData trackData);
 }

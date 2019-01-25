@@ -47,7 +47,6 @@ import com.asimq.artists.bandninja.jobs.BandSyncJobService;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
-import com.asimq.artists.bandninja.room.dao.ArtistTagDao;
 import com.asimq.artists.bandninja.ui.CustomEditText;
 import com.asimq.artists.bandninja.utils.Util;
 import com.asimq.artists.bandninja.viewmodelfactories.SearchResultsViewModelFactory;
@@ -92,16 +91,17 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			}
 		}
 	}
+
 	private static final String JOB_TAG = "MyJobService";
 	final String TAG = this.getClass().getSimpleName();
 	AdView adView;
 	private ApplicationComponent applicationComponent;
 	@Inject
 	ArtistDataDao artistDataDao;
-	@Inject
-	ArtistTagDao artistTagDao;
 	@BindView(R.id.fab)
 	FloatingActionButton fab;
+	private Map<String, String> genreMap = new HashMap<>();
+	ListPopupWindow listPopupWindow;
 	@BindView(R.id.locationView)
 	TextView locationView;
 	private GoogleApiClient mClient;
@@ -132,6 +132,26 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		new ConsiderDisplayingArtistsFromStorageTask().executeOnExecutor(Executors.newSingleThreadExecutor(), artistDataDao);
 	}
 
+	private String[] getPopupMenuItems() {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		Set<String> favoriteGenres = prefs.getStringSet(getString(R.string.favorite_genre_key), new HashSet<>());
+		List<String> popupMenuItems = new ArrayList<>();
+		popupMenuItems.add(getString(R.string.topArtists));
+		if (favoriteGenres.isEmpty()) {
+			popupMenuItems.add(getString(R.string.topArtistsByGenre));
+		}
+		popupMenuItems.add(getString(R.string.topAlbums));
+		for (String genre : favoriteGenres) {
+			if (!genre.isEmpty()) {
+				String capitalGenre = genre.substring(0, 1).toUpperCase() + genre.substring(1);
+				final String byGenreKey = String.format("Top Artists in %s", capitalGenre);
+				popupMenuItems.add(byGenreKey);
+				genreMap.put(byGenreKey, genre);
+			}
+		}
+		String[] items = new String[popupMenuItems.size()];
+		return popupMenuItems.toArray(items);
+	}
 
 	private void hideKeyboard() {
 		InputMethodManager inputManager =
@@ -223,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		toolbar.setNavigationOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Toast.makeText(getApplicationContext(),"your icon was clicked",Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), "your icon was clicked", Toast.LENGTH_SHORT).show();
 				listPopupWindow = new ListPopupWindow(
 						MainActivity.this);
 				final String[] popupMenuItems = getPopupMenuItems();
@@ -239,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 						listPopupWindow.dismiss();
 						final String popupMenuItemText = popupMenuItems[position];
-						Toast.makeText(getApplicationContext(), popupMenuItemText + " was clicked",Toast.LENGTH_SHORT).show();
+						Toast.makeText(getApplicationContext(), popupMenuItemText + " was clicked", Toast.LENGTH_SHORT).show();
 						if (genreMap.containsKey(popupMenuItemText)) {
 							onDisplayingArtistsByTag(genreMap.get(popupMenuItemText));
 							return;
@@ -265,34 +285,9 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 
 		loadAd();
 		setUpSearchByArtistView();
-		considerDisplayingArtistsFromStorage();
+//		considerDisplayingArtistsFromStorage();
 		onDisplayingArtistsByTag("alternative");
 	}
-
-	ListPopupWindow listPopupWindow;
-
-	private String[] getPopupMenuItems() {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		Set<String> favoriteGenres = prefs.getStringSet(getString(R.string.favorite_genre_key), new HashSet<>());
-		List<String> popupMenuItems = new ArrayList<>();
-		popupMenuItems.add(getString(R.string.topArtists));
-		if (favoriteGenres.isEmpty()) {
-			popupMenuItems.add(getString(R.string.topArtistsByGenre));
-		}
-		popupMenuItems.add(getString(R.string.topAlbums));
-		for (String genre : favoriteGenres) {
-			if (!genre.isEmpty()) {
-				String capitalGenre = genre.substring(0, 1).toUpperCase() + genre.substring(1);
-				final String byGenreKey = String.format("Top Artists in %s", capitalGenre);
-				popupMenuItems.add(byGenreKey);
-				genreMap.put(byGenreKey, genre);
-			}
-		}
-		String[] items = new String[popupMenuItems.size()];
-		return popupMenuItems.toArray(items);
-	}
-
-	private Map<String, String> genreMap = new HashMap<>();
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -337,20 +332,20 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	}
 
 	@Override
-	public void onDisplayingTopArtists() {
-		MusicItemsListFragment musicItemsListFragment = (MusicItemsListFragment)
-				getSupportFragmentManager().findFragmentById(R.id.musicItemsListFragment);
-		if (musicItemsListFragment != null) {
-			musicItemsListFragment.populateTopArtists();
-		}
-	}
-
-	@Override
 	public void onDisplayingTopAlbums() {
 		MusicItemsListFragment musicItemsListFragment = (MusicItemsListFragment)
 				getSupportFragmentManager().findFragmentById(R.id.musicItemsListFragment);
 		if (musicItemsListFragment != null) {
 			musicItemsListFragment.populateTopAlbums();
+		}
+	}
+
+	@Override
+	public void onDisplayingTopArtists() {
+		MusicItemsListFragment musicItemsListFragment = (MusicItemsListFragment)
+				getSupportFragmentManager().findFragmentById(R.id.musicItemsListFragment);
+		if (musicItemsListFragment != null) {
+			musicItemsListFragment.populateTopArtists();
 		}
 	}
 

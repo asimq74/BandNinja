@@ -30,75 +30,7 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 	public static final int SEARCH_RESULTS_LIMIT = 10;
 
 	final String TAG = this.getClass().getSimpleName();
-
 	private MutableLiveData<Boolean> artistsRefreshingMutableLiveData = new MutableLiveData<>();
-
-	@Override
-	public LiveData<List<Artist>> getTopArtists() {
-		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
-		final MutableLiveData<List<Artist>> artistMutableLiveData = new MutableLiveData<>();
-		Call<ArtistsWrapper> topArtistsCall = service.getTopArtists("chart.gettopartists", API_KEY, DEFAULT_FORMAT,
-				SEARCH_RESULTS_LIMIT);
-		topArtistsCall.enqueue(new Callback<ArtistsWrapper>() {
-			@Override
-			public void onResponse(Call<ArtistsWrapper> call, Response<ArtistsWrapper> response) {
-				final ArtistsWrapper artistsWrapper = response.body();
-				if (artistsWrapper == null) {
-					return;
-				}
-				List<Artist> artists = artistsWrapper.getTopArtists().getArtists();
-				if (null == artists) {
-					artistMutableLiveData.setValue(new ArrayList<>());
-					return;
-				}
-				artists = Util.removeAllItemsWithoutMbidOrImages(artists);
-				Collections.sort(artists);
-				artistMutableLiveData.setValue(artists);
-			}
-
-			@Override
-			public void onFailure(Call<ArtistsWrapper> call, Throwable t) {
-				artistMutableLiveData.setValue(new ArrayList<>());
-			}
-		});
-		return artistMutableLiveData;
-	}
-
-	@Override
-	public LiveData<List<Artist>> getTopArtistsByTag(@NonNull String tag) {
-		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
-		final MutableLiveData<List<Artist>> artistMutableLiveData = new MutableLiveData<>();
-		Call<TopArtistsByTagWrapper> artistInfoByTagCall = service.getArtistByTag("tag.gettopartists", tag,
-				API_KEY, DEFAULT_FORMAT);
-		artistInfoByTagCall.enqueue(new Callback<TopArtistsByTagWrapper>() {
-			@Override
-			public void onResponse(Call<TopArtistsByTagWrapper> call, Response<TopArtistsByTagWrapper> response) {
-				final TopArtistsByTagWrapper topArtistsByTagWrapper = response.body();
-				if (topArtistsByTagWrapper == null) {
-					return;
-				}
-				List<Artist> artists = topArtistsByTagWrapper.getTopArtists().getArtists();
-				if (null == artists) {
-					artistMutableLiveData.setValue(null);
-					return;
-				}
-				artists = Util.removeAllItemsWithoutMbidOrImages(artists);
-				Collections.sort(artists);
-				artistMutableLiveData.setValue(artists);
-			}
-
-			@Override
-			public void onFailure(Call<TopArtistsByTagWrapper> call, Throwable t) {
-				artistMutableLiveData.setValue(new ArrayList<>());
-			}
-		});
-		return artistMutableLiveData;
-	}
-
-	@Override
-	public LiveData<Boolean> getArtistsRefreshingMutableLiveData() {
-		return artistsRefreshingMutableLiveData;
-	}
 
 	@Override
 	public LiveData<Artist> getArtistInfo(@NonNull String artistName) {
@@ -122,6 +54,11 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 			}
 		});
 		return artistInfoMutableLiveData;
+	}
+
+	@Override
+	public LiveData<Boolean> getArtistsRefreshingMutableLiveData() {
+		return artistsRefreshingMutableLiveData;
 	}
 
 	@Override
@@ -159,6 +96,68 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 			}
 		});
 		artistsRefreshingMutableLiveData.setValue(false);
+		return artistMutableLiveData;
+	}
+
+	@Override
+	public LiveData<List<Artist>> getTopArtists() {
+		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
+		final MutableLiveData<List<Artist>> artistMutableLiveData = new MutableLiveData<>();
+		Call<ArtistsWrapper> topArtistsCall = service.getTopArtists("chart.gettopartists", API_KEY, DEFAULT_FORMAT,
+				SEARCH_RESULTS_LIMIT);
+		topArtistsCall.enqueue(new Callback<ArtistsWrapper>() {
+			@Override
+			public void onFailure(Call<ArtistsWrapper> call, Throwable t) {
+				artistMutableLiveData.setValue(new ArrayList<>());
+			}
+
+			@Override
+			public void onResponse(Call<ArtistsWrapper> call, Response<ArtistsWrapper> response) {
+				final ArtistsWrapper artistsWrapper = response.body();
+				if (artistsWrapper == null) {
+					return;
+				}
+				List<Artist> artists = artistsWrapper.getTopArtists().getArtists();
+				if (null == artists) {
+					artistMutableLiveData.setValue(new ArrayList<>());
+					return;
+				}
+				artists = Util.removeAllItemsWithoutMbidOrImages(artists);
+				Collections.sort(artists);
+				artistMutableLiveData.setValue(artists);
+			}
+		});
+		return artistMutableLiveData;
+	}
+
+	@Override
+	public LiveData<List<Artist>> getTopArtistsByTag(@NonNull String tag) {
+		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
+		final MutableLiveData<List<Artist>> artistMutableLiveData = new MutableLiveData<>();
+		Call<TopArtistsByTagWrapper> artistInfoByTagCall = service.getArtistByTag("tag.gettopartists", tag,
+				API_KEY, DEFAULT_FORMAT);
+		artistInfoByTagCall.enqueue(new Callback<TopArtistsByTagWrapper>() {
+			@Override
+			public void onFailure(Call<TopArtistsByTagWrapper> call, Throwable t) {
+				artistMutableLiveData.setValue(new ArrayList<>());
+			}
+
+			@Override
+			public void onResponse(Call<TopArtistsByTagWrapper> call, Response<TopArtistsByTagWrapper> response) {
+				final TopArtistsByTagWrapper topArtistsByTagWrapper = response.body();
+				if (topArtistsByTagWrapper == null) {
+					return;
+				}
+				List<Artist> artists = topArtistsByTagWrapper.getTopArtists().getArtists();
+				if (null == artists) {
+					artistMutableLiveData.setValue(null);
+					return;
+				}
+				artists = Util.removeAllItemsWithoutMbidOrImages(artists);
+				Collections.sort(artists);
+				artistMutableLiveData.setValue(artists);
+			}
+		});
 		return artistMutableLiveData;
 	}
 }

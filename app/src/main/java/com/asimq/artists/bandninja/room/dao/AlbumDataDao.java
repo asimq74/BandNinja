@@ -15,6 +15,9 @@ import java.util.List;
 @Dao
 public interface AlbumDataDao {
 
+	@Query("SELECT * from albums")
+	@NonNull
+	List<AlbumData> fetchAllAlbumDatas();
 
 	@Query("SELECT * from albums where mbid = :mbid")
 	@NonNull
