@@ -25,13 +25,18 @@
         <item name="android:textColor">@color/colorPrimary</item>
     </style>
 
-    <style name="ArticleBody" parent="@style/BaseArticleBody"/>
+    <style name="MainTitle" parent="@style/BaseArticleBody">
+        <item name="android:textSize">@dimen/placeTextSize</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ArticleBody" parent="@style/BaseArticleBody" />
 
     <style name="BaseExpandedTitle" parent="@style/TextAppearance.AppCompat.Headline">
         <item name="android:textColor">@android:color/white</item>
     </style>
 
-    <style name="ExpandedTitle" parent="@style/BaseExpandedTitle"/>
+    <style name="ExpandedTitle" parent="@style/BaseExpandedTitle" />
 
     <style name="BaseExpandedSubTitle">
         <item name="android:textColor">@android:color/white</item>
@@ -39,7 +44,7 @@
         <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="ExpandedSubTitle" parent="@style/BaseExpandedSubTitle"/>
+    <style name="ExpandedSubTitle" parent="@style/BaseExpandedSubTitle" />
 
     <style name="FabStyle">
         <item name="android:layout_width">wrap_content</item>
@@ -51,6 +56,7 @@
         <item name="pressedTranslationZ">12dp</item>
         <item name="rippleColor">@android:color/white</item>
     </style>
+
     <color name="accent_translucent">#80FFEB3B</color>
 
     <style name="TemperatureTextView">
@@ -60,17 +66,19 @@
     </style>
 
     <style name="PlaceTextView">
-        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:textSize">@dimen/placeTextSize</item>
         <item name="android:gravity">center</item>
     </style>
 
     <style name="ClockTextView">
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">@dimen/clockTextSize</item>
         <item name="android:gravity">center</item>
     </style>
 
     <style name="DescriptionTextView">
-        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/colorPrimaryLight</item>
+        <item name="android:textSize">@dimen/descriptionTextSize</item>
         <item name="android:maxLines">2</item>
         <item name="android:ellipsize">end</item>
     </style>

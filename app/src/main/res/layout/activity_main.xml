@@ -19,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="?android:actionBarSize"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:contentInsetStart="72dp"
+            app:contentInsetStart="@dimen/mainToolbarcontentInset"
             app:layout_collapseMode="pin"
             app:navigationIcon="@drawable/ic_menu">
 
@@ -32,6 +32,7 @@
 
         <RelativeLayout
             android:id="@+id/search_layout"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/toolbar"
@@ -44,13 +45,13 @@
                 android:singleLine="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawablePadding="22dp"
+                android:drawablePadding="@dimen/customable_edit_text_padding"
                 android:drawableRight="@android:drawable/ic_menu_search"
                 android:drawableLeft="@android:drawable/ic_menu_close_clear_cancel"
                 android:gravity="left|center"
                 android:hint="@string/search_by_artist"
                 android:background="@color/ltgray"
-                android:padding="10dp"
+                android:padding="@dimen/card_corner_radius"
                 android:textColor="@android:color/black"
                 android:textColorHint="@android:color/black" />
         </RelativeLayout>
@@ -69,7 +70,7 @@
             android:layout_height="match_parent"
             android:clipChildren="false"
             android:orientation="vertical"
-            android:paddingBottom="28dp"
+            android:paddingBottom="@dimen/location_view_padding"
             android:paddingLeft="@dimen/list_side_margin"
             android:paddingRight="@dimen/list_side_margin"
             android:paddingTop="@dimen/activity_vertical_margin">

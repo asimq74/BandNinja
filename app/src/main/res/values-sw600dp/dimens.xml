@@ -4,4 +4,7 @@
     <dimen name="detail_body_text_size">28sp</dimen>
     <item name="detail_body_line_spacing_multiplier" format="float" type="fraction">1.5</item>
     <dimen name="fab_margin">32dp</dimen>
+    <dimen name="placeTextSize">36sp</dimen>
+    <dimen name="clockTextSize">28sp</dimen>
+    <dimen name="descriptionTextSize">28sp</dimen>
 </resources>

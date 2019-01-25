@@ -25,7 +25,6 @@ public class AlbumInfoRepositoryDao implements AlbumInfoRepository {
 	public static final String API_KEY = BuildConfig.LastFMApiKey;
 	public static final String DEFAULT_FORMAT = "json";
 	public static final int PAGES = 1;
-	final String TAG = this.getClass().getSimpleName();
 
 	@Override
 	public LiveData<List<Album>> getAlbums(@NonNull String artistName) {

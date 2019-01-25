@@ -30,8 +30,7 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait">
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH"/>
             </intent-filter>
@@ -49,21 +48,8 @@
             android:name=".ArticleDetailActivity"
             android:noHistory="true"/>
         <activity
-            android:name=".ResultActivity"
-            android:noHistory="true"
-            android:parentActivityName=".MainNavigationActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainNavigationActivity"/>
-        </activity>
-        <activity
             android:name=".DetailsActivity"
             android:label="@string/title_activity_details"/>
-        <activity
-            android:name=".ConnectionActivity"
-            android:label="@string/title_activity_details"/>
-
-
         <service
             android:name=".jobs.BandSyncJobService"
             android:exported="false">

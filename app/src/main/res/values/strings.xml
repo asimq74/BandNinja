@@ -12,11 +12,15 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="search_by_artist">Search by Artist...</string>
-    <string name="search_hint">The Beatles</string>
     <string name="logoDescription">Application Logo</string>
     <string name="band_widget">Band Ninja Widget</string>
 
-    <string name="readMore">Read More...</string>
+    <string name="informationUnavailable">Information Unavailable at this time</string>
+    <string name="locationServicesRequireGooglePlay">Please Install Google Play Services</string>
+    <string name="locationServicesRequireInternet">Please Check your Internet Connection</string>
+    <string name="locationServicesEnabled">Location Enabled</string>
+    <string name="locationServicesDisabled">Location Disabled</string>
+    <string name="readMore">READ MORE...</string>
     <string name="summaryUnavailable">Summary Unavailable</string>
 
     <string name="topArtists">Top Artists</string>

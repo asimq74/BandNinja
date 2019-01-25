@@ -3,6 +3,8 @@ package com.asimq.artists.bandninja.utils;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -13,6 +15,8 @@ import android.widget.TextView;
 import com.asimq.artists.bandninja.json.Image;
 import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.json.Tag;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -25,6 +29,20 @@ public class Util {
 
     private static List<String> BLOCKED_TAGS = Arrays.asList("albums I own", "favorite albums");
     public static final String PREFS_WIDGET_TITLE = "PREFS_WIDGET_TITLE";
+
+    public static boolean isConnected(@NonNull Context context) {
+        ConnectivityManager cm =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+    }
+
+    public static boolean isGooglePlayServicesAvailable(@NonNull Context context) {
+        return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
+                == ConnectionResult.SUCCESS;
+    }
 
     @NonNull
     public static String getTagsAsString(@NonNull List<Tag> tags) {
