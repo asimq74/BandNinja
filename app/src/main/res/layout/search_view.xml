@@ -9,9 +9,11 @@
         android:id="@+id/searchIconImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:contentDescription="@string/searchIconImageDescription"
         android:src="@android:drawable/ic_menu_search"/>
 
     <EditText
+        android:hint="@string/search_by_artist"
         android:id="@+id/searchEditText"
         android:layout_width="175dp"
         android:layout_height="wrap_content"
@@ -28,6 +30,7 @@
         android:id="@+id/closeImageButton"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:contentDescription="@string/closeImageDescription"
         android:src="@android:drawable/ic_menu_close_clear_cancel"/>
 
 </LinearLayout>
