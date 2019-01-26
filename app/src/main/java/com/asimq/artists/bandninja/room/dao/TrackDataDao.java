@@ -18,6 +18,10 @@ public interface TrackDataDao {
 	@NonNull
 	List<TrackData> fetchAllTrackDatas();
 
+	@Query("SELECT * from tracks")
+	@NonNull
+	LiveData<List<TrackData>> fetchAllTrackLiveDatas();
+
 	@Query("SELECT * from tracks where albumId = :mbid ORDER BY number ASC")
 	@NonNull
 	LiveData<List<TrackData>> fetchLiveTrackDatas(@NonNull String mbid);

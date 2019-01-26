@@ -1,6 +1,7 @@
 package com.asimq.artists.bandninja;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Entity;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
@@ -257,7 +258,10 @@ public class ArticleDetailActivity extends AppCompatActivity
         cardView.setVisibility(View.VISIBLE);
     }
 
+    private AlbumInfo globalAlbumInfo = new AlbumInfo();
+
     private void populateInitialView(@NonNull AlbumInfo albumInfo) {
+        globalAlbumInfo = albumInfo;
         toolbarHeaderView.bindTo(albumInfo.getName(), albumInfo.getArtist(), albumInfo.getReleaseDate());
         floatHeaderView.bindTo(albumInfo.getName(), albumInfo.getArtist(), albumInfo.getReleaseDate());
         final ImageView photoView = findViewById(R.id.photo);
@@ -351,10 +355,18 @@ public class ArticleDetailActivity extends AppCompatActivity
         public void onClick(View v) {
             Intent shareIntent = new Intent();
             shareIntent.setAction(Intent.ACTION_SEND);
-            shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Information about " + globalArtistData.getName());
-            StringBuilder builder = new StringBuilder(globalArtistData.getName()).append("\n")
-                    .append(globalArtistData.getBio()).append("\n").append(globalArtistData.getImage());
-            shareIntent.putExtra(Intent.EXTRA_TEXT, builder.toString());
+            if (entityType.equals(Entities.ARTIST.name())) {
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Information about " + globalArtistData.getName());
+                StringBuilder builder = new StringBuilder(globalArtistData.getName()).append("\n")
+                        .append(globalArtistData.getBio()).append("\n").append(globalArtistData.getImage());
+                shareIntent.putExtra(Intent.EXTRA_TEXT, builder.toString());
+            } else {
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, String.format("Information about %s - %s",
+                        globalAlbumInfo.getArtist(), globalAlbumInfo.getName()));
+                StringBuilder builder = new StringBuilder(globalAlbumInfo.getName()).append("\n")
+                        .append(globalAlbumInfo.getWiki().getContent()).append("\n");
+                shareIntent.putExtra(Intent.EXTRA_TEXT, builder.toString());
+            }
             shareIntent.setType("text/plain");
             startActivity(Intent.createChooser(shareIntent, getString(R.string.shareArticle)));
         }

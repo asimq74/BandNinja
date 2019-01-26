@@ -2,7 +2,6 @@ package com.asimq.artists.bandninja;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Build;
@@ -38,9 +37,9 @@ import com.asimq.artists.bandninja.json.Wiki;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.AlbumData;
 import com.asimq.artists.bandninja.room.ArtistData;
+import com.asimq.artists.bandninja.room.TrackData;
 import com.asimq.artists.bandninja.room.dao.AlbumDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
-import com.asimq.artists.bandninja.ui.Executable;
 import com.asimq.artists.bandninja.utils.Util;
 import com.asimq.artists.bandninja.utils.Util.Entities;
 import com.asimq.artists.bandninja.viewmodelfactories.AlbumDetailViewModelFactory;
@@ -88,7 +87,7 @@ public class MusicItemsListFragment extends Fragment {
     @Inject
     BandItemRepository bandItemRepository;
     @BindView(R.id.ts_description)
-    TextSwitcher descriptionsSwitcher;
+    TextView descriptionTextView;
     OnMainActivityInteractionListener mCallback;
     @BindView(R.id.mainTitleView_1)
     TextView mainTitleView1;
@@ -105,7 +104,6 @@ public class MusicItemsListFragment extends Fragment {
     @BindView(R.id.tracksRecyclerView)
     RecyclerView tracksRecyclerView;
     private AlbumDetailViewModel albumDetailViewModel;
-    private final Executable<String> albumInfoObservable = createAlbumInfoObservable();
     private ApplicationComponent applicationComponent;
     private long artistAnimDuration;
     private ArtistDetailViewModel artistDetailViewModel;
@@ -114,8 +112,11 @@ public class MusicItemsListFragment extends Fragment {
     private int currentPosition;
     private CardSliderLayoutManager layoutManger;
     private SearchResultsViewModel searchResultsViewModel;
-    private final Executable<String> artistInfoObservable = createArtistInfoObservable();
     private SliderAdapter sliderAdapter;
+    private Map<String, ArtistData> artistDatasByName = new HashMap<>();
+    private Map<String, AlbumData> albumDatasByName = new HashMap<>();
+    private Map<String, List<TrackData>> trackDatasByName = new HashMap<>();
+
     public MusicItemsListFragment() {
         // Required empty public constructor
     }
@@ -138,17 +139,7 @@ public class MusicItemsListFragment extends Fragment {
         return fragment;
     }
 
-    @NonNull
-    private Executable<String> createAlbumInfoObservable() {
-        return params -> albumDetailViewModel.getAlbumInfo(params[0], params[1]).observe(
-                getActivity(), albumDetailedInfo -> populateAlbumInfo(albumDetailedInfo));
-    }
 
-    @NonNull
-    private Executable<String> createArtistInfoObservable() {
-        return params -> searchResultsViewModel.getArtistInfo(params[0]).observe(
-                getActivity(), artistDetailedInfo -> populateArtistInfo(artistDetailedInfo));
-    }
 
     protected void displayAlbumsByArtist(@NonNull String artistName) {
         albumDetailViewModel.getAlbumsByArtist(artistName).observe(this, this::populateAlbums);
@@ -175,7 +166,6 @@ public class MusicItemsListFragment extends Fragment {
     }
 
     private void initRecyclerView(@NonNull List<? extends BaseMusicItem> musicItems,
-                                  @NonNull Executable<String> furtherAction,
                                   @NonNull OnClickListener onClickListener) {
         if (null != sliderAdapter) {
             sliderAdapter.clear();
@@ -187,7 +177,7 @@ public class MusicItemsListFragment extends Fragment {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    onActiveCardChange(musicItems, furtherAction);
+                    onActiveCardChange(musicItems);
                 }
             }
         });
@@ -198,48 +188,61 @@ public class MusicItemsListFragment extends Fragment {
         CARD_SNAP_HELPER.attachToRecyclerView(recyclerView);
     }
 
-    private void initSwitchers(@NonNull List<? extends MusicItem> musicItems, Executable<String> furtherAction) {
+    private void initSwitchers(@NonNull List<? extends MusicItem> musicItems) {
         final MusicItem musicItem = musicItems.get(0);
         String name = musicItem.getName();
         String mbid = musicItem.getMbid();
         Log.d(TAG, String.format("musicItem: %s mbid: %s", name, mbid));
         if (musicItem instanceof Album) {
             Album album = (Album) musicItem;
-            furtherAction.executeWith(album.getArtist().getName(), name);
+            considerHandlingSavedAlbumInfo(album.getArtist().getName(), name);
         } else {
-//            furtherAction.executeWith(name);
-					searchResultsViewModel.getArtistInfo(name).observe(
-							getActivity(), artistDetailedInfo -> populateArtistInfo(artistDetailedInfo));
+            Artist artist = (Artist) musicItem;
+           considerHandlingSavedArtistInfo(artist);
         }
-
-        descriptionsSwitcher.removeAllViews();
-        descriptionsSwitcher.setInAnimation(getActivity(), android.R.anim.fade_in);
-        descriptionsSwitcher.setOutAnimation(getActivity(), android.R.anim.fade_out);
-        descriptionsSwitcher.setFactory(new TextViewFactory(R.style.DescriptionTextView, false));
-        descriptionsSwitcher.setCurrentText("");
     }
 
-    private void onActiveCardChange(List<? extends MusicItem> musicItems, Executable<String> furtherAction) {
+    private void onActiveCardChange(List<? extends MusicItem> musicItems) {
         final int pos = layoutManger.getActiveCardPosition();
         if (pos == RecyclerView.NO_POSITION || pos == currentPosition) {
             return;
         }
 
-        onActiveCardChange(musicItems, pos, furtherAction);
+        onActiveCardChange(musicItems, pos);
     }
 
-    private void onActiveCardChange(List<? extends MusicItem> musicItems, int pos, Executable<String> furtherAction) {
+
+    private void considerHandlingSavedAlbumInfo(String artistName, String albumName) {
+        String key = Util.getKeyFromArtistAndAlbum(artistName, albumName);
+        AlbumData albumData = albumDatasByName.get(key);
+        if (null != albumData && !albumData.getName().isEmpty()) {
+            AlbumInfo albumInfoFromData = new AlbumInfo(albumData);
+            List<Track> tracks = new ArrayList<>();
+            List<TrackData> trackDatas = trackDatasByName.get(key);
+            if (null != trackDatas) {
+                for (TrackData trackData : trackDatas) {
+                    tracks.add(new Track(trackData));
+                }
+            }
+            albumInfoFromData.getTrackWrapper().setTracks(tracks);
+            processAlbumInfo(albumInfoFromData);
+            return;
+        }
+        albumDetailViewModel.getAlbumInfo(artistName, albumName).observe(
+                getActivity(), albumDetailedInfo -> populateAlbumInfo(albumDetailedInfo));
+    }
+
+    private void onActiveCardChange(List<? extends MusicItem> musicItems, int pos) {
         MusicItem musicItem = musicItems.get(pos);
         String name = musicItem.getName();
         String mbid = musicItem.getMbid();
         Log.d(TAG, String.format("name: %s mbid: %s", name, mbid));
         if (musicItem instanceof Album) {
             Album album = (Album) musicItem;
-            furtherAction.executeWith(album.getArtist().getName(), name);
+            considerHandlingSavedAlbumInfo(album.getArtist().getName(), name);
         } else {
-//            furtherAction.executeWith(name);
-					searchResultsViewModel.getArtistInfo(name).observe(
-							getActivity(), artistDetailedInfo -> populateArtistInfo(artistDetailedInfo));
+            Artist artist = (Artist) musicItem;
+            considerHandlingSavedArtistInfo(artist);
         }
         int animH[] = new int[]{R.anim.slide_in_right, R.anim.slide_out_left};
         int animV[] = new int[]{R.anim.slide_in_top, R.anim.slide_out_bottom};
@@ -282,7 +285,10 @@ public class MusicItemsListFragment extends Fragment {
                 .get(AlbumDetailViewModel.class);
         artistDetailViewModel = ViewModelProviders.of(this, artistDetailViewModelFactory)
                 .get(ArtistDetailViewModel.class);
-        searchResultsViewModel.getArtistDatas().observe(this, artistDatas->populateArtistDatas(artistDatas));
+        artistDetailViewModel.getAllArtistDatas().observe(this, artistDatas -> populateArtistDatas(artistDatas));
+        albumDetailViewModel.getAllAlbumDatas().observe(this, albumDatas -> populateAlbumDatas(albumDatas));
+        albumDetailViewModel.getAllTrackDatas().observe(this, trackDatas -> populateTrackDatas(trackDatas));
+
         searchResultsViewModel.getArtistsRefreshingMutableLiveData().observe(this, loading -> {
             if (loading) {
                 progressBar.setVisibility(View.VISIBLE);
@@ -297,8 +303,27 @@ public class MusicItemsListFragment extends Fragment {
         return view;
     }
 
+    void populateAlbumDatas(List<AlbumData> albumDatas) {
+        for (AlbumData albumData : albumDatas) {
+            albumDatasByName.put(Util.getKeyFromAlbumData(albumData), albumData);
+        }
+        Log.d(TAG, "albumDatas: " + albumDatas);
+    }
 
-    private Map<String, ArtistData> artistDatasByName = new HashMap<>();
+    void populateTrackDatas(List<TrackData> trackDatas) {
+        trackDatasByName = new HashMap<>();
+        for (TrackData trackData : trackDatas) {
+            String key = Util.getKeyFromTrackData(trackData);
+            if (trackDatasByName.containsKey(key)) {
+                trackDatasByName.get(key).add(trackData);
+            } else {
+                List<TrackData> tempList = new ArrayList<>();
+                tempList.add(trackData);
+                trackDatasByName.put(key, tempList);
+            }
+        }
+        Log.d(TAG, "trackDatas: " + trackDatas);
+    }
 
     void populateArtistDatas(List<ArtistData> artistDatas) {
         for (ArtistData artistData : artistDatas) {
@@ -320,9 +345,9 @@ public class MusicItemsListFragment extends Fragment {
 
     private void populateAlbums(List<Album> albums) {
         if (albums.isEmpty()) return;
-        initRecyclerView(albums, albumInfoObservable, new OnAlbumCardClickedListener(albums));
+        initRecyclerView(albums, new OnAlbumCardClickedListener(albums));
         initMusicItemNameText(albums);
-        initSwitchers(albums, albumInfoObservable);
+        initSwitchers(albums);
     }
 
     private void populateAlbumsFromAlbumDatas(List<AlbumData> albumDatas) {
@@ -342,20 +367,19 @@ public class MusicItemsListFragment extends Fragment {
         if (!Util.isConnected(getActivity())) {
             return;
         }
-        artistDetailViewModel.saveArtist(artistDetailedInfo);
-//        searchResultsViewModel.getArtistInfo(artistDetailedInfo.getName()).observe(this,
-////                artist -> processArtistInfo(artist));
-        considerHandlingSavedArtistInfo(artistDetailedInfo.getName());
+        considerHandlingSavedArtistInfo(artistDetailedInfo);
     }
 
-    private void considerHandlingSavedArtistInfo(String incomingName) {
-        ArtistData artistData = artistDatasByName.get(incomingName);
+    private void considerHandlingSavedArtistInfo(@NonNull Artist artistDetailedInfo) {
+        String artistName = artistDetailedInfo.getName();
+        ArtistData artistData = artistDatasByName.get(artistName);
         if (null != artistData && !artistData.getName().isEmpty()) {
             Artist artistFromData = new Artist(artistData);
             processArtistInfo(artistFromData);
             return;
         }
-        searchResultsViewModel.getArtistInfo(incomingName).observe(this, artist -> processArtistInfo(artist));
+        artistDetailViewModel.saveArtist(artistDetailedInfo);
+        searchResultsViewModel.getArtistInfo(artistName).observe(this, artist -> processArtistInfo(artist));
     }
 
     private void populateArtists(@NonNull List<Artist> artists) {
@@ -365,9 +389,9 @@ public class MusicItemsListFragment extends Fragment {
             return;
         }
         recyclerView.setVisibility(View.VISIBLE);
-        initRecyclerView(artists, artistInfoObservable, new OnArtistCardClickedListener(artists));
+        initRecyclerView(artists, new OnArtistCardClickedListener(artists));
         initMusicItemNameText(artists);
-        initSwitchers(artists, artistInfoObservable);
+        initSwitchers(artists);
     }
 
     protected void populateArtistsByTag(@NonNull String tag) {
@@ -396,11 +420,6 @@ public class MusicItemsListFragment extends Fragment {
         placeSwitcher.removeAllViews();
         placeSwitcher.setFactory(new TextViewFactory(R.style.PlaceTextView, false));
         placeSwitcher.setCurrentText(tagsText);
-
-        descriptionsSwitcher.removeAllViews();
-        descriptionsSwitcher.setInAnimation(getActivity(), android.R.anim.fade_in);
-        descriptionsSwitcher.setOutAnimation(getActivity(), android.R.anim.fade_out);
-        descriptionsSwitcher.setFactory(new TextViewFactory(R.style.DescriptionTextView, false));
         final Wiki wiki = albumInfo.getWiki();
         if (null != wiki) {
             updateDescriptionsSwitcher(albumInfo.getArtist(), albumInfo.getName(), albumInfo.getMbid(), wiki.getSummary(), Entities.ALBUM);
@@ -460,10 +479,7 @@ public class MusicItemsListFragment extends Fragment {
 
     private void updateDescriptionsSwitcher(String artist, String album, String mbid, String text,
                                             Entities type) {
-        descriptionsSwitcher.removeAllViews();
-        descriptionsSwitcher.setInAnimation(getActivity(), android.R.anim.fade_in);
-        descriptionsSwitcher.setOutAnimation(getActivity(), android.R.anim.fade_out);
-        descriptionsSwitcher.setFactory(new TextViewFactory(R.style.DescriptionTextView, false));
+
         StringBuilder abbreviatedSummaryBuilder = new StringBuilder();
         if (text.isEmpty()) {
             abbreviatedSummaryBuilder.append(getString(R.string.summaryUnavailable));
@@ -472,10 +488,9 @@ public class MusicItemsListFragment extends Fragment {
                     text.substring(0, 100) : text).append("\n")
                     .append(getString(R.string.readMore));
         }
-        Util.populateHTMLForSwitcher(descriptionsSwitcher, abbreviatedSummaryBuilder.toString());
-        TextView tv = (TextView) descriptionsSwitcher.getCurrentView();
+        Util.populateHTMLForTextView(descriptionTextView, abbreviatedSummaryBuilder.toString());
         if (!text.isEmpty()) {
-            tv.setOnClickListener(new OnClickListener() {
+            descriptionTextView.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent articleDetailIntent = new Intent(getActivity(), ArticleDetailActivity.class);
@@ -486,7 +501,6 @@ public class MusicItemsListFragment extends Fragment {
                     startActivity(articleDetailIntent);
                 }
             });
-            ;
         }
     }
 

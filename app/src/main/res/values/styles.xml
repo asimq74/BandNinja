@@ -79,7 +79,6 @@
     <style name="DescriptionTextView">
         <item name="android:textColor">@color/colorPrimaryLight</item>
         <item name="android:textSize">@dimen/descriptionTextSize</item>
-        <item name="android:maxLines">2</item>
         <item name="android:ellipsize">end</item>
     </style>
 

@@ -1,5 +1,8 @@
 package com.asimq.artists.bandninja.json;
 
+import android.support.annotation.NonNull;
+
+import com.asimq.artists.bandninja.room.TrackData;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -17,6 +20,16 @@ public class Track {
     @SerializedName("artist")
     @Expose
     private Artist artist = new Artist();
+
+    public Track() {
+    }
+
+    public Track(@NonNull TrackData trackData) {
+        this.artist.setName(trackData.getArtistName());
+        this.duration = trackData.getDuration();
+        this.name = trackData.getName();
+        this.url = trackData.getUrl();
+    }
 
     public String getName() {
         return name;

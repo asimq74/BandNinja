@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MediatorLiveData;
 import android.support.annotation.NonNull;
 
 import com.asimq.artists.bandninja.asynctasks.SaveArtistDataTask;
@@ -21,11 +22,23 @@ public class ArtistDetailViewModel extends AndroidViewModel {
 
 	private final BandItemRepository bandItemRepository;
 	private LiveData<ArtistData> mLiveArtistData;
+	// MediatorLiveData can observe other LiveData objects and react on their emissions.
+	private final MediatorLiveData<List<ArtistData>> mObservableArtistDatas;
 
 	public ArtistDetailViewModel(@NonNull Application application, @NonNull BandItemRepository bandItemRepository) {
 		super(application);
 		this.bandItemRepository = bandItemRepository;
+		this.mObservableArtistDatas = new MediatorLiveData<>();
+		this.mObservableArtistDatas.setValue(new ArrayList<>());
+		LiveData<List<ArtistData>> artistDatas = bandItemRepository.getAllArtistData();
+		this.mObservableArtistDatas.addSource(artistDatas, mObservableArtistDatas::setValue);
 	}
+
+
+	public LiveData<List<ArtistData>> getAllArtistDatas() {
+		return mObservableArtistDatas;
+	}
+
 
 	public LiveData<ArtistData> getArtistDetail(@NonNull String mbid) {
 		if (mLiveArtistData == null) {
@@ -39,11 +52,4 @@ public class ArtistDetailViewModel extends AndroidViewModel {
 		new SaveArtistDataTask(bandItemRepository).execute(artistData);
 	}
 
-	public void saveTagDatas(@NonNull List<Tag> tags) {
-		List<TagData> tagDatas = new ArrayList<>();
-		for (Tag tag : tags) {
-			tagDatas.add(new TagData(tag));
-		}
-		new SaveTagDataTask(bandItemRepository).executeOnExecutor(Executors.newSingleThreadExecutor(), tagDatas);
-	}
 }

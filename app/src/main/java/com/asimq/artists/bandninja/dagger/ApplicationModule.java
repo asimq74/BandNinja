@@ -69,9 +69,10 @@ public class ApplicationModule {
 	@Provides
 	@Singleton
 	AlbumDetailViewModelFactory provideAlbumDetailViewModelFactory(
-			AlbumInfoRepository albumInfoRepository, TrackDataDao trackDataDao,
-			AlbumDataDao albumDataDao) {
-		return new AlbumDetailViewModelFactory(mApplication, albumInfoRepository, trackDataDao, albumDataDao);
+			AlbumInfoRepository albumInfoRepository, BandItemRepository bandItemRepository,
+			TrackDataDao trackDataDao, AlbumDataDao albumDataDao) {
+		return new AlbumDetailViewModelFactory(mApplication, albumInfoRepository, bandItemRepository,
+				trackDataDao, albumDataDao);
 	}
 
 	@Provides

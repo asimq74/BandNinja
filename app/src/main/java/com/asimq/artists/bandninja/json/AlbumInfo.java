@@ -1,8 +1,12 @@
 package com.asimq.artists.bandninja.json;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import com.asimq.artists.bandninja.room.AlbumData;
+import com.asimq.artists.bandninja.utils.Util;
 import com.google.gson.annotations.SerializedName;
 
 public class AlbumInfo extends BaseMusicItem {
@@ -27,6 +31,24 @@ public class AlbumInfo extends BaseMusicItem {
 	private String url = "";
 	@SerializedName("wiki")
 	private Wiki wiki = new Wiki();
+
+	public AlbumInfo() {
+	}
+
+	public AlbumInfo(@NonNull AlbumData albumData) {
+		this.mbid = albumData.getMbid();
+		this.name = albumData.getName();
+		this.artist = albumData.getArtist();
+		Image image = new Image();
+		image.setText(albumData.getImage());
+		this.images.add(image);
+		this.url = albumData.getUrl();
+		this.wiki.setContent(albumData.getWiki());
+		this.wiki.setSummary(albumData.getSummary());
+		this.playcount = albumData.getPlaycount();
+		this.tagWrapper.setTags(Util.getTagsFromString(albumData.getTags()));
+		this.releaseDate = albumData.getReleaseDate();
+	}
 
 	public String getReleaseDate() {
 		return releaseDate;

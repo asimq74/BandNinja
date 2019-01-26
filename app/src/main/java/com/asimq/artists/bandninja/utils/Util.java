@@ -15,6 +15,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.text.Html;
+import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.widget.TextSwitcher;
@@ -23,6 +24,8 @@ import android.widget.TextView;
 import com.asimq.artists.bandninja.json.Image;
 import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.json.Tag;
+import com.asimq.artists.bandninja.room.AlbumData;
+import com.asimq.artists.bandninja.room.TrackData;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
@@ -89,6 +92,18 @@ public class Util {
 		return sb.toString();
 	}
 
+	public static String getKeyFromAlbumData(@NonNull AlbumData albumData) {
+		return getKeyFromArtistAndAlbum(albumData.getArtist(), albumData.getName());
+	}
+
+	public static String getKeyFromTrackData(@NonNull TrackData trackData) {
+		return getKeyFromArtistAndAlbum(trackData.getArtistName(), trackData.getAlbumName());
+	}
+
+	public static String getKeyFromArtistAndAlbum(@NonNull String artist, @NonNull String album) {
+		return String.format("%s|%s", artist, album);
+	}
+
 	@NonNull
 	public static List<Tag> getTagsFromString(@NonNull String tagString) {
 		List<Tag> tags = new ArrayList<>();
@@ -121,12 +136,22 @@ public class Util {
 	}
 
 	public static void populateHTMLForSwitcher(@NonNull TextSwitcher switcher, @NonNull String content) {
-		switcher.setCurrentText(Html.fromHtml(content
+		Spanned text = Html.fromHtml(content
 				.replaceAll("(\n)", "<br />")
-				.replaceAll("(\r)", "<br />")));
+				.replaceAll("(\r)", "<br />"));
+		switcher.setText(text);
 		TextView tv = (TextView) switcher.getCurrentView();
+		tv.setText(text);
 		tv.setMovementMethod(LinkMovementMethod.getInstance());
 	}
+
+    public static void populateHTMLForTextView(@NonNull TextView textView, @NonNull String content) {
+        Spanned text = Html.fromHtml(content
+                .replaceAll("(\n)", "<br />")
+                .replaceAll("(\r)", "<br />"));
+        textView.setText(text);
+        textView.setMovementMethod(LinkMovementMethod.getInstance());
+    }
 
 	public static List removeAllItemsWithoutMbidOrImages(List<? extends MusicItem> musicItems) {
 		if (android.os.Build.VERSION.SDK_INT < 24) {

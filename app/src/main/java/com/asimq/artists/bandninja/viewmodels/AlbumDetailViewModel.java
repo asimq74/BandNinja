@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MediatorLiveData;
 import android.support.annotation.NonNull;
 
 import com.asimq.artists.bandninja.asynctasks.SaveAlbumDataTask;
@@ -16,7 +17,9 @@ import com.asimq.artists.bandninja.json.Album;
 import com.asimq.artists.bandninja.json.AlbumInfo;
 import com.asimq.artists.bandninja.json.Track;
 import com.asimq.artists.bandninja.repositories.AlbumInfoRepository;
+import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.AlbumData;
+import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.TrackData;
 import com.asimq.artists.bandninja.room.dao.AlbumDataDao;
 import com.asimq.artists.bandninja.room.dao.TrackDataDao;
@@ -30,14 +33,35 @@ public class AlbumDetailViewModel extends AndroidViewModel {
 	private LiveData<List<AlbumData>> mLiveAlbumDatas;
 	private final TrackDataDao trackDataDao;
 	private final AlbumDataDao albumDataDao;
+	private final MediatorLiveData<List<AlbumData>> mObservableAlbumDatas;
+	private final MediatorLiveData<List<TrackData>> mObservableTrackDatas;
+	private final BandItemRepository bandItemRepository;
 
 	public AlbumDetailViewModel(@NonNull Application application,
 			@NonNull AlbumInfoRepository albumInfoRepository,
+								@NonNull BandItemRepository bandItemRepository,
 								TrackDataDao trackDataDao, AlbumDataDao albumDataDao) {
 		super(application);
 		this.albumInfoRepository = albumInfoRepository;
+		this.bandItemRepository = bandItemRepository;
 		this.trackDataDao = trackDataDao;
 		this.albumDataDao = albumDataDao;
+		this.mObservableAlbumDatas = new MediatorLiveData<>();
+		this.mObservableAlbumDatas.setValue(new ArrayList<>());
+		LiveData<List<AlbumData>> albumDatas = bandItemRepository.getAllAlbumDatas();
+		this.mObservableAlbumDatas.addSource(albumDatas, mObservableAlbumDatas::setValue);
+		this.mObservableTrackDatas = new MediatorLiveData<>();
+		this.mObservableTrackDatas.setValue(new ArrayList<>());
+		LiveData<List<TrackData>> trackDatas = bandItemRepository.getAllTrackLiveDatas();
+		this.mObservableTrackDatas.addSource(trackDatas, mObservableTrackDatas::setValue);
+	}
+
+	public LiveData<List<AlbumData>> getAllAlbumDatas() {
+		return mObservableAlbumDatas;
+	}
+
+	public LiveData<List<TrackData>> getAllTrackDatas() {
+		return mObservableTrackDatas;
 	}
 
 	public LiveData<List<Album>> getAlbumsByArtist(@NonNull String artistName) {

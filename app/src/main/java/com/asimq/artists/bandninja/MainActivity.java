@@ -1,17 +1,6 @@
 package com.asimq.artists.bandninja;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Executors;
-
-import javax.inject.Inject;
-
 import android.app.SearchManager;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -49,9 +38,6 @@ import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.ui.CustomEditText;
 import com.asimq.artists.bandninja.utils.Util;
-import com.asimq.artists.bandninja.viewmodelfactories.SearchResultsViewModelFactory;
-import com.asimq.artists.bandninja.viewmodelfactories.TagDetailViewModelFactory;
-import com.asimq.artists.bandninja.viewmodels.TagDetailViewModel;
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
@@ -64,6 +50,16 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executors;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -111,11 +107,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	RecyclerView mRecyclerView;
 	@BindView(R.id.searchByArtistEditView)
 	CustomEditText searchByArtistEditTextView;
-	@Inject
-	SearchResultsViewModelFactory searchResultsViewModelFactory;
-	private TagDetailViewModel tagDetailViewModel;
-	@Inject
-	TagDetailViewModelFactory tagDetailViewModelFactory;
 	@BindView(R.id.toolbar)
 	Toolbar toolbar;
 
@@ -234,9 +225,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		final MyApplication application = (MyApplication) getApplicationContext();
 		applicationComponent = application.getApplicationComponent();
 		applicationComponent.inject(this);
-		tagDetailViewModel = ViewModelProviders.of(this, tagDetailViewModelFactory)
-				.get(TagDetailViewModel.class);
-
 		setSupportActionBar(toolbar);
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
 
@@ -357,12 +345,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			return true;
 		}
 		return false;
-	}
-
-	@Override
-	protected void onResumeFragments() {
-		super.onResumeFragments();
-//        tagDetailViewModel.getTopTags().observe(this, tags -> Log.d(TAG, "tags: " + tags));
 	}
 
 	@Override

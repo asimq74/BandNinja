@@ -16,6 +16,12 @@ import com.asimq.artists.bandninja.room.TrackData;
 public interface BandItemRepository {
 
 	@NonNull
+	LiveData<List<TrackData>> getAllTrackLiveDatas();
+
+	@NonNull
+	LiveData<List<AlbumData>> getAllAlbumDatas();
+
+	@NonNull
 	LiveData<ArtistData> getArtistDataByName(@NonNull String name);
 
 	@NonNull
