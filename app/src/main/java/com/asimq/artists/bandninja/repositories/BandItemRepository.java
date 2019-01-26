@@ -25,6 +25,9 @@ public interface BandItemRepository {
 	LiveData<ArtistData> getLiveArtistDataByName(@NonNull String name);
 
 	@NonNull
+	List<ArtistData> getArtistDatasByNames(@NonNull List<String> names);
+
+	@NonNull
 	ArtistData getArtistDataByName(@NonNull String name);
 
 	@NonNull

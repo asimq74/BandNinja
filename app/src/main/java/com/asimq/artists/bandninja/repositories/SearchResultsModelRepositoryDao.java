@@ -5,9 +5,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -67,12 +69,17 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 		}
 	}
 
+	@Override
+	public void searchForArtist(@NonNull Context context, @NonNull String artistName) {
+		new ProcessSearchResultsAsyncTask(context)
+				.executeOnExecutor(Executors.newSingleThreadExecutor(), artistName);
+	}
 
 	@Override
 	public Map<String, Artist> getSearchResultsByArtistName(@NonNull String query) {
 		ArtistMapContainer container = new ArtistMapContainer(new HashMap<>());
 		Log.d(TAG, "onQueryTextSubmit: query->" + query);
-		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
+		final GetMusicInfo service = BackgroundRetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
 		Call<ResultsWrapper> call = service.getArtists("artist.search", query,
 				API_KEY, DEFAULT_FORMAT, SEARCH_RESULTS_LIMIT);
 		call.enqueue(new Callback<ResultsWrapper>() {

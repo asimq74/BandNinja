@@ -34,6 +34,10 @@ public interface ArtistDataDao {
 	@NonNull
 	ArtistData fetchArtistDataByName(@NonNull String name);
 
+	@Query("SELECT * from artists where name IN (:names)")
+	@NonNull
+	List<ArtistData> fetchArtistDataByNames(@NonNull List<String> names);
+
 	@Query("SELECT * from artists where mbid = :mbid")
 	@NonNull
 	ArtistData fetchArtistDataById(@NonNull String mbid);

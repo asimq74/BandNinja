@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import android.arch.lifecycle.LiveData;
+import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.asimq.artists.bandninja.json.Artist;
@@ -18,6 +19,8 @@ public interface SearchResultsRepository {
 	LiveData<Artist> getArtistInfo(@NonNull String artistName);
 
 	Artist getArtist(@NonNull String artistName);
+
+	void searchForArtist(@NonNull Context context, @NonNull String artistName);
 
 	Map<String, Artist> getSearchResultsByArtistName(@NonNull String query);
 

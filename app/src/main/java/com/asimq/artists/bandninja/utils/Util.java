@@ -3,6 +3,7 @@ package com.asimq.artists.bandninja.utils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -21,6 +22,7 @@ import android.util.Log;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 
+import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.Image;
 import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.json.Tag;
@@ -133,6 +135,22 @@ public class Util {
 	public static boolean isGooglePlayServicesAvailable(@NonNull Context context) {
 		return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
 				== ConnectionResult.SUCCESS;
+	}
+
+
+	class ColorComparator implements Comparator<Artist>
+	{
+		private List<String> sortOrder;
+		public ColorComparator (List<String> sortOrder){
+			this.sortOrder = sortOrder;
+		}
+
+		public int compare(Artist c1, Artist c2)
+		{
+			int a1 = c1.getListeners();
+			int a2 = c2.getListeners();
+			return a1 - a2;
+		}
 	}
 
 	public static void populateHTMLForSwitcher(@NonNull TextSwitcher switcher, @NonNull String content) {

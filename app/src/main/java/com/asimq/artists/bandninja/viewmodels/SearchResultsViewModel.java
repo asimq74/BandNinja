@@ -8,6 +8,7 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MediatorLiveData;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
@@ -54,45 +55,8 @@ public class SearchResultsViewModel extends AndroidViewModel {
 		return mLiveArtists;
 	}
 
-	private static Map<String, Boolean> mapOfAttachmentTasks = new HashMap<>();
-
-	public static synchronized void addTask(String taskQueryString){
-		mapOfAttachmentTasks.put(taskQueryString, true);
+	public void searchForArtist(@NonNull Context context, @NonNull String artistName) {
+		searchResultsRepository.searchForArtist(context, artistName);
 	}
 
-	public static synchronized void removeTask(String taskQueryString){
-		mapOfAttachmentTasks.remove(taskQueryString);
-	}
-
-	public static synchronized boolean isTasksEmpty(){
-		return mapOfAttachmentTasks.isEmpty();
-	}
-
-	class ArtistInfoAsyncTask extends AsyncTask<String, Void, Artist> {
-
-		private final MediatorLiveData<List<Artist>> artistsLiveDataObservable;
-		private final String taskQueryString;
-
-		public ArtistInfoAsyncTask(MediatorLiveData<List<Artist>> artistsLiveDataObservable,
-								   String taskQueryString) {
-			this.artistsLiveDataObservable = artistsLiveDataObservable;
-			this.taskQueryString = taskQueryString;
-			addTask(taskQueryString);
-		}
-
-		@Override
-		protected Artist doInBackground(String... strings) {
-			String artistName = strings[0];
-			return searchResultsRepository.getArtist(artistName);
-		}
-
-		@Override
-		protected void onPostExecute(Artist artist) {
-			removeTask(taskQueryString);
-
-			if (isTasksEmpty()) {
-//				replace artist in map}
-			}
-		}
-	}
 }

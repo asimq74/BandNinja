@@ -35,6 +35,7 @@ import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.json.Track;
 import com.asimq.artists.bandninja.json.Wiki;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
+import com.asimq.artists.bandninja.repositories.ProcessSearchResultsAsyncTask;
 import com.asimq.artists.bandninja.room.AlbumData;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.TrackData;
@@ -56,6 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
@@ -300,6 +302,7 @@ public class MusicItemsListFragment extends Fragment {
             recyclerView.setVisibility(View.VISIBLE);
             Log.d(TAG, "loading progress ended...");
         });
+        searchResultsViewModel.searchForArtist(getActivity().getApplicationContext(), "Radiohead");
         return view;
     }
 
