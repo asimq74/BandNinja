@@ -36,13 +36,19 @@ public class BandItemDataSource implements BandItemRepository {
 
 	@NonNull
 	@Override
+	public ArtistData getArtistDataByName(@NonNull String name) {
+		return artistDataDao.fetchArtistDataByName(name);
+	}
+
+	@NonNull
+	@Override
 	public LiveData<List<TrackData>> getAllTrackLiveDatas() {
 		return trackDataDao.fetchAllTrackLiveDatas();
 	}
 
 	@NonNull
 	@Override
-	public LiveData<ArtistData> getArtistDataByName(@NonNull String name) {
+	public LiveData<ArtistData> getLiveArtistDataByName(@NonNull String name) {
 		return artistDataDao.fetchLiveArtistDataByName(name);
 	}
 

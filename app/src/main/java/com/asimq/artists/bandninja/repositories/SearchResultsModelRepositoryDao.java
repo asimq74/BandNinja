@@ -2,7 +2,9 @@ package com.asimq.artists.bandninja.repositories;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
@@ -15,6 +17,7 @@ import com.asimq.artists.bandninja.json.ArtistWrapper;
 import com.asimq.artists.bandninja.json.ArtistsWrapper;
 import com.asimq.artists.bandninja.json.ResultsWrapper;
 import com.asimq.artists.bandninja.json.TopArtistsByTagWrapper;
+import com.asimq.artists.bandninja.remote.retrofit.BackgroundRetrofitClientInstance;
 import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
 import com.asimq.artists.bandninja.utils.Util;
@@ -31,6 +34,102 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 
 	final String TAG = this.getClass().getSimpleName();
 	private MutableLiveData<Boolean> artistsRefreshingMutableLiveData = new MutableLiveData<>();
+
+	public class ArtistContainer {
+		private Artist artist;
+
+		public ArtistContainer(Artist artist) {
+			this.artist = artist;
+		}
+
+		public void setArtist(Artist artist) {
+			this.artist = artist;
+		}
+
+		public Artist getArtist() {
+			return artist;
+		}
+	}
+
+	public class ArtistMapContainer {
+		private Map<String, Artist> artistMap = new HashMap<>();
+
+		public ArtistMapContainer(Map<String, Artist> artistMap) {
+			this.artistMap = artistMap;
+		}
+
+		public Map<String, Artist> getArtistMap() {
+			return artistMap;
+		}
+
+		public void setArtistMap(Map<String, Artist> artistMap) {
+			this.artistMap = artistMap;
+		}
+	}
+
+
+	@Override
+	public Map<String, Artist> getSearchResultsByArtistName(@NonNull String query) {
+		ArtistMapContainer container = new ArtistMapContainer(new HashMap<>());
+		Log.d(TAG, "onQueryTextSubmit: query->" + query);
+		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
+		Call<ResultsWrapper> call = service.getArtists("artist.search", query,
+				API_KEY, DEFAULT_FORMAT, SEARCH_RESULTS_LIMIT);
+		call.enqueue(new Callback<ResultsWrapper>() {
+
+			@Override
+			public void onFailure(Call<ResultsWrapper> call, Throwable t) {
+				Log.e(TAG, "error calling service", t);
+			}
+
+			@Override
+			public void onResponse(Call<ResultsWrapper> call, Response<ResultsWrapper> response) {
+				final ResultsWrapper artistPojo = response.body();
+				if (artistPojo == null) {
+					return;
+				}
+
+				Log.i(TAG, "result: " + artistPojo.getResult());
+				List<Artist> artists = artistPojo.getResult().getArtistmatches().getArtists();
+				if (null == artists) {
+					return;
+				}
+				artists = Util.removeAllItemsWithoutMbidOrImages(artists);
+				Collections.sort(artists);
+				for (Artist artist : artists) {
+					container.getArtistMap().put(artist.getName(), artist);
+				}
+			}
+		});
+		return container.getArtistMap();
+	}
+
+	@Override
+	public Artist getArtist(@NonNull String artistName) {
+		final GetMusicInfo service
+				= BackgroundRetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
+		Call<ArtistWrapper> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
+				API_KEY, DEFAULT_FORMAT);
+		final ArtistContainer container = new ArtistContainer(new Artist());
+		artistInfoCall.enqueue(new Callback<ArtistWrapper>() {
+			@Override
+			public void onFailure(Call<ArtistWrapper> call, Throwable t) {
+				container.setArtist(new Artist());
+			}
+
+			@Override
+			public void onResponse(Call<ArtistWrapper> call, Response<ArtistWrapper> response) {
+				final ArtistWrapper artistWrapper = response.body();
+				if (artistWrapper == null) {
+					container.setArtist(new Artist());
+					return;
+				}
+				container.setArtist(artistWrapper.getArtist());
+			}
+		});
+		return container.getArtist();
+	}
+
 
 	@Override
 	public LiveData<Artist> getArtistInfo(@NonNull String artistName) {

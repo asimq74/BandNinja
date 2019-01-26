@@ -22,7 +22,10 @@ public interface BandItemRepository {
 	LiveData<List<AlbumData>> getAllAlbumDatas();
 
 	@NonNull
-	LiveData<ArtistData> getArtistDataByName(@NonNull String name);
+	LiveData<ArtistData> getLiveArtistDataByName(@NonNull String name);
+
+	@NonNull
+	ArtistData getArtistDataByName(@NonNull String name);
 
 	@NonNull
 	List<AlbumData> getAlbumDatas(@NonNull String mbid);
