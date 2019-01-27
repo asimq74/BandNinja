@@ -36,6 +36,10 @@ public interface AlbumDataDao {
 	@NonNull
 	LiveData<List<AlbumData>> fetchLiveAlbumDatasByArtist(@NonNull String artist);
 
+	@Query("SELECT * from albums where name IN (:names)")
+	@NonNull
+	List<AlbumData> fetchAlbumDatasByAlbumNames(@NonNull List<String> names);
+
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	void insertAlbumData(@NonNull AlbumData albumData);
 

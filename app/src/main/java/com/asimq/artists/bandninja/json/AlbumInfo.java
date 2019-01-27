@@ -9,7 +9,7 @@ import com.asimq.artists.bandninja.room.AlbumData;
 import com.asimq.artists.bandninja.utils.Util;
 import com.google.gson.annotations.SerializedName;
 
-public class AlbumInfo extends BaseMusicItem {
+public class AlbumInfo extends BaseMusicItem implements Comparable<AlbumInfo>{
 
 	@SerializedName("artist")
 	private String artist = "";
@@ -32,6 +32,23 @@ public class AlbumInfo extends BaseMusicItem {
 	@SerializedName("wiki")
 	private Wiki wiki = new Wiki();
 
+	@Override
+	public int compareTo(@NonNull AlbumInfo albumInfo) {
+
+		int playcount = stringToInt(albumInfo.getPlaycount());
+		int playcount1 = stringToInt(getPlaycount());
+		return playcount - playcount1;
+	}
+
+
+	public static int stringToInt(String param) {
+		try {
+			return Integer.valueOf(param);
+		} catch(NumberFormatException e) {
+			return -1;
+		}
+	}
+
 	public AlbumInfo() {
 	}
 
@@ -48,6 +65,18 @@ public class AlbumInfo extends BaseMusicItem {
 		this.playcount = albumData.getPlaycount();
 		this.tagWrapper.setTags(Util.getTagsFromString(albumData.getTags()));
 		this.releaseDate = albumData.getReleaseDate();
+	}
+
+	public AlbumInfo(@NonNull Album album) {
+		this.mbid = album.getMbid();
+		this.name = album.getName();
+		this.artist = album.getArtist().getName();
+		this.images = album.getImages();
+		this.url = album.getUrl();
+		this.wiki.setContent(album.getWiki().getContent());
+		this.wiki.setSummary(album.getWiki().getSummary());
+		this.playcount = album.getPlaycount() +"";
+		this.tagWrapper.setTags(album.getTagWrapper().getTags());
 	}
 
 	public String getReleaseDate() {

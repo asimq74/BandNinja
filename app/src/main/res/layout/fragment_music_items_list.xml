@@ -53,11 +53,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/text_margin">
 
-        <TextSwitcher
+        <TextView
             android:id="@+id/ts_place"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            style="@style/PlaceTextView"
             android:layout_marginStart="@dimen/left_offset" />
 
     </FrameLayout>

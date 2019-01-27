@@ -68,6 +68,11 @@ public class SearchResultsViewModel extends AndroidViewModel {
                 isRefreshingObservable, tagName);
     }
 
+    public void searchForTopArtists(@NonNull Context context) {
+        searchResultsRepository.searchForTopArtists(context, artistsLiveDataObservable,
+                isRefreshingObservable);
+    }
+
 	public MediatorLiveData<List<Artist>> getArtistsLiveDataObservable() {
 		return artistsLiveDataObservable;
 	}

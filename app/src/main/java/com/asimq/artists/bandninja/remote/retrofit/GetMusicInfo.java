@@ -56,7 +56,7 @@ public interface GetMusicInfo {
 	@GET("/2.0/")
 	Call<TopAlbumsWrapper> getTopAlbums(@Query("method") String method, @Query("artist") String artist,
 			@Query("api_key") String api_key, @Query("format") String format,
-			@Query("page") int page);
+			@Query("page") int page, @Query("limit") int limit);
 
 	//    method=tag.getTopTagsLiveData&api_key=06aec4c91800f972d32c0d702c003bd5&format=json
 	@GET("/2.0/")

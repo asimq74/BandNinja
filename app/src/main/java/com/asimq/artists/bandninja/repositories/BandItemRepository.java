@@ -34,6 +34,9 @@ public interface BandItemRepository {
 	List<AlbumData> getAlbumDatas(@NonNull String mbid);
 
 	@NonNull
+	List<AlbumData> getAlbumDatasByAlbumNames(@NonNull List<String> names);
+
+	@NonNull
 	LiveData<List<ArtistData>> getAllArtistData();
 
 	@NonNull
@@ -47,6 +50,8 @@ public interface BandItemRepository {
 	@Query("SELECT * from tags")
 	@NonNull
 	LiveData<List<TagData>> getTopTagLiveDatas();
+
+	List<TrackData> getTrackDatasByArtistName(@NonNull String artistName);
 
 	List<TrackData> getTrackDatas(@NonNull String mbid);
 

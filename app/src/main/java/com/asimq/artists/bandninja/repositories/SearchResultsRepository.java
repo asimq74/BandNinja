@@ -31,6 +31,10 @@ public interface SearchResultsRepository {
 							  @NonNull MediatorLiveData<Boolean> isRefreshingObservable,
 							  @NonNull String tagName);
 
+	void searchForTopArtists(@NonNull Context context,
+							  @NonNull MediatorLiveData<List<Artist>> artistsLiveDataObservable,
+							  @NonNull MediatorLiveData<Boolean> isRefreshingObservable);
+
 	Map<String, Artist> getSearchResultsByArtistName(@NonNull String query);
 
 	LiveData<Boolean> getArtistsRefreshingMutableLiveData();

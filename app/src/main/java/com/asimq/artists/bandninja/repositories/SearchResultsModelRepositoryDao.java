@@ -16,6 +16,7 @@ import android.util.Log;
 
 import com.asimq.artists.bandninja.BuildConfig;
 import com.asimq.artists.bandninja.asynctasks.ProcessSearchResultsAsyncTask;
+import com.asimq.artists.bandninja.asynctasks.ProcessTopArtistsAsyncTask;
 import com.asimq.artists.bandninja.asynctasks.ProcessTopArtistsByTagAsyncTask;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.ArtistWrapper;
@@ -70,6 +71,14 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 		public void setArtistMap(Map<String, Artist> artistMap) {
 			this.artistMap = artistMap;
 		}
+	}
+
+	@Override
+	public void searchForTopArtists(@NonNull Context context,
+									@NonNull MediatorLiveData<List<Artist>> artistsLiveDataObservable,
+									@NonNull MediatorLiveData<Boolean> isRefreshingObservable) {
+		new ProcessTopArtistsAsyncTask(context, artistsLiveDataObservable, isRefreshingObservable)
+				.executeOnExecutor(Executors.newSingleThreadExecutor());
 	}
 
 	@Override

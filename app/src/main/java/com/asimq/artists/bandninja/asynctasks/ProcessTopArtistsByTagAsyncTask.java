@@ -9,17 +9,17 @@ import com.asimq.artists.bandninja.BuildConfig;
 import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.ArtistWrapper;
-import com.asimq.artists.bandninja.json.ResultsWrapper;
 import com.asimq.artists.bandninja.json.TopArtistsByTagWrapper;
 import com.asimq.artists.bandninja.remote.retrofit.BackgroundRetrofitClientInstance;
 import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;
+import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.utils.Util;
+import com.google.gson.internal.LinkedHashTreeMap;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -35,10 +35,10 @@ public class ProcessTopArtistsByTagAsyncTask extends AsyncTask<String, Void, Voi
     public static final String API_KEY = BuildConfig.LastFMApiKey;
     public static final String DEFAULT_FORMAT = "json";
     public static final int SEARCH_RESULTS_LIMIT = 10;
-    private static Map<String, Boolean> mapOfAttachmentTasks = new HashMap<>();
+    private static Map<String, Boolean> mapOfAttachmentTasks = new LinkedHashTreeMap<>();
     final String TAG = this.getClass().getSimpleName();
-    private final Map<String, Artist> resultsMap = new HashMap<>();
-    private final Map<String, Integer> listenersMap = new HashMap<>();
+    private final Map<String, Artist> resultsMap = new LinkedHashTreeMap<>();
+    private final Map<String, Integer> listenersMap = new LinkedHashTreeMap<>();
     private final List<String> dataAlreadyExistsKeys = new ArrayList<>();
     private final MediatorLiveData<List<Artist>> artistsLiveDataObservable;
     private final MediatorLiveData<Boolean> isRefreshingObservable;
@@ -198,7 +198,7 @@ public class ProcessTopArtistsByTagAsyncTask extends AsyncTask<String, Void, Voi
         protected Void doInBackground(String... strings) {
             String artistName = strings[0];
             final GetMusicInfo service
-                    = BackgroundRetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
+                    = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
             Call<ArtistWrapper> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
                     API_KEY, DEFAULT_FORMAT);
             artistInfoCall.enqueue(new Callback<ArtistWrapper>() {
@@ -219,6 +219,14 @@ public class ProcessTopArtistsByTagAsyncTask extends AsyncTask<String, Void, Voi
                     }
                     resultsMap.put(name, artist);
                     new SaveArtistDataTask(bandItemRepository).execute(new ArtistData(artist));
+                    removeTask(taskQueryString);
+                    if (isTasksEmpty()) {
+                        Log.d(TAG, "final results map = " + resultsMap);
+                        ArrayList artists = new ArrayList(resultsMap.values());
+                        Collections.sort(artists);
+                        artistsLiveDataObservable.setValue(artists);
+                        isRefreshingObservable.setValue(false);
+                    }
                 }
             });
             return null;
@@ -226,14 +234,6 @@ public class ProcessTopArtistsByTagAsyncTask extends AsyncTask<String, Void, Voi
 
         @Override
         protected void onPostExecute(Void avoid) {
-            removeTask(taskQueryString);
-            if (isTasksEmpty()) {
-                Log.d(TAG, "final results map = " + resultsMap);
-                ArrayList artists = new ArrayList(resultsMap.values());
-                Collections.sort(artists);
-                artistsLiveDataObservable.setValue(artists);
-                isRefreshingObservable.setValue(false);
-            }
         }
     }
 }

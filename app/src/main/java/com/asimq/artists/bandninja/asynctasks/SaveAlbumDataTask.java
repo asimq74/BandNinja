@@ -4,22 +4,23 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.AlbumData;
 import com.asimq.artists.bandninja.room.dao.AlbumDataDao;
 
 public class SaveAlbumDataTask extends AsyncTask<AlbumData, Void, AlbumData> {
 
     final String TAG = this.getClass().getSimpleName();
-    private final AlbumDataDao albumDataDao;
+    private final BandItemRepository repository;
 
-    public SaveAlbumDataTask(@NonNull AlbumDataDao albumDataDao) {
-        this.albumDataDao = albumDataDao;
+    public SaveAlbumDataTask(@NonNull BandItemRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     protected AlbumData doInBackground(AlbumData... params) {
         final AlbumData data = params[0];
-        albumDataDao.insertAlbumData(data);
+        repository.saveAlbumData(data);
         return data;
     }
 

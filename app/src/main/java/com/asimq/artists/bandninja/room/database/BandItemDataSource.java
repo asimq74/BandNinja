@@ -34,10 +34,21 @@ public class BandItemDataSource implements BandItemRepository {
 		this.tagDataDao = tagDataDao;
 	}
 
+	@Override
+	public List<TrackData> getTrackDatasByArtistName(@NonNull String artistName) {
+		return trackDataDao.fetchTrackDatasByArtist(artistName);
+	}
+
 	@NonNull
 	@Override
 	public List<ArtistData> getArtistDatasByNames(@NonNull List<String> names) {
 		return artistDataDao.fetchArtistDataByNames(names);
+	}
+
+	@NonNull
+	@Override
+	public List<AlbumData> getAlbumDatasByAlbumNames(@NonNull List<String> names) {
+		return albumDataDao.fetchAlbumDatasByAlbumNames(names);
 	}
 
 	@NonNull

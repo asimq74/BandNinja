@@ -21,7 +21,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
-import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
@@ -94,7 +93,7 @@ public class MusicItemsListFragment extends Fragment {
     @BindView(R.id.mainTitleView_2)
     TextView mainTitleView2;
     @BindView(R.id.ts_place)
-    TextSwitcher placeSwitcher;
+    TextView place;
     @BindView(R.id.progressBar)
     ProgressBar progressBar;
     @BindView(R.id.recycler_view)
@@ -142,7 +141,7 @@ public class MusicItemsListFragment extends Fragment {
 
 
     protected void displayAlbumsByArtist(@NonNull String artistName) {
-        albumDetailViewModel.getAlbumsByArtist(artistName).observe(this, this::populateAlbums);
+        albumDetailViewModel.searchForAlbums(getActivity().getApplicationContext(), artistName);
     }
 
     protected void displayArtistsFromStorage(@NonNull List<Artist> artists) {
@@ -210,7 +209,11 @@ public class MusicItemsListFragment extends Fragment {
         if (musicItem instanceof Album) {
             Album album = (Album) musicItem;
             considerHandlingSavedAlbumInfo(album.getArtist().getName(), name);
-        } else {
+        } else if (musicItem instanceof AlbumInfo) {
+            AlbumInfo albumInfo = (AlbumInfo) musicItem;
+            processAlbumInfo(albumInfo);
+        }
+        else {
             Artist artist = (Artist) musicItem;
             processArtistInfo(artist);
         }
@@ -254,6 +257,9 @@ public class MusicItemsListFragment extends Fragment {
         if (musicItem instanceof Album) {
             Album album = (Album) musicItem;
             considerHandlingSavedAlbumInfo(album.getArtist().getName(), name);
+        } else if (musicItem instanceof AlbumInfo) {
+            AlbumInfo albumInfo = (AlbumInfo) musicItem;
+            processAlbumInfo(albumInfo);
         } else {
             Artist artist = (Artist) musicItem;
             considerHandlingSavedArtistInfo(artist);
@@ -271,9 +277,6 @@ public class MusicItemsListFragment extends Fragment {
 
         setArtistText(musicItems.get(pos % musicItems.size()).getName(), left2right);
 
-        placeSwitcher.setInAnimation(getActivity(), animV[0]);
-        placeSwitcher.setOutAnimation(getActivity(), animV[1]);
-
         currentPosition = pos;
     }
 
@@ -283,6 +286,8 @@ public class MusicItemsListFragment extends Fragment {
         if (getArguments() != null) {
         }
     }
+
+    private Map<String, Track> tracksByAlbumMap = new HashMap<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -299,30 +304,46 @@ public class MusicItemsListFragment extends Fragment {
                 .get(AlbumDetailViewModel.class);
         artistDetailViewModel = ViewModelProviders.of(this, artistDetailViewModelFactory)
                 .get(ArtistDetailViewModel.class);
-        artistDetailViewModel.getAllArtistDatas().observe(this, artistDatas -> populateArtistDatas(artistDatas));
-        albumDetailViewModel.getAllAlbumDatas().observe(this, albumDatas -> populateAlbumDatas(albumDatas));
-        albumDetailViewModel.getAllTrackDatas().observe(this, trackDatas -> populateTrackDatas(trackDatas));
-
-        searchResultsViewModel.getArtistsRefreshingMutableLiveData().observe(this, loading -> {
-            if (loading) {
-                progressBar.setVisibility(View.VISIBLE);
-                recyclerView.setVisibility(View.GONE);
-                Log.d(TAG, "loading progress began...");
-                return;
-            }
-            progressBar.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
-            Log.d(TAG, "loading progress ended...");
-        });
         searchResultsViewModel.getArtistsLiveDataObservable().observe(this,
                 artists -> buildArtists(artists));
         searchResultsViewModel.getIsRefreshingObservable().observe(this,
-                isRefreshing -> handleIsRefreshing(isRefreshing));
+                isRefreshing -> handleArtistsIsRefreshing(isRefreshing));
+        albumDetailViewModel.getIsRefreshingObservable().observe(this,
+                isRefreshing -> handleAlbumsIsRefreshing(isRefreshing));
+        albumDetailViewModel.getAlbumsLiveDataObservable().observe(this,
+                albums -> buildAlbums(albums));
+        albumDetailViewModel.getTracksByAlbumLiveDataObservable().observe(this,
+                trackMap -> buildTracksByAlbumMap(trackMap));
         return view;
     }
 
-    void handleIsRefreshing(boolean isRefreshing) {
+
+    void buildTracksByAlbumMap(Map<String, Track> tracksByAlbumMap) {
+        this.tracksByAlbumMap.clear();
+        this.tracksByAlbumMap.putAll(tracksByAlbumMap);
+        Log.d(TAG, "tracksByAlbumMap refreshed: " + tracksByAlbumMap);
+    }
+
+    void handleArtistsIsRefreshing(boolean isRefreshing) {
         Log.d(TAG, "artists are refreshing: " + (isRefreshing? true: false));
+        if (isRefreshing) {
+            progressBar.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+        } else {
+            progressBar.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    void handleAlbumsIsRefreshing(boolean isRefreshing) {
+        Log.d(TAG, "albums are refreshing: " + (isRefreshing? true: false));
+        if (isRefreshing) {
+            progressBar.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+        } else {
+            progressBar.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
     }
 
     void populateAlbumDatas(List<AlbumData> albumDatas) {
@@ -404,6 +425,18 @@ public class MusicItemsListFragment extends Fragment {
         searchResultsViewModel.getArtistInfo(artistName).observe(this, artist -> processArtistInfo(artist));
     }
 
+    private void buildAlbums(@NonNull List<AlbumInfo> albumInfos) {
+        if (null == albumInfos || albumInfos.isEmpty()) {
+            recyclerView.setVisibility(View.GONE);
+            mainTitleView1.setText(getString(R.string.informationUnavailable));
+            return;
+        }
+        recyclerView.setVisibility(View.VISIBLE);
+        initRecyclerView(albumInfos, new OnAlbumInfoCardClickedListener(albumInfos));
+        initMusicItemNameText(albumInfos);
+        buildSwitchers(albumInfos);
+    }
+
     private void buildArtists(@NonNull List<Artist> artists) {
         if (null == artists || artists.isEmpty()) {
             recyclerView.setVisibility(View.GONE);
@@ -438,7 +471,7 @@ public class MusicItemsListFragment extends Fragment {
     }
 
     protected void populateTopArtists() {
-        searchResultsViewModel.getTopArtists().observe(this, this::populateArtists);
+        searchResultsViewModel.searchForTopArtists(getActivity().getApplicationContext());
     }
 
     private void populateTracksRecyclerView(@NonNull List<Track> tracks) {
@@ -451,10 +484,9 @@ public class MusicItemsListFragment extends Fragment {
     }
 
     private void processAlbumInfo(@NonNull AlbumInfo albumInfo) {
+        albumDetailViewModel.searchForTracks(getActivity().getApplicationContext(), albumInfo.getArtist());
         String tagsText = null != albumInfo.getTagWrapper() ? Util.getTagsAsString(albumInfo.getTagWrapper().getTags()) : "";
-        placeSwitcher.removeAllViews();
-        placeSwitcher.setFactory(new TextViewFactory(R.style.PlaceTextView, false));
-        placeSwitcher.setCurrentText(tagsText);
+        place.setText(tagsText);
         final Wiki wiki = albumInfo.getWiki();
         if (null != wiki) {
             updateDescriptionsSwitcher(albumInfo.getArtist(), albumInfo.getName(), albumInfo.getMbid(), wiki.getSummary(), Entities.ALBUM);
@@ -469,9 +501,7 @@ public class MusicItemsListFragment extends Fragment {
             return;
         }
         String tagsText = Util.getTagsAsString(artist.getTagWrapper().getTags());
-        placeSwitcher.removeAllViews();
-        placeSwitcher.setFactory(new TextViewFactory(R.style.PlaceTextView, false));
-        placeSwitcher.setCurrentText(tagsText);
+        place.setText(tagsText);
         updateDescriptionsSwitcher(artist.getName(), "", artist.getMbid(), artist.getBio().getSummary(), Entities.ARTIST);
     }
 
@@ -515,15 +545,12 @@ public class MusicItemsListFragment extends Fragment {
     private void updateDescriptionsSwitcher(String artist, String album, String mbid, String text,
                                             Entities type) {
 
-        StringBuilder abbreviatedSummaryBuilder = new StringBuilder();
         if (text.isEmpty()) {
-            abbreviatedSummaryBuilder.append(getString(R.string.summaryUnavailable));
+            descriptionTextView.setText(R.string.summaryUnavailable);
         } else {
-            abbreviatedSummaryBuilder.append(text.length() > 100 ?
-                    text.substring(0, 100) : text).append("\n")
-                    .append(getString(R.string.readMore));
+            Util.populateHTMLForTextView(descriptionTextView, text);
+            Util.makeTextViewResizable(descriptionTextView, 3, getString(R.string.readMore), true);
         }
-        Util.populateHTMLForTextView(descriptionTextView, abbreviatedSummaryBuilder.toString());
         if (!text.isEmpty()) {
             descriptionTextView.setOnClickListener(new OnClickListener() {
                 @Override
@@ -616,6 +643,47 @@ public class MusicItemsListFragment extends Fragment {
             }
         }
     }
+
+
+    private class OnAlbumInfoCardClickedListener implements View.OnClickListener {
+
+        private final List<AlbumInfo> albums;
+
+        public OnAlbumInfoCardClickedListener(List<AlbumInfo> albums) {
+            this.albums = albums;
+        }
+
+        @Override
+        public void onClick(View view) {
+            final CardSliderLayoutManager lm = (CardSliderLayoutManager) recyclerView.getLayoutManager();
+
+            if (lm.isSmoothScrolling()) {
+                return;
+            }
+
+            final int activeCardPosition = lm.getActiveCardPosition();
+            if (activeCardPosition == RecyclerView.NO_POSITION) {
+                return;
+            }
+
+            final int clickedPosition = recyclerView.getChildAdapterPosition(view);
+            if (clickedPosition == activeCardPosition) {
+                AlbumInfo album = albums.get(clickedPosition);
+                Intent articleDetailIntent = new Intent(getActivity(), ArticleDetailActivity.class);
+                articleDetailIntent.putExtra(ArticleDetailActivity.MBID, album.getMbid());
+                articleDetailIntent.putExtra(ArticleDetailActivity.ENTITY_TYPE, Entities.ALBUM.name());
+                articleDetailIntent.putExtra(ArticleDetailActivity.ARTIST, album.getArtist());
+                final CardView cardView = (CardView) view;
+                final View sharedView = cardView.getChildAt(cardView.getChildCount() - 1);
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        Objects.requireNonNull(getActivity()), sharedView, DetailsActivity.EXTRA_IMAGE);
+                startActivity(articleDetailIntent, options.toBundle());
+            } else if (clickedPosition > activeCardPosition) {
+                recyclerView.smoothScrollToPosition(clickedPosition);
+            }
+        }
+    }
+
 
     private class OnArtistCardClickedListener implements View.OnClickListener {
 

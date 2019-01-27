@@ -1,10 +1,14 @@
 package com.asimq.artists.bandninja;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -22,6 +26,8 @@ import android.widget.TextView;
 
 import com.asimq.artists.bandninja.MusicItemsListFragment.OnDetailsInteractionListener;
 import com.asimq.artists.bandninja.ui.HeaderView;
+import com.asimq.artists.bandninja.utils.Util;
+import com.google.gson.Gson;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -114,12 +120,31 @@ public class DetailsActivity extends AppCompatActivity implements OnDetailsInter
 				});
 			}
 		});
-
-		TextView title = findViewById(R.id.title);
-		title.setText(itemTitle);
+		description.setText(itemTitle);
 		onDisplayAlbumsByArtist(itemTitle);
 	}
 
+	@Override
+	protected void onStart() {
+		super.onStart();
+		SharedPreferences sharedPreferences = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
+		SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String locationFromPreferences = sharedPreferences.getString("location", null);
+		StringBuilder titleViewBuilder = new StringBuilder(defaultSharedPreferences.getString(getString(R.string.display_name_key), ""));
+		if (null != locationFromPreferences) {
+			mLocation = new Gson().fromJson(locationFromPreferences, Location.class);
+			String localityAndPostalCode = Util.getLocalityAndPostalCode(this, mLocation.getLatitude(), mLocation.getLongitude());
+			titleViewBuilder.append("\n").append(localityAndPostalCode);
+		}
+		titleView.setText(titleViewBuilder.toString());
+	}
+
+	private Location mLocation = null;
+
+	@BindView(R.id.description)
+	TextView description;
+	@BindView(R.id.title)
+	TextView titleView;
 
 	@Override
 	public void onDisplayAlbumsByArtist(@NonNull String artistName) {

@@ -68,7 +68,6 @@
     <style name="PlaceTextView">
         <item name="android:textColor">@color/colorPrimaryDark</item>
         <item name="android:textSize">@dimen/placeTextSize</item>
-        <item name="android:gravity">center</item>
     </style>
 
     <style name="ClockTextView">

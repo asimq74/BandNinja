@@ -9,6 +9,7 @@ import com.asimq.artists.bandninja.BuildConfig;
 import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.ArtistWrapper;
+import com.asimq.artists.bandninja.json.ArtistsWrapper;
 import com.asimq.artists.bandninja.json.ResultsWrapper;
 import com.asimq.artists.bandninja.remote.retrofit.BackgroundRetrofitClientInstance;
 import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;
@@ -30,7 +31,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ProcessSearchResultsAsyncTask extends AsyncTask<String, Void, Void> {
+public class ProcessTopArtistsAsyncTask extends AsyncTask<Void, Void, Void> {
 
     public static final String API_KEY = BuildConfig.LastFMApiKey;
     public static final String DEFAULT_FORMAT = "json";
@@ -45,9 +46,9 @@ public class ProcessSearchResultsAsyncTask extends AsyncTask<String, Void, Void>
     @Inject
     BandItemRepository bandItemRepository;
 
-    public ProcessSearchResultsAsyncTask(Context applicationContext,
-                                         MediatorLiveData<List<Artist>> artistsLiveDataObservable,
-                                         MediatorLiveData<Boolean> isRefreshingObservable) {
+    public ProcessTopArtistsAsyncTask(Context applicationContext,
+                                      MediatorLiveData<List<Artist>> artistsLiveDataObservable,
+                                      MediatorLiveData<Boolean> isRefreshingObservable) {
         final MyApplication application = (MyApplication) applicationContext;
         application.getApplicationComponent().inject(this);
         this.artistsLiveDataObservable = artistsLiveDataObservable;
@@ -67,32 +68,31 @@ public class ProcessSearchResultsAsyncTask extends AsyncTask<String, Void, Void>
     }
 
     @Override
-    protected Void doInBackground(String... strings) {
-        String query = strings[0];
-        Log.d(TAG, "onQueryTextSubmit: query->" + query);
-        final GetMusicInfo service = BackgroundRetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
-        Call<ResultsWrapper> call = service.getArtists("artist.search", query,
+    protected Void doInBackground(Void... voids) {
+        final GetMusicInfo service = BackgroundRetrofitClientInstance.getRetrofitInstance()
+                .create(GetMusicInfo.class);
+        Call<ArtistsWrapper> topArtistsCall = service.getTopArtists("chart.gettopartists",
                 API_KEY, DEFAULT_FORMAT, SEARCH_RESULTS_LIMIT);
-        call.enqueue(new Callback<ResultsWrapper>() {
+        topArtistsCall.enqueue(new Callback<ArtistsWrapper>() {
 
             @Override
-            public void onFailure(Call<ResultsWrapper> call, Throwable t) {
+            public void onFailure(Call<ArtistsWrapper> call, Throwable t) {
                 Log.e(TAG, "error calling service", t);
                 isRefreshingObservable.setValue(false);
                 artistsLiveDataObservable.setValue(new ArrayList<Artist>());
             }
 
             @Override
-            public void onResponse(Call<ResultsWrapper> call, Response<ResultsWrapper> response) {
-                final ResultsWrapper artistPojo = response.body();
+            public void onResponse(Call<ArtistsWrapper> call, Response<ArtistsWrapper> response) {
+                final ArtistsWrapper artistPojo = response.body();
                 if (artistPojo == null) {
                     isRefreshingObservable.setValue(false);
                     artistsLiveDataObservable.setValue(new ArrayList<>());
                     return;
                 }
 
-                Log.i(TAG, "result: " + artistPojo.getResult());
-                List<Artist> artists = artistPojo.getResult().getArtistmatches().getArtists();
+                Log.i(TAG, "result: " + artistPojo.getTopArtists());
+                List<Artist> artists = artistPojo.getTopArtists().getArtists();
                 if (null == artists) {
                     isRefreshingObservable.setValue(false);
                     artistsLiveDataObservable.setValue(new ArrayList<>());
@@ -234,7 +234,6 @@ public class ProcessSearchResultsAsyncTask extends AsyncTask<String, Void, Void>
 
         @Override
         protected void onPostExecute(Void avoid) {
-
         }
     }
 }
