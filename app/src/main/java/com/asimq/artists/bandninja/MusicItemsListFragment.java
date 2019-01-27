@@ -35,7 +35,6 @@ import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.json.Track;
 import com.asimq.artists.bandninja.json.Wiki;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
-import com.asimq.artists.bandninja.repositories.ProcessSearchResultsAsyncTask;
 import com.asimq.artists.bandninja.room.AlbumData;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.TrackData;
@@ -57,7 +56,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
@@ -152,8 +150,7 @@ public class MusicItemsListFragment extends Fragment {
     }
 
     protected void displaySearchResultsByArtist(@NonNull String artistName) {
-        searchResultsViewModel.getSearchResultsByArtist(artistName).observe(this,
-                this::populateArtists);
+        searchResultsViewModel.searchForArtist(getActivity().getApplicationContext(), artistName);
     }
 
     private void initMusicItemNameText(@NonNull List<? extends MusicItem> musicItems) {
@@ -200,7 +197,22 @@ public class MusicItemsListFragment extends Fragment {
             considerHandlingSavedAlbumInfo(album.getArtist().getName(), name);
         } else {
             Artist artist = (Artist) musicItem;
-           considerHandlingSavedArtistInfo(artist);
+            considerHandlingSavedArtistInfo(artist);
+        }
+    }
+
+
+    private void buildSwitchers(@NonNull List<? extends MusicItem> musicItems) {
+        final MusicItem musicItem = musicItems.get(0);
+        String name = musicItem.getName();
+        String mbid = musicItem.getMbid();
+        Log.d(TAG, String.format("musicItem: %s mbid: %s", name, mbid));
+        if (musicItem instanceof Album) {
+            Album album = (Album) musicItem;
+            considerHandlingSavedAlbumInfo(album.getArtist().getName(), name);
+        } else {
+            Artist artist = (Artist) musicItem;
+            processArtistInfo(artist);
         }
     }
 
@@ -302,8 +314,15 @@ public class MusicItemsListFragment extends Fragment {
             recyclerView.setVisibility(View.VISIBLE);
             Log.d(TAG, "loading progress ended...");
         });
-        searchResultsViewModel.searchForArtist(getActivity().getApplicationContext(), "Radiohead");
+        searchResultsViewModel.getArtistsLiveDataObservable().observe(this,
+                artists -> buildArtists(artists));
+        searchResultsViewModel.getIsRefreshingObservable().observe(this,
+                isRefreshing -> handleIsRefreshing(isRefreshing));
         return view;
+    }
+
+    void handleIsRefreshing(boolean isRefreshing) {
+        Log.d(TAG, "artists are refreshing: " + (isRefreshing? true: false));
     }
 
     void populateAlbumDatas(List<AlbumData> albumDatas) {
@@ -385,6 +404,18 @@ public class MusicItemsListFragment extends Fragment {
         searchResultsViewModel.getArtistInfo(artistName).observe(this, artist -> processArtistInfo(artist));
     }
 
+    private void buildArtists(@NonNull List<Artist> artists) {
+        if (null == artists || artists.isEmpty()) {
+            recyclerView.setVisibility(View.GONE);
+            mainTitleView1.setText(getString(R.string.informationUnavailable));
+            return;
+        }
+        recyclerView.setVisibility(View.VISIBLE);
+        initRecyclerView(artists, new OnArtistCardClickedListener(artists));
+        initMusicItemNameText(artists);
+        buildSwitchers(artists);
+    }
+
     private void populateArtists(@NonNull List<Artist> artists) {
         if (null == artists || artists.isEmpty()) {
             recyclerView.setVisibility(View.GONE);
@@ -398,7 +429,8 @@ public class MusicItemsListFragment extends Fragment {
     }
 
     protected void populateArtistsByTag(@NonNull String tag) {
-        searchResultsViewModel.getTopArtistsByTag(tag).observe(this, this::populateArtists);
+//        searchResultsViewModel.getTopArtistsByTag(tag).observe(this, this::populateArtists);
+        searchResultsViewModel.searchForArtistByTag(getActivity().getApplicationContext(), tag);
     }
 
     protected void populateTopAlbums() {

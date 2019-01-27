@@ -7,7 +7,8 @@ import com.asimq.artists.bandninja.ArticleDetailActivity;
 import com.asimq.artists.bandninja.MainActivity;
 import com.asimq.artists.bandninja.MusicItemsListFragment;
 import com.asimq.artists.bandninja.MyApplication;
-import com.asimq.artists.bandninja.repositories.ProcessSearchResultsAsyncTask;
+import com.asimq.artists.bandninja.asynctasks.ProcessSearchResultsAsyncTask;
+import com.asimq.artists.bandninja.asynctasks.ProcessTopArtistsByTagAsyncTask;
 import com.asimq.artists.bandninja.repositories.SearchResultsModelRepositoryDao;
 import com.asimq.artists.bandninja.service.BandDataSyncAsyncTask;
 import com.asimq.artists.bandninja.service.DataSyncJobService;
@@ -59,6 +60,8 @@ public interface ApplicationComponent {
     void inject(SearchResultsModelRepositoryDao searchResultsModelRepositoryDao);
 
     void inject(ProcessSearchResultsAsyncTask processSearchResultsAsyncTask);
+
+    void inject(ProcessTopArtistsByTagAsyncTask processTopArtistsByTagAsyncTask);
 
 
 }

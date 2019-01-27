@@ -6,6 +6,7 @@ import java.util.Map;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
+import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MediatorLiveData;
 import android.content.Context;
@@ -22,6 +23,8 @@ public class SearchResultsViewModel extends AndroidViewModel {
 	private LiveData<List<Artist>> mLiveArtists;
 	private final SearchResultsRepository searchResultsRepository;
 	private final BandItemRepository bandItemRepository;
+	private MediatorLiveData<List<Artist>> artistsLiveDataObservable = new MediatorLiveData<>();
+	private MediatorLiveData<Boolean> isRefreshingObservable = new MediatorLiveData<>();
 
 	public SearchResultsViewModel(@NonNull Application application,
 			@NonNull SearchResultsRepository searchResultsRepository,
@@ -56,7 +59,20 @@ public class SearchResultsViewModel extends AndroidViewModel {
 	}
 
 	public void searchForArtist(@NonNull Context context, @NonNull String artistName) {
-		searchResultsRepository.searchForArtist(context, artistName);
+		searchResultsRepository.searchForArtist(context, artistsLiveDataObservable,
+				isRefreshingObservable, artistName);
 	}
 
+    public void searchForArtistByTag(@NonNull Context context, @NonNull String tagName) {
+        searchResultsRepository.searchForArtistByTag(context, artistsLiveDataObservable,
+                isRefreshingObservable, tagName);
+    }
+
+	public MediatorLiveData<List<Artist>> getArtistsLiveDataObservable() {
+		return artistsLiveDataObservable;
+	}
+
+	public MediatorLiveData<Boolean> getIsRefreshingObservable() {
+		return isRefreshingObservable;
+	}
 }

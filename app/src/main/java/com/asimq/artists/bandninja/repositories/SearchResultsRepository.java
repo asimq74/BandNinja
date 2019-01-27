@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MediatorLiveData;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
@@ -20,7 +21,15 @@ public interface SearchResultsRepository {
 
 	Artist getArtist(@NonNull String artistName);
 
-	void searchForArtist(@NonNull Context context, @NonNull String artistName);
+	void searchForArtist(@NonNull Context context,
+						 @NonNull MediatorLiveData<List<Artist>> artistsLiveDataObservable,
+						 @NonNull MediatorLiveData<Boolean> isRefreshingObservable,
+						 @NonNull String artistName);
+
+	void searchForArtistByTag(@NonNull Context context,
+							  @NonNull MediatorLiveData<List<Artist>> artistsLiveDataObservable,
+							  @NonNull MediatorLiveData<Boolean> isRefreshingObservable,
+							  @NonNull String tagName);
 
 	Map<String, Artist> getSearchResultsByArtistName(@NonNull String query);
 

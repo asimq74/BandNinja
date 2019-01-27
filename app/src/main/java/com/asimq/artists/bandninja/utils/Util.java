@@ -138,12 +138,9 @@ public class Util {
 	}
 
 
-	class ColorComparator implements Comparator<Artist>
+	class ArtistComparator implements Comparator<Artist>
 	{
 		private List<String> sortOrder;
-		public ColorComparator (List<String> sortOrder){
-			this.sortOrder = sortOrder;
-		}
 
 		public int compare(Artist c1, Artist c2)
 		{

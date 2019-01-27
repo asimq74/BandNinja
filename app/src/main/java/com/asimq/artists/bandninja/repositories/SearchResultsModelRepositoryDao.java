@@ -8,12 +8,15 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MediatorLiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.asimq.artists.bandninja.BuildConfig;
+import com.asimq.artists.bandninja.asynctasks.ProcessSearchResultsAsyncTask;
+import com.asimq.artists.bandninja.asynctasks.ProcessTopArtistsByTagAsyncTask;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.ArtistWrapper;
 import com.asimq.artists.bandninja.json.ArtistsWrapper;
@@ -70,9 +73,21 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 	}
 
 	@Override
-	public void searchForArtist(@NonNull Context context, @NonNull String artistName) {
-		new ProcessSearchResultsAsyncTask(context)
+	public void searchForArtist(@NonNull Context context,
+								@NonNull MediatorLiveData<List<Artist>> artistsLiveDataObservable,
+								@NonNull MediatorLiveData<Boolean> isRefreshingObservable,
+								@NonNull String artistName) {
+		new ProcessSearchResultsAsyncTask(context, artistsLiveDataObservable, isRefreshingObservable)
 				.executeOnExecutor(Executors.newSingleThreadExecutor(), artistName);
+	}
+
+	@Override
+	public void searchForArtistByTag(@NonNull Context context,
+								@NonNull MediatorLiveData<List<Artist>> artistsLiveDataObservable,
+								@NonNull MediatorLiveData<Boolean> isRefreshingObservable,
+								@NonNull String tagName) {
+		new ProcessTopArtistsByTagAsyncTask(context, artistsLiveDataObservable, isRefreshingObservable)
+				.executeOnExecutor(Executors.newSingleThreadExecutor(), tagName);
 	}
 
 	@Override
