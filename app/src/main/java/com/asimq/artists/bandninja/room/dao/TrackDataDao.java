@@ -34,6 +34,10 @@ public interface TrackDataDao {
 	@NonNull
 	List<TrackData> fetchTrackDatasByArtist(String artistName);
 
+	@Query("SELECT * from tracks where artistName = :artistName and albumName = :albumName ORDER BY number ASC")
+	@NonNull
+	List<TrackData> getTrackLiveDatasByArtistAndAlbum(@NonNull String artistName, @NonNull String albumName);
+
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	void insertMultipleTrackDatas(@NonNull List<TrackData> trackDatas);
 

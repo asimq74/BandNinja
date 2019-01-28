@@ -53,6 +53,8 @@ public interface BandItemRepository {
 
 	List<TrackData> getTrackDatasByArtistName(@NonNull String artistName);
 
+	List<TrackData> getTrackLiveDatasByArtistAndAlbum(@NonNull String artistName, @NonNull String albumName);
+
 	List<TrackData> getTrackDatas(@NonNull String mbid);
 
 	LiveData<List<TrackData>> getTrackLiveDatas(@NonNull String mbid);

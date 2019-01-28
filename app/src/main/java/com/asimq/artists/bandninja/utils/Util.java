@@ -199,6 +199,9 @@ public class Util {
 							addClickablePartTextViewResizable(Html.fromHtml(tv.getText().toString()), tv, maxLine, expandText,
 									viewMore), TextView.BufferType.SPANNABLE);
 				} else {
+					if (null == tv || null == tv.getLayout()) {
+						return;
+					}
 					int lineEndIndex = tv.getLayout().getLineEnd(tv.getLayout().getLineCount() - 1);
 					String text = tv.getText().subSequence(0, lineEndIndex) + " " + expandText;
 					tv.setText(text);

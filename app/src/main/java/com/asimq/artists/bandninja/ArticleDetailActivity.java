@@ -32,7 +32,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.asimq.artists.bandninja.json.AlbumInfo;
+import com.asimq.artists.bandninja.json.Track;
 import com.asimq.artists.bandninja.room.ArtistData;
+import com.asimq.artists.bandninja.room.TrackData;
 import com.asimq.artists.bandninja.room.dao.TrackDataDao;
 import com.asimq.artists.bandninja.ui.HeaderView;
 import com.asimq.artists.bandninja.utils.Util;
@@ -47,7 +49,10 @@ import com.squareup.picasso.Picasso;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -201,6 +206,7 @@ public class ArticleDetailActivity extends AppCompatActivity
                 .get(ArtistDetailViewModel.class);
         albumDetailViewModel = ViewModelProviders.of(this, albumDetailViewModelFactory)
                 .get(AlbumDetailViewModel.class);
+        albumDetailViewModel.getAlbumTracksObservable().observe(ArticleDetailActivity.this, trackDatas->buildTracks(trackDatas));
         if (Entities.ARTIST.name().equals(entityType)) {
             artistDetailViewModel.getArtistDetail(mbId).observe(this, artistData -> populateInitialView(artistData));
         } else if (Entities.ALBUM.name().equals(entityType)) {
@@ -212,22 +218,72 @@ public class ArticleDetailActivity extends AppCompatActivity
         }
     }
 
-    private Date parsePublishedDate(String dateString) {
-        try {
-            return dateFormat.parse(dateString);
-        } catch (ParseException ex) {
-            Log.e(TAG, ex.getMessage());
-            Log.i(TAG, "passing today's date");
-            return new Date();
-        }
-    }
-
     protected void populateBody(String body) {
         cardView.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
         populateUI(body.split("(\r\n\r\n)"));
         progressBar.setVisibility(View.GONE);
         cardView.setVisibility(View.VISIBLE);
+    }
+
+    private Map<String, Track> tracksByAlbumMap = new HashMap<>();
+
+    void buildTracks(List<TrackData> trackDatas) {
+        Log.d(TAG, "trackDatas: " + trackDatas);
+        if (null == trackDatas || trackDatas.isEmpty()) {
+            return;
+        }
+        populateTracksRecyclerView(trackDatas);
+    }
+
+    private void populateTracksRecyclerView(@NonNull List<TrackData> tracks) {
+        TracksAdapter adapter = new TracksAdapter(tracks);
+        adapter.setHasStableIds(true);
+        tracksRecyclerView.setAdapter(adapter);
+        StaggeredGridLayoutManager sglm =
+            new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
+        tracksRecyclerView.setLayoutManager(sglm);
+    }
+
+    @BindView(R.id.tracksRecyclerView)
+    RecyclerView tracksRecyclerView;
+
+    public static class TracksViewHolder extends RecyclerView.ViewHolder {
+
+        public TextView trackListItemView;
+
+        public TracksViewHolder(View view) {
+            super(view);
+            trackListItemView = view.findViewById(R.id.trackListItemView);
+        }
+    }
+
+    private class TracksAdapter extends RecyclerView.Adapter<TracksViewHolder> {
+
+        private List<TrackData> tracks;
+
+        public TracksAdapter(List<TrackData> tracks) {
+            this.tracks = tracks;
+        }
+
+        @Override
+        public int getItemCount() {
+            return tracks.size();
+        }
+
+        @Override
+        public void onBindViewHolder(TracksViewHolder holder, int position) {
+            final TrackData track = tracks.get(position);
+            holder.trackListItemView.setText(String.format("%s. %s - %s", position + 1, track.getName(), track.getDuration()));
+            holder.trackListItemView.setMovementMethod(LinkMovementMethod.getInstance());
+
+        }
+
+        @Override
+        public TracksViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new TracksViewHolder(getLayoutInflater().inflate(R.layout.track_list_item_detail, parent, false));
+        }
+
     }
 
     private void populateInitialView(@NonNull ArtistData artistData) {
@@ -282,12 +338,8 @@ public class ArticleDetailActivity extends AppCompatActivity
                 Bitmap bitmap = ((BitmapDrawable) photoView.getDrawable()).getBitmap();
                 Palette.from(bitmap).generate(this::onGenerated);
                 final String body = null != albumInfo.getWiki() ? albumInfo.getWiki().getContent() : "";
-                albumDetailViewModel.getTrackDatas(mbId).observe(
-                        ArticleDetailActivity.this,
-                        trackDatas -> Log.d(TAG, "trackDatas: " + trackDatas));
-                albumDetailViewModel.getAlbumDatas(albumInfo.getArtist()).observe(ArticleDetailActivity.this,
-                        albumDatas -> Log.d(TAG, "albumDatas: " + albumDatas));
                 populateBody(body);
+                albumDetailViewModel.obtainTrackInformation(getApplicationContext(), albumInfo.getArtist(), albumInfo.getName());
             }
         });
         progressBar.setVisibility(View.GONE);

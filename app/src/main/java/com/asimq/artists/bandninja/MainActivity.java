@@ -89,6 +89,9 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	}
 
 	private static final String JOB_TAG = "MyJobService";
+	public static final String ON_DISPLAYING_ARTISTS_BY_TAG = "onDisplayingArtistsByTag";
+	public static final String ON_DISPLAYING_TOP_ARTISTS = "onDisplayingTopArtists";
+	public static final String ON_QUERY_TEXT_SUBMIT = "onQueryTextSubmit";
 	final String TAG = this.getClass().getSimpleName();
 	AdView adView;
 	private ApplicationComponent applicationComponent;
@@ -148,6 +151,9 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		InputMethodManager inputManager =
 				(InputMethodManager) this.
 						getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (null == this.getCurrentFocus()) {
+			return;
+		}
 		inputManager.hideSoftInputFromWindow(
 				this.getCurrentFocus().getWindowToken(),
 				InputMethodManager.HIDE_NOT_ALWAYS);
@@ -216,8 +222,25 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	}
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		currentTag = savedInstanceState.getString(EXTRA_CURRENT_TAG);
+		currentArtist = savedInstanceState.getString(EXTRA_CURRENT_ARTIST);
+		currentAlbum = savedInstanceState.getString(EXTRA_CURRENT_ALBUM);
+		currentMethod = savedInstanceState.getString(EXTRA_CURRENT_METHOD);
+		Log.d(TAG, String.format("current state %s, %s, %s, %s", currentMethod, currentArtist, currentAlbum, currentTag));
+		super.onRestoreInstanceState(savedInstanceState);
+	}
+
+	@Override
+	protected void onCreate(Bundle bundle) {
+		super.onCreate(bundle);
+		if (bundle != null) {
+			currentTag = bundle.getString(EXTRA_CURRENT_TAG);
+			currentArtist = bundle.getString(EXTRA_CURRENT_ARTIST);
+			currentAlbum = bundle.getString(EXTRA_CURRENT_ALBUM);
+			currentMethod = bundle.getString(EXTRA_CURRENT_METHOD);
+			Log.d(TAG, String.format("oncreate: current state %s, %s, %s, %s", currentMethod, currentArtist, currentAlbum, currentTag));
+		}
 		setContentView(R.layout.activity_main);
 		mDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
 		scheduleJob();
@@ -273,8 +296,16 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 
 		loadAd();
 		setUpSearchByArtistView();
-//		considerDisplayingArtistsFromStorage();
-		onDisplayingArtistsByTag("alternative");
+		if (ON_DISPLAYING_ARTISTS_BY_TAG.equals(currentMethod)) {
+			onDisplayingArtistsByTag(currentTag);
+		} else if (ON_DISPLAYING_TOP_ARTISTS.equals(currentMethod)) {
+			onDisplayingTopArtists();
+		} else if (ON_QUERY_TEXT_SUBMIT.equals(currentMethod)) {
+			onSearchedForArtistName(currentArtist);
+		} else {
+			onDisplayingTopArtists();
+		}
+
 	}
 
 	@Override
@@ -294,12 +325,36 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			@Override
 			public boolean onQueryTextSubmit(String query) {
 				Log.d(TAG, "onQueryTextSubmit: query->" + query);
+				currentArtist = query;
+				currentMethod = ON_QUERY_TEXT_SUBMIT;
+				currentAlbum = "";
+				currentTag = "";
 				onSearchedForArtistName(query);
 				return false;
 			}
 		});
 		return true;
 	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putString(EXTRA_CURRENT_TAG, currentTag);
+		outState.putString(EXTRA_CURRENT_ARTIST, currentArtist);
+		outState.putString(EXTRA_CURRENT_ALBUM, currentAlbum);
+		outState.putString(EXTRA_CURRENT_METHOD, currentMethod);
+		Log.d(TAG, String.format("current saved state %s, %s, %s, %s", currentMethod, currentArtist, currentAlbum, currentTag));
+	}
+
+	private String currentTag = "";
+	private String currentArtist = "";
+	private String currentAlbum = "";
+	private String currentMethod = "";
+
+	public static final String EXTRA_CURRENT_TAG = "EXTRA_CURRENT_TAG";
+	public static final String EXTRA_CURRENT_ARTIST = "EXTRA_CURRENT_ARTIST";
+	public static final String EXTRA_CURRENT_ALBUM = "EXTRA_CURRENT_ALBUM";
+	public static final String EXTRA_CURRENT_METHOD = "EXTRA_CURRENT_METHOD";
 
 	@Override
 	public void onDisplayArtistList(@NonNull List<Artist> artists) {
@@ -315,6 +370,10 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		MusicItemsListFragment musicItemsListFragment = (MusicItemsListFragment)
 				getSupportFragmentManager().findFragmentById(R.id.musicItemsListFragment);
 		if (musicItemsListFragment != null) {
+			currentArtist = "";
+			currentMethod = ON_DISPLAYING_ARTISTS_BY_TAG;
+			currentAlbum = "";
+			currentTag = tag;
 			musicItemsListFragment.populateArtistsByTag(tag);
 		}
 	}
@@ -333,6 +392,10 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		MusicItemsListFragment musicItemsListFragment = (MusicItemsListFragment)
 				getSupportFragmentManager().findFragmentById(R.id.musicItemsListFragment);
 		if (musicItemsListFragment != null) {
+			currentArtist = "";
+			currentMethod = ON_DISPLAYING_TOP_ARTISTS;
+			currentAlbum = "";
+			currentTag = "";
 			musicItemsListFragment.populateTopArtists();
 		}
 	}
@@ -352,6 +415,10 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		MusicItemsListFragment musicItemsListFragment = (MusicItemsListFragment)
 				getSupportFragmentManager().findFragmentById(R.id.musicItemsListFragment);
 		if (musicItemsListFragment != null) {
+			currentArtist = "";
+			currentMethod = ON_QUERY_TEXT_SUBMIT;
+			currentAlbum = "";
+			currentTag = "";
 			musicItemsListFragment.displaySearchResultsByArtist(artistName);
 		}
 		hideKeyboard();

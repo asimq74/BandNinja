@@ -23,6 +23,7 @@ import com.asimq.artists.bandninja.json.TopAlbumsWrapper;
 import com.asimq.artists.bandninja.json.Track;
 import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
+import com.asimq.artists.bandninja.room.TrackData;
 import com.asimq.artists.bandninja.utils.Util;
 
 import retrofit2.Call;
@@ -42,15 +43,6 @@ public class AlbumInfoRepositoryDao implements AlbumInfoRepository {
 								@NonNull MediatorLiveData<Boolean> isRefreshingObservable,
 								@NonNull String artistName) {
 		new ProcessAlbumsByArtistAsyncTask(context, albumsLiveDataObservable, isRefreshingObservable)
-				.executeOnExecutor(Executors.newSingleThreadExecutor(), artistName);
-	}
-
-	@Override
-	public void searchForTracks(@NonNull Context context,
-								@NonNull MediatorLiveData<Map<String, Track>> tracksByAlbumLiveDataObservable,
-								@NonNull MediatorLiveData<Boolean> isRefreshingObservable,
-								@NonNull String artistName) {
-		new FetchTrackDataTask(context, tracksByAlbumLiveDataObservable, isRefreshingObservable)
 				.executeOnExecutor(Executors.newSingleThreadExecutor(), artistName);
 	}
 

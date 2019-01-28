@@ -9,6 +9,7 @@ import com.asimq.artists.bandninja.json.Album;
 import com.asimq.artists.bandninja.json.AlbumInfo;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.Track;
+import com.asimq.artists.bandninja.room.TrackData;
 
 import java.util.List;
 import java.util.Map;
@@ -27,8 +28,4 @@ public interface AlbumInfoRepository {
                          @NonNull MediatorLiveData<Boolean> isRefreshingObservable,
                          @NonNull String artistName);
 
-    void searchForTracks(@NonNull Context context,
-                         @NonNull MediatorLiveData<Map<String, Track>> tracksByAlbumLiveDataObservable,
-                         @NonNull MediatorLiveData<Boolean> isRefreshingObservable,
-                         @NonNull String artistName);
 }

@@ -46,6 +46,7 @@ public class AlbumDetailViewModel extends AndroidViewModel {
 	private MediatorLiveData<List<AlbumInfo>> albumsLiveDataObservable = new MediatorLiveData<>();
 	private MediatorLiveData<Boolean> isRefreshingObservable = new MediatorLiveData<>();
 	private MediatorLiveData<Map<String, Track>> tracksByAlbumLiveDataObservable = new MediatorLiveData<>();
+	private MediatorLiveData<List<TrackData>> albumTracksObservable = new MediatorLiveData<>();
 
 	public MediatorLiveData<Map<String, Track>> getTracksByAlbumLiveDataObservable() {
 		return tracksByAlbumLiveDataObservable;
@@ -70,10 +71,13 @@ public class AlbumDetailViewModel extends AndroidViewModel {
 		this.mObservableTrackDatas.addSource(trackDatas, mObservableTrackDatas::setValue);
 	}
 
+	public void obtainTrackInformation(Context context, String artistName, String albumName) {
+		new FetchTrackDataTask(context, albumTracksObservable)
+				.executeOnExecutor(Executors.newSingleThreadExecutor(), artistName, albumName);
+	}
 
-	public void searchForTracks(@NonNull Context context, @NonNull String artistName) {
-		albumInfoRepository.searchForTracks(context, tracksByAlbumLiveDataObservable,
-				isRefreshingObservable, artistName);
+	public LiveData<List<TrackData>> getAlbumTracksObservable() {
+		return albumTracksObservable;
 	}
 
 	public void searchForAlbums(@NonNull Context context, @NonNull String artistName) {
