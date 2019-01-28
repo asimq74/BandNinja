@@ -313,6 +313,7 @@ public class MusicItemsListFragment extends Fragment {
 		if (null == albumInfos || albumInfos.isEmpty()) {
 			recyclerView.setVisibility(View.GONE);
 			mainTitleView1.setText(getString(R.string.informationUnavailable));
+			hideFieldsExceptTitle();
 			return;
 		}
 		recyclerView.setVisibility(View.VISIBLE);
@@ -325,6 +326,7 @@ public class MusicItemsListFragment extends Fragment {
 		if (null == artists || artists.isEmpty()) {
 			recyclerView.setVisibility(View.GONE);
 			mainTitleView1.setText(getString(R.string.informationUnavailable));
+			hideFieldsExceptTitle();
 			return;
 		}
 		recyclerView.setVisibility(View.VISIBLE);
@@ -629,6 +631,12 @@ public class MusicItemsListFragment extends Fragment {
 		mainTitleLayout.setVisibility(visibility);
 		tagsLayout.setVisibility(visibility);
 		descriptionLayout.setVisibility(visibility);
+	}
+
+	private void hideFieldsExceptTitle() {
+		recyclerView.setVisibility(View.GONE);
+		tagsLayout.setVisibility(View.GONE);
+		descriptionLayout.setVisibility(View.GONE);
 	}
 
 	private void updateDescriptionsSwitcher(String artist, String album, String mbid, String text,

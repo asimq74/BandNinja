@@ -55,6 +55,21 @@ public class ProcessTopArtistsAsyncTask extends AsyncTask<Void, Void, Void> {
         this.isRefreshingObservable = isRefreshingObservable;
     }
 
+    class EmptyDataProcessor extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            isRefreshingObservable.setValue(false);
+            artistsLiveDataObservable.setValue(new ArrayList<>());
+        }
+    }
+
     public static synchronized void addTask(String taskQueryString) {
         mapOfAttachmentTasks.put(taskQueryString, true);
     }
@@ -78,31 +93,27 @@ public class ProcessTopArtistsAsyncTask extends AsyncTask<Void, Void, Void> {
             @Override
             public void onFailure(Call<ArtistsWrapper> call, Throwable t) {
                 Log.e(TAG, "error calling service", t);
-                isRefreshingObservable.setValue(false);
-                artistsLiveDataObservable.setValue(new ArrayList<Artist>());
+                new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
             }
 
             @Override
             public void onResponse(Call<ArtistsWrapper> call, Response<ArtistsWrapper> response) {
                 final ArtistsWrapper artistPojo = response.body();
                 if (artistPojo == null) {
-                    isRefreshingObservable.setValue(false);
-                    artistsLiveDataObservable.setValue(new ArrayList<>());
+                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                     return;
                 }
 
                 Log.i(TAG, "result: " + artistPojo.getTopArtists());
                 List<Artist> artists = artistPojo.getTopArtists().getArtists();
                 if (null == artists) {
-                    isRefreshingObservable.setValue(false);
-                    artistsLiveDataObservable.setValue(new ArrayList<>());
+                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                     return;
                 }
                 artists = Util.removeAllItemsWithoutMbidOrImages(artists);
                 Collections.sort(artists);
                 if (artists.isEmpty()) {
-                    isRefreshingObservable.setValue(false);
-                    artistsLiveDataObservable.setValue(new ArrayList<>());
+                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                 }
                 for (Artist artist : artists) {
                     resultsMap.put(artist.getName(), artist);
@@ -110,8 +121,7 @@ public class ProcessTopArtistsAsyncTask extends AsyncTask<Void, Void, Void> {
                 }
                 if (null == resultsMap || resultsMap.keySet().isEmpty()) {
                     Log.e(TAG, "no results returned");
-                    artistsLiveDataObservable.setValue(new ArrayList<>());
-                    isRefreshingObservable.setValue(false);
+                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                     return;
                 }
                 List<String> artistKeys = new ArrayList<>();
@@ -230,10 +240,6 @@ public class ProcessTopArtistsAsyncTask extends AsyncTask<Void, Void, Void> {
                 }
             });
             return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void avoid) {
         }
     }
 }

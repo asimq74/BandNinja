@@ -78,31 +78,27 @@ public class ProcessSearchResultsAsyncTask extends AsyncTask<String, Void, Void>
             @Override
             public void onFailure(Call<ResultsWrapper> call, Throwable t) {
                 Log.e(TAG, "error calling service", t);
-                isRefreshingObservable.setValue(false);
-                artistsLiveDataObservable.setValue(new ArrayList<Artist>());
+                new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
             }
 
             @Override
             public void onResponse(Call<ResultsWrapper> call, Response<ResultsWrapper> response) {
                 final ResultsWrapper artistPojo = response.body();
                 if (artistPojo == null) {
-                    isRefreshingObservable.setValue(false);
-                    artistsLiveDataObservable.setValue(new ArrayList<>());
+                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                     return;
                 }
 
                 Log.i(TAG, "result: " + artistPojo.getResult());
                 List<Artist> artists = artistPojo.getResult().getArtistmatches().getArtists();
                 if (null == artists) {
-                    isRefreshingObservable.setValue(false);
-                    artistsLiveDataObservable.setValue(new ArrayList<>());
+                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                     return;
                 }
                 artists = Util.removeAllItemsWithoutMbidOrImages(artists);
                 Collections.sort(artists);
                 if (artists.isEmpty()) {
-                    isRefreshingObservable.setValue(false);
-                    artistsLiveDataObservable.setValue(new ArrayList<>());
+                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                 }
                 for (Artist artist : artists) {
                     resultsMap.put(artist.getName(), artist);
@@ -110,8 +106,7 @@ public class ProcessSearchResultsAsyncTask extends AsyncTask<String, Void, Void>
                 }
                 if (null == resultsMap || resultsMap.keySet().isEmpty()) {
                     Log.e(TAG, "no results returned");
-                    artistsLiveDataObservable.setValue(new ArrayList<>());
-                    isRefreshingObservable.setValue(false);
+                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                     return;
                 }
                 List<String> artistKeys = new ArrayList<>();
@@ -121,6 +116,21 @@ public class ProcessSearchResultsAsyncTask extends AsyncTask<String, Void, Void>
             }
         });
         return null;
+    }
+
+    class EmptyDataProcessor extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            isRefreshingObservable.setValue(false);
+            artistsLiveDataObservable.setValue(new ArrayList<>());
+        }
     }
 
     @Override

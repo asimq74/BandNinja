@@ -1,8 +1,6 @@
 package com.asimq.artists.bandninja.asynctasks;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -12,12 +10,12 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.asimq.artists.bandninja.MyApplication;
-import com.asimq.artists.bandninja.json.Track;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.TrackData;
 
 public class FetchTrackDataTask extends AsyncTask<String, Void, List<TrackData>> {
 
+	private final String TAG = this.getClass().getSimpleName();
 	@Inject
 	BandItemRepository bandItemRepository;
 	private final MediatorLiveData<List<TrackData>> tracksByAlbumLiveDataObservable;
@@ -37,13 +35,10 @@ public class FetchTrackDataTask extends AsyncTask<String, Void, List<TrackData>>
 	@Override
 	protected void onPostExecute(List<TrackData> trackDatas) {
 		super.onPostExecute(trackDatas);
-		Map<String, Track> trackMap = new LinkedHashMap<>();
 		if (trackDatas == null || trackDatas.isEmpty()) {
 			return;
 		}
 		Log.d(TAG, "tracksByAlbumMap refreshed: " + trackDatas);
 		tracksByAlbumLiveDataObservable.setValue(trackDatas);
 	}
-
-	private final String TAG = this.getClass().getSimpleName();
 }

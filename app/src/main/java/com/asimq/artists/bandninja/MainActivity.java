@@ -91,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	private static final String JOB_TAG = "MyJobService";
 	public static final String ON_DISPLAYING_ARTISTS_BY_TAG = "onDisplayingArtistsByTag";
 	public static final String ON_DISPLAYING_TOP_ARTISTS = "onDisplayingTopArtists";
+	public static final String ON_SEARCH_FOR_AN_ARTIST = "onSearchForAnArtist";
 	public static final String ON_QUERY_TEXT_SUBMIT = "onQueryTextSubmit";
 	final String TAG = this.getClass().getSimpleName();
 	AdView adView;
@@ -234,6 +235,18 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	@Override
 	protected void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
+		if (getIntent() != null && getIntent().getExtras() != null) {
+			currentTag = getIntent().getStringExtra(EXTRA_CURRENT_TAG);
+			currentArtist = getIntent().getStringExtra(EXTRA_CURRENT_ARTIST);
+			currentAlbum = getIntent().getStringExtra(EXTRA_CURRENT_ALBUM);
+			currentMethod = getIntent().getStringExtra(EXTRA_CURRENT_METHOD);
+			Set<String> keySet = getIntent().getExtras().keySet();
+			for (String key : keySet) {
+				Log.d(TAG, String.format("key: %s value: %s" , key, getIntent().getStringExtra(key)));
+			}
+		} else {
+			Log.d(TAG, "intent was null");
+		}
 		if (bundle != null) {
 			currentTag = bundle.getString(EXTRA_CURRENT_TAG);
 			currentArtist = bundle.getString(EXTRA_CURRENT_ARTIST);
@@ -255,8 +268,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			@Override
 			public void onClick(View v) {
 				Toast.makeText(getApplicationContext(), "your icon was clicked", Toast.LENGTH_SHORT).show();
-				listPopupWindow = new ListPopupWindow(
-						MainActivity.this);
+				listPopupWindow = new ListPopupWindow(MainActivity.this);
 				final String[] popupMenuItems = getPopupMenuItems();
 				listPopupWindow.setAdapter(new ArrayAdapter<>(MainActivity.this, R.layout.popup_menu_list_item,
 						popupMenuItems));

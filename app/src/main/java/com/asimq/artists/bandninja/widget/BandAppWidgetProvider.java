@@ -40,38 +40,26 @@ public class BandAppWidgetProvider extends AppWidgetProvider {
 		context.sendBroadcast(intent);
 	}
 
-	static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-			int appWidgetId) {
-
-		// Construct the RemoteViews object
-		RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.bandninja_app_widget);
-
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-		final String title = prefs.getString(Util.PREFS_WIDGET_TITLE, "");
-		remoteViews.setTextViewText(R.id.titleTextView, title);
-
-		final Intent widgetClickIntent = new Intent(context, MainActivity.class);
-//        mainActivityIntent.putExtra(RECIPE_ID, recipe.getId());
-//        mainActivityIntent.putExtra(SHOW_INGREDIENTS, true);
-		PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, widgetClickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-		//Widgets allow click handlers to only launch pending intents
-		remoteViews.setOnClickPendingIntent(R.id.widgetLayout, pendingIntent);
-
-		Intent artistsIntent = new Intent(context, BandAppWidgetRemoteViewsService.class);
-		remoteViews.setRemoteAdapter(R.id.widgetListView, artistsIntent);
-
-		// template to handle the click listener for each item
-		PendingIntent clickPendingIntentTemplate = TaskStackBuilder.create(context)
-				.addNextIntentWithParentStack(widgetClickIntent)
-				.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-		remoteViews.setPendingIntentTemplate(R.id.widgetListView, clickPendingIntentTemplate);
-
-		appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
-	}
-
 	static void updateAppWidgets(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+		// There may be multiple widgets active, so update all of them
 		for (int appWidgetId : appWidgetIds) {
-			updateAppWidget(context, appWidgetManager, appWidgetId);
+			RemoteViews views = new RemoteViews(
+					context.getPackageName(), R.layout.bandninja_app_widget
+			);
+
+
+			views.setTextViewText(R.id.titleTextView, context.getString(R.string.appwidget_text));
+
+			Intent intent = new Intent(context, BandAppWidgetRemoteViewsService.class);
+			views.setRemoteAdapter(R.id.widgetListView, intent);
+
+			Intent clickIntentTemplate = new Intent(context, MainActivity.class);
+			PendingIntent clickPendingIntentTemplate = TaskStackBuilder.create(context)
+					.addNextIntentWithParentStack(clickIntentTemplate)
+					.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+			views.setPendingIntentTemplate(R.id.widgetListView, clickPendingIntentTemplate);
+
+			appWidgetManager.updateAppWidget(appWidgetId, views);
 		}
 	}
 
@@ -108,10 +96,7 @@ public class BandAppWidgetProvider extends AppWidgetProvider {
 
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-		// There may be multiple widgets active, so update all of them
-		for (int appWidgetId : appWidgetIds) {
-			updateAppWidget(context, appWidgetManager, appWidgetId);
-		}
+		updateAppWidgets(context, appWidgetManager, appWidgetIds);
 	}
 }
 

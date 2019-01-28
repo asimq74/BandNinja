@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.asimq.artists.bandninja.BuildConfig;
 import com.asimq.artists.bandninja.MyApplication;
+import com.asimq.artists.bandninja.asynctasks.ProcessTopArtistsAsyncTask.EmptyDataProcessor;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.ArtistWrapper;
 import com.asimq.artists.bandninja.json.TopArtistsByTagWrapper;
@@ -34,7 +35,6 @@ public class ProcessTopArtistsByTagAsyncTask extends AsyncTask<String, Void, Voi
 
     public static final String API_KEY = BuildConfig.LastFMApiKey;
     public static final String DEFAULT_FORMAT = "json";
-    public static final int SEARCH_RESULTS_LIMIT = 10;
     private static Map<String, Boolean> mapOfAttachmentTasks = new LinkedHashTreeMap<>();
     final String TAG = this.getClass().getSimpleName();
     private final Map<String, Artist> resultsMap = new LinkedHashTreeMap<>();
@@ -53,6 +53,22 @@ public class ProcessTopArtistsByTagAsyncTask extends AsyncTask<String, Void, Voi
         this.artistsLiveDataObservable = artistsLiveDataObservable;
         this.isRefreshingObservable = isRefreshingObservable;
     }
+
+    class EmptyDataProcessor extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            isRefreshingObservable.setValue(false);
+            artistsLiveDataObservable.setValue(new ArrayList<>());
+        }
+    }
+
 
     public static synchronized void addTask(String taskQueryString) {
         mapOfAttachmentTasks.put(taskQueryString, true);
@@ -78,31 +94,27 @@ public class ProcessTopArtistsByTagAsyncTask extends AsyncTask<String, Void, Voi
             @Override
             public void onFailure(Call<TopArtistsByTagWrapper> call, Throwable t) {
                 Log.e(TAG, "error calling service", t);
-                isRefreshingObservable.setValue(false);
-                artistsLiveDataObservable.setValue(new ArrayList<Artist>());
+                new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
             }
 
             @Override
             public void onResponse(Call<TopArtistsByTagWrapper> call, Response<TopArtistsByTagWrapper> response) {
                 final TopArtistsByTagWrapper artistPojo = response.body();
                 if (artistPojo == null) {
-                    isRefreshingObservable.setValue(false);
-                    artistsLiveDataObservable.setValue(new ArrayList<>());
+                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                     return;
                 }
 
                 Log.i(TAG, "result: " + artistPojo.getTopArtists());
                 List<Artist> artists = artistPojo.getTopArtists().getArtists();
                 if (null == artists) {
-                    isRefreshingObservable.setValue(false);
-                    artistsLiveDataObservable.setValue(new ArrayList<>());
+                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                     return;
                 }
                 artists = Util.removeAllItemsWithoutMbidOrImages(artists);
                 Collections.sort(artists);
                 if (artists.isEmpty()) {
-                    isRefreshingObservable.setValue(false);
-                    artistsLiveDataObservable.setValue(new ArrayList<>());
+                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                 }
                 for (Artist artist : artists) {
                     resultsMap.put(artist.getName(), artist);
@@ -110,8 +122,7 @@ public class ProcessTopArtistsByTagAsyncTask extends AsyncTask<String, Void, Voi
                 }
                 if (null == resultsMap || resultsMap.keySet().isEmpty()) {
                     Log.e(TAG, "no results returned");
-                    artistsLiveDataObservable.setValue(new ArrayList<>());
-                    isRefreshingObservable.setValue(false);
+                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                     return;
                 }
                 List<String> artistKeys = new ArrayList<>();
@@ -232,8 +243,5 @@ public class ProcessTopArtistsByTagAsyncTask extends AsyncTask<String, Void, Voi
             return null;
         }
 
-        @Override
-        protected void onPostExecute(Void avoid) {
-        }
     }
 }

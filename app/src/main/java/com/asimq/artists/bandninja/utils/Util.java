@@ -48,7 +48,6 @@ public class Util {
 	}
 
 	private static List<String> BLOCKED_TAGS = Arrays.asList("albums I own", "favorite albums");
-	public static final String PREFS_WIDGET_TITLE = "PREFS_WIDGET_TITLE";
 
 	public static boolean containsImageUrls(List<Image> images) {
 		if (null == images || images.isEmpty()) {

@@ -1,30 +1,69 @@
 package com.asimq.artists.bandninja.widget;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Binder;
-import android.support.v4.app.TaskStackBuilder;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.util.Log;
 import android.widget.AdapterView;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
-import com.asimq.artists.bandninja.DetailsActivity;
 import com.asimq.artists.bandninja.MainActivity;
 import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.R;
-import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 
 public class TopArtistsAppWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
-	private List<ArtistData> artistDatas = new ArrayList<>();
+	@Inject
+	ArtistDataDao artistDataDao;
+	private Map<String, ExtrasTuple> itemExtrasMap = new HashMap<>();
+	private List<String> items = new ArrayList<>();
 	private final Context mContext;
+
+
+	public static class ExtrasTuple {
+		private String currentTag = "";
+		private String currentArtist = "";
+		private String currentAlbum = "";
+		private String currentMethod = "";
+
+		public ExtrasTuple(String currentTag, String currentArtist, String currentAlbum, String currentMethod) {
+			this.currentTag = currentTag;
+			this.currentArtist = currentArtist;
+			this.currentAlbum = currentAlbum;
+			this.currentMethod = currentMethod;
+		}
+
+		public String getCurrentAlbum() {
+			return currentAlbum;
+		}
+
+		public String getCurrentTag() {
+			return currentTag;
+		}
+
+		public String getCurrentArtist() {
+			return currentArtist;
+		}
+
+		public String getCurrentMethod() {
+			return currentMethod;
+		}
+	}
 
 	public TopArtistsAppWidgetRemoteViewsFactory(Context mContext, Intent intent) {
 		this.mContext = mContext;
@@ -32,7 +71,7 @@ public class TopArtistsAppWidgetRemoteViewsFactory implements RemoteViewsService
 
 	@Override
 	public int getCount() {
-		return artistDatas == null ? 0 : artistDatas.size();
+		return items == null ? 0 : items.size();
 	}
 
 	@Override
@@ -48,20 +87,21 @@ public class TopArtistsAppWidgetRemoteViewsFactory implements RemoteViewsService
 	@Override
 	public RemoteViews getViewAt(int position) {
 		if (position == AdapterView.INVALID_POSITION ||
-				artistDatas == null || position >= artistDatas.size()) {
+				items == null || position >= items.size()) {
 			return null;
 		}
+		String menuItem = items.get(position);
 		RemoteViews remoteViews = new RemoteViews(mContext.getPackageName(), R.layout.band_ninja_app_widget_list_item);
-		ArtistData artistData = artistDatas.get(position);
-		remoteViews.setTextViewText(R.id.widgetItemLabel, artistData.getName());
-//		final Intent widgetListItemIntent = new Intent(mContext, DetailsActivity.class);
-//		widgetListItemIntent.putExtra(DetailsActivity.EXTRA_IMAGE, artistData.getImage());
-//		widgetListItemIntent.putExtra(DetailsActivity.EXTRA_TITLE, artistData.getName());
-//		// template to handle the click listener for each item
-//		PendingIntent clickPendingIntentTemplate = TaskStackBuilder.create(mContext)
-//				.addNextIntentWithParentStack(widgetListItemIntent)
-//				.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-//		remoteViews.setOnClickPendingIntent(R.id.widgetItemLabel, clickPendingIntentTemplate);
+		remoteViews.setTextViewText(R.id.widgetItemLabel, menuItem);
+		Bundle extras = new Bundle();
+		final ExtrasTuple extrasTuple = itemExtrasMap.get(menuItem);
+		extras.putString(MainActivity.EXTRA_CURRENT_ALBUM, extrasTuple.getCurrentAlbum());
+		extras.putString(MainActivity.EXTRA_CURRENT_ARTIST, extrasTuple.getCurrentArtist());
+		extras.putString(MainActivity.EXTRA_CURRENT_METHOD, extrasTuple.getCurrentMethod());
+		extras.putString(MainActivity.EXTRA_CURRENT_TAG, extrasTuple.getCurrentTag());
+		Intent fillInIntent = new Intent();
+		fillInIntent.putExtras(extras);
+		remoteViews.setOnClickFillInIntent(R.id.widgetItemContainer, fillInIntent);
 		return remoteViews;
 	}
 
@@ -69,6 +109,31 @@ public class TopArtistsAppWidgetRemoteViewsFactory implements RemoteViewsService
 	public int getViewTypeCount() {
 		return 1;
 	}
+
+	@NonNull
+	private void createItem(String key, List<String> items, String currentMethod, String artist, String tag) {
+		items.add(key);
+		ExtrasTuple tuple = new ExtrasTuple(tag, artist, "", currentMethod);
+		itemExtrasMap.put(key, tuple);
+	}
+
+	private List<String> getWidgetListItems() {
+		Log.d(TAG, "getWidgetListItems called: ");
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+		Set<String> favoriteGenres = prefs.getStringSet(mContext.getString(R.string.favorite_genre_key), new HashSet<>());
+		List<String> items = new ArrayList<>();
+		createItem(mContext.getString(R.string.searchForAnArtist), items, MainActivity.ON_SEARCH_FOR_AN_ARTIST, "", "");
+		createItem(mContext.getString(R.string.topArtists), items, MainActivity.ON_DISPLAYING_TOP_ARTISTS, "", "");
+		for (String genre : favoriteGenres) {
+			if (!genre.isEmpty()) {
+				String capitalGenre = genre.substring(0, 1).toUpperCase() + genre.substring(1);
+				final String byGenreKey = String.format("Top Artists in %s", capitalGenre);
+				createItem(byGenreKey, items, MainActivity.ON_DISPLAYING_ARTISTS_BY_TAG, "", genre);
+			}
+		}
+		return items;
+	}
+
 
 	@Override
 	public boolean hasStableIds() {
@@ -81,21 +146,21 @@ public class TopArtistsAppWidgetRemoteViewsFactory implements RemoteViewsService
 		(application).getApplicationComponent().inject(this);
 	}
 
-	@Inject
-	ArtistDataDao artistDataDao;
-
 	@Override
 	public void onDataSetChanged() {
 		final long identityToken = Binder.clearCallingIdentity();
-		artistDatas.clear();
-		artistDatas = artistDataDao.fetchAllArtistDatas();
+		items.clear();
+		items = getWidgetListItems();
+		Log.d(TAG, "onDataSetChanged->items: " + items);
 		Binder.restoreCallingIdentity(identityToken);
 	}
 
+	final String TAG = this.getClass().getSimpleName();
+
 	@Override
 	public void onDestroy() {
-		if (artistDatas != null) {
-			artistDatas = null;
+		if (items != null) {
+			items = null;
 		}
 	}
 }

@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.asimq.artists.bandninja.BuildConfig;
 import com.asimq.artists.bandninja.MyApplication;
+import com.asimq.artists.bandninja.asynctasks.ProcessSearchResultsAsyncTask.EmptyDataProcessor;
 import com.asimq.artists.bandninja.json.Album;
 import com.asimq.artists.bandninja.json.AlbumInfo;
 import com.asimq.artists.bandninja.json.AlbumInfoWrapper;
@@ -71,6 +72,21 @@ public class ProcessAlbumsByArtistAsyncTask extends AsyncTask<String, Void, Void
         return mapOfAttachmentTasks.isEmpty();
     }
 
+    class EmptyDataProcessor extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            isRefreshingObservable.setValue(false);
+            albumsLiveDataObservable.setValue(new ArrayList<>());
+        }
+    }
+
     @Override
     protected Void doInBackground(String... strings) {
         String artistName = strings[0];
@@ -84,31 +100,27 @@ public class ProcessAlbumsByArtistAsyncTask extends AsyncTask<String, Void, Void
             @Override
             public void onFailure(Call<TopAlbumsWrapper> call, Throwable t) {
                 Log.e(TAG, "error calling service", t);
-                isRefreshingObservable.setValue(false);
-                albumsLiveDataObservable.setValue(new ArrayList<AlbumInfo>());
+                new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
             }
 
             @Override
             public void onResponse(Call<TopAlbumsWrapper> call, Response<TopAlbumsWrapper> response) {
                 final TopAlbumsWrapper topAlbumsWrapper = response.body();
                 if (topAlbumsWrapper == null) {
-                    isRefreshingObservable.setValue(false);
-                    albumsLiveDataObservable.setValue(new ArrayList<>());
+                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                     return;
                 }
 
                 Log.i(TAG, "result: " + topAlbumsWrapper.getTopAlbums());
                 List<Album> albums = topAlbumsWrapper.getTopAlbums().getAlbums();
                 if (null == albums) {
-                    isRefreshingObservable.setValue(false);
-                    albumsLiveDataObservable.setValue(new ArrayList<>());
+                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                     return;
                 }
                 albums = Util.removeAllItemsWithoutMbidOrImages(albums);
                 Collections.sort(albums);
                 if (albums.isEmpty()) {
-                    isRefreshingObservable.setValue(false);
-                    albumsLiveDataObservable.setValue(new ArrayList<>());
+                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                 }
                 for (Album album : albums) {
                     resultsMap.put(album.getName(), new AlbumInfo(album));
@@ -116,8 +128,7 @@ public class ProcessAlbumsByArtistAsyncTask extends AsyncTask<String, Void, Void
                 }
                 if (null == resultsMap || resultsMap.keySet().isEmpty()) {
                     Log.e(TAG, "no results returned");
-                    albumsLiveDataObservable.setValue(new ArrayList<>());
-                    isRefreshingObservable.setValue(false);
+                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                     return;
                 }
                 List<String> albumKeys = new ArrayList<>();
@@ -253,16 +264,5 @@ public class ProcessAlbumsByArtistAsyncTask extends AsyncTask<String, Void, Void
             return null;
         }
 
-        @Override
-        protected void onPostExecute(Void avoid) {
-//            removeTask(taskQueryString);
-//            if (isTasksEmpty()) {
-//                Log.d(TAG, "final results map = " + resultsMap);
-//                ArrayList albums = new ArrayList(resultsMap.values());
-//                Collections.sort(albums);
-//                albumsLiveDataObservable.setValue(albums);
-//                isRefreshingObservable.setValue(false);
-//            }
-        }
     }
 }

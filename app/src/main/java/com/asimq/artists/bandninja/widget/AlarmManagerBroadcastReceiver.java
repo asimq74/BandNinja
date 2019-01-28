@@ -29,11 +29,6 @@ public class AlarmManagerBroadcastReceiver extends BroadcastReceiver  {
 		PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKE_LOG_TAG);
 		//Acquire the lock
 		wl.acquire();
-
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-		SharedPreferences.Editor editor = prefs.edit();
-		editor.putString(Util.PREFS_WIDGET_TITLE, "Top Artists");
-		editor.commit();
 		BandAppWidgetProvider.sendRefreshBroadcast(context);
 
 		//Release the lock

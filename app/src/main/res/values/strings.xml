@@ -12,6 +12,7 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="search_by_artist">Search by Artist...</string>
+    <string name="searchForAnArtist">Search for an Artist</string>
     <string name="logoDescription">Application Logo</string>
     <string name="band_widget">Band Ninja Widget</string>
     <string name="artistOrAlbumImageDescription">The artist or album image will be placed here</string>
@@ -35,7 +36,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_details">DetailsActivity</string>
-    <string name="appwidget_text">EXAMPLE</string>
+    <string name="appwidget_text">Band Ninja Widget</string>
     <string name="add_widget">Add widget</string>
     <string name="title_activity_settings">Settings</string>
     <string name="display_name_key">display_name_key</string>
