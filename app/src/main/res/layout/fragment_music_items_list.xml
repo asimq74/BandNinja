@@ -12,17 +12,18 @@
     tools:context=".MusicItemsListFragment">
 
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
     <RelativeLayout
         android:id="@+id/mainTitleLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="@dimen/detail_body_bottom_margin"
-            android:layout_height="@dimen/detail_body_bottom_margin"
-            android:visibility="gone"
-            tools:visibility="visible" />
 
         <TextView
             android:id="@+id/mainTitleView_1"
