@@ -9,7 +9,7 @@ import com.asimq.artists.bandninja.json.Wiki;
 import com.asimq.artists.bandninja.utils.Util;
 
 @Entity(tableName = "albums", primaryKeys = {"name", "mbid"})
-public class AlbumData {
+public class AlbumData implements Comparable<AlbumData> {
 
     @ColumnInfo(name = "artist")
     private String artist = "";
@@ -49,6 +49,13 @@ public class AlbumData {
         this.url = albumInfo.getUrl();
         this.wiki = getWiki(albumInfo).getContent();
         this.summary = getWiki(albumInfo).getSummary();
+    }
+
+    @Override
+    public int compareTo(@NonNull AlbumData albumData) {
+        int playcount = Util.stringToInt(albumData.getPlaycount());
+        int playcount1 = Util.stringToInt(getPlaycount());
+        return playcount - playcount1;
     }
 
     private Wiki getWiki(@NonNull AlbumInfo albumInfo) {

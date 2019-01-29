@@ -11,6 +11,7 @@ import android.widget.ImageView;
 
 import com.asimq.artists.bandninja.R;
 import com.asimq.artists.bandninja.json.MusicItem;
+import com.asimq.artists.bandninja.room.AlbumData;
 import com.asimq.artists.bandninja.utils.DecodeBitmapTask;
 import com.asimq.artists.bandninja.utils.Util;
 import com.squareup.picasso.Picasso;
@@ -64,6 +65,23 @@ public class SliderCard extends RecyclerView.ViewHolder implements DecodeBitmapT
 
 	void setContent(Context context, MusicItem musicItem) {
 		final String imageUrl = Util.getImageUrl(musicItem);
+		if (viewWidth == 0) {
+			itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+				@Override
+				public void onGlobalLayout() {
+					itemView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+					viewWidth = itemView.getWidth();
+					viewHeight = itemView.getHeight();
+					loadImageUrl(context, imageUrl);
+				}
+			});
+		} else {
+			loadImageUrl(context, imageUrl);
+		}
+	}
+
+	void setContent(Context context, AlbumData albumData) {
+		final String imageUrl = albumData.getImage();
 		if (viewWidth == 0) {
 			itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 				@Override

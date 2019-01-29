@@ -34,19 +34,9 @@ public class AlbumInfo extends BaseMusicItem implements Comparable<AlbumInfo>{
 
 	@Override
 	public int compareTo(@NonNull AlbumInfo albumInfo) {
-
-		int playcount = stringToInt(albumInfo.getPlaycount());
-		int playcount1 = stringToInt(getPlaycount());
+		int playcount = Util.stringToInt(albumInfo.getPlaycount());
+		int playcount1 = Util.stringToInt(getPlaycount());
 		return playcount - playcount1;
-	}
-
-
-	public static int stringToInt(String param) {
-		try {
-			return Integer.valueOf(param);
-		} catch(NumberFormatException e) {
-			return -1;
-		}
 	}
 
 	public AlbumInfo() {

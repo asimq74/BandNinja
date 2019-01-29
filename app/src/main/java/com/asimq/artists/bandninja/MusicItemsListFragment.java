@@ -29,6 +29,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
+import com.asimq.artists.bandninja.cards.AlbumDataSliderAdapter;
 import com.asimq.artists.bandninja.cards.SliderAdapter;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
 import com.asimq.artists.bandninja.json.Album;
@@ -132,6 +133,46 @@ public class MusicItemsListFragment extends Fragment {
 			}
 		}
 	}
+
+
+    private class OnAlbumDataCardClickedListener implements View.OnClickListener {
+
+        private final List<AlbumData> albums;
+
+        public OnAlbumDataCardClickedListener(List<AlbumData> albums) {
+            this.albums = albums;
+        }
+
+        @Override
+        public void onClick(View view) {
+            final CardSliderLayoutManager lm = (CardSliderLayoutManager) recyclerView.getLayoutManager();
+
+            if (lm.isSmoothScrolling()) {
+                return;
+            }
+
+            final int activeCardPosition = lm.getActiveCardPosition();
+            if (activeCardPosition == RecyclerView.NO_POSITION) {
+                return;
+            }
+
+            final int clickedPosition = recyclerView.getChildAdapterPosition(view);
+            if (clickedPosition == activeCardPosition) {
+                AlbumData album = albums.get(clickedPosition);
+                Intent articleDetailIntent = new Intent(getActivity(), ArticleDetailActivity.class);
+                articleDetailIntent.putExtra(ArticleDetailActivity.MBID, album.getMbid());
+                articleDetailIntent.putExtra(ArticleDetailActivity.ENTITY_TYPE, Entities.ALBUM.name());
+                articleDetailIntent.putExtra(ArticleDetailActivity.ARTIST, album.getArtist());
+                final CardView cardView = (CardView) view;
+                final View sharedView = cardView.getChildAt(cardView.getChildCount() - 1);
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        Objects.requireNonNull(getActivity()), sharedView, DetailsActivity.EXTRA_IMAGE);
+                startActivity(articleDetailIntent, options.toBundle());
+            } else if (clickedPosition > activeCardPosition) {
+                recyclerView.smoothScrollToPosition(clickedPosition);
+            }
+        }
+    }
 
 	private class OnAlbumInfoCardClickedListener implements View.OnClickListener {
 
@@ -302,12 +343,26 @@ public class MusicItemsListFragment extends Fragment {
 	@Inject
 	SearchResultsViewModelFactory searchResultsViewModelFactory;
 	private SliderAdapter sliderAdapter;
+	private AlbumDataSliderAdapter albumDataSliderAdapter;
 	@BindView(R.id.tagsLayout)
 	View tagsLayout;
 
 	public MusicItemsListFragment() {
 		// Required empty public constructor
 	}
+
+    protected void buildAlbumDatas(@NonNull List<AlbumData> albumDatas) {
+        if (null == albumDatas || albumDatas.isEmpty()) {
+            recyclerView.setVisibility(View.GONE);
+            mainTitleView1.setText(getString(R.string.informationUnavailable));
+            hideFieldsExceptTitle();
+            return;
+        }
+        recyclerView.setVisibility(View.VISIBLE);
+        initRecyclerViewForAlbumDatas(albumDatas, new OnAlbumDataCardClickedListener(albumDatas));
+        initMusicItemNameTextForAlbumDatas(albumDatas);
+        buildSwitchersForAlbumDatas(albumDatas);
+    }
 
 	private void buildAlbums(@NonNull List<AlbumInfo> albumInfos) {
 		if (null == albumInfos || albumInfos.isEmpty()) {
@@ -334,6 +389,15 @@ public class MusicItemsListFragment extends Fragment {
 		initMusicItemNameText(artists);
 		buildSwitchers(artists);
 	}
+
+
+    private void buildSwitchersForAlbumDatas(@NonNull List<AlbumData> musicItems) {
+        final AlbumData musicItem = musicItems.get(0);
+        String name = musicItem.getName();
+        String mbid = musicItem.getMbid();
+        Log.d(TAG, String.format("musicItem: %s mbid: %s", name, mbid));
+        processAlbumData(musicItem);
+    }
 
 	private void buildSwitchers(@NonNull List<? extends MusicItem> musicItems) {
 		final MusicItem musicItem = musicItems.get(0);
@@ -399,6 +463,31 @@ public class MusicItemsListFragment extends Fragment {
 		}
 	}
 
+
+	public interface DetailsActivityCallback {
+		void loadImageIntoToolbar(String extraImageUrl);
+	}
+
+    private void initMusicItemNameTextForAlbumDatas(@NonNull List<AlbumData> musicItems) {
+		AlbumData albumData = musicItems.get(0);
+		((DetailsActivityCallback) getActivity()).loadImageIntoToolbar(albumData.getImage());
+        artistAnimDuration = getResources().getInteger(R.integer.labels_animation_duration);
+        artistOffset1 = getResources().getDimensionPixelSize(R.dimen.left_offset);
+        artistOffset2 = getResources().getDimensionPixelSize(R.dimen.card_width);
+        mainTitleView1.setX(artistOffset1);
+        mainTitleView2.setX(artistOffset2);
+		String formattedTitle = formatAlbumDataTitle(albumData);
+		mainTitleView1.setText(formattedTitle);
+        mainTitleView2.setAlpha(0f);
+        mainTitleView2.setText(formattedTitle);
+    }
+
+    private String formatAlbumDataTitle(@NonNull AlbumData albumData) {
+		String musicItemName = albumData.getName();
+		String artist = albumData.getArtist();
+		return String.format("%s - %s", artist, musicItemName);
+	}
+
 	private void initMusicItemNameText(@NonNull List<? extends MusicItem> musicItems) {
 		String musicItemName = musicItems.get(0).getName();
 		artistAnimDuration = getResources().getInteger(R.integer.labels_animation_duration);
@@ -410,6 +499,30 @@ public class MusicItemsListFragment extends Fragment {
 		mainTitleView2.setAlpha(0f);
 		mainTitleView2.setText(musicItemName);
 	}
+
+
+    private void initRecyclerViewForAlbumDatas(@NonNull List<AlbumData> albumDatas,
+                                  @NonNull OnClickListener onClickListener) {
+        if (null != albumDataSliderAdapter) {
+            sliderAdapter.clear();
+        }
+		albumDataSliderAdapter = new AlbumDataSliderAdapter(applicationComponent, albumDatas, onClickListener);
+		albumDataSliderAdapter.notifyDataSetChanged();
+        recyclerView.setAdapter(albumDataSliderAdapter);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    onActiveCardChangeForAlbumDatas(albumDatas);
+                }
+            }
+        });
+
+        recyclerView.setLayoutManager(new CardSliderLayoutManager(Objects.requireNonNull(getActivity())));
+        layoutManger = (CardSliderLayoutManager) recyclerView.getLayoutManager();
+
+        CARD_SNAP_HELPER.attachToRecyclerView(recyclerView);
+    }
 
 	private void initRecyclerView(@NonNull List<? extends BaseMusicItem> musicItems,
 			@NonNull OnClickListener onClickListener) {
@@ -456,6 +569,39 @@ public class MusicItemsListFragment extends Fragment {
 
 		onActiveCardChange(musicItems, pos);
 	}
+
+    private void onActiveCardChangeForAlbumDatas(List<AlbumData> musicItems) {
+        final int pos = layoutManger.getActiveCardPosition();
+        if (pos == RecyclerView.NO_POSITION || pos == currentPosition) {
+            return;
+        }
+
+        onActiveCardChangeForAlbumDatas(musicItems, pos);
+    }
+
+    private void onActiveCardChangeForAlbumDatas(List<AlbumData> albumDatas, int pos) {
+	    AlbumData albumData = albumDatas.get(pos);
+        String artistName = albumData.getArtist();
+        String albumName = albumData.getName();
+		((DetailsActivityCallback) getActivity()).loadImageIntoToolbar(albumData.getImage());
+        Log.d(TAG, String.format("artistName: %s albumName: %s", artistName, albumName));
+        considerHandlingSavedAlbumInfo(artistName, albumName);
+        int animH[] = new int[]{R.anim.slide_in_right, R.anim.slide_out_left};
+        int animV[] = new int[]{R.anim.slide_in_top, R.anim.slide_out_bottom};
+
+        final boolean left2right = pos < currentPosition;
+        if (left2right) {
+            animH[0] = R.anim.slide_in_left;
+            animH[1] = R.anim.slide_out_right;
+            animV[0] = R.anim.slide_in_bottom;
+            animV[1] = R.anim.slide_out_top;
+        }
+
+        setArtistText(formatAlbumDataTitle(albumDatas.get(pos % albumDatas.size())), left2right);
+
+        currentPosition = pos;
+
+    }
 
 	private void onActiveCardChange(List<? extends MusicItem> musicItems, int pos) {
 		MusicItem musicItem = musicItems.get(pos);
@@ -564,12 +710,23 @@ public class MusicItemsListFragment extends Fragment {
 	}
 
 	protected void populateTopAlbums() {
-//        albumDataDao.fetchLiveAlbumDatas().observe(this, this::populateAlbumsFromAlbumDatas);
+		Intent detailsIntent = new Intent(getActivity(), DetailsActivity.class);
+		detailsIntent.putExtra(DetailsActivity.EXTRA_IMAGE, "");
+		detailsIntent.putExtra(DetailsActivity.EXTRA_TITLE, getString(R.string.topAlbums));
+		startActivity(detailsIntent);
 	}
 
 	protected void populateTopArtists() {
 		searchResultsViewModel.searchForTopArtists(getActivity().getApplicationContext());
 	}
+
+	private void processAlbumData(@NonNull AlbumData albumData) {
+		mainTitleView1.setText(formatAlbumDataTitle(albumData));
+		mainTitleView2.setText(formatAlbumDataTitle(albumData));
+		place.setText(albumData.getTags());
+		updateDescriptionsSwitcher(albumData);
+	}
+
 
 	private void processAlbumInfo(@NonNull AlbumInfo albumInfo) {
 		String tagsText = null != albumInfo.getTagWrapper() ? Util.getTagsAsString(albumInfo.getTagWrapper().getTags()) : "";
@@ -637,6 +794,30 @@ public class MusicItemsListFragment extends Fragment {
 		recyclerView.setVisibility(View.GONE);
 		tagsLayout.setVisibility(View.GONE);
 		descriptionLayout.setVisibility(View.GONE);
+	}
+
+
+	private void updateDescriptionsSwitcher(AlbumData albumData) {
+		String wiki = albumData.getWiki();
+		if (!wiki.isEmpty()) {
+			descriptionTextView.setText(R.string.summaryUnavailable);
+		} else {
+			Util.populateHTMLForTextView(descriptionTextView, wiki);
+			Util.makeTextViewResizable(descriptionTextView, 3, getString(R.string.readMore), true);
+		}
+		if (!wiki.isEmpty()) {
+			descriptionTextView.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Intent articleDetailIntent = new Intent(getActivity(), ArticleDetailActivity.class);
+					articleDetailIntent.putExtra(ArticleDetailActivity.MBID, albumData.getMbid());
+					articleDetailIntent.putExtra(ArticleDetailActivity.ENTITY_TYPE, Entities.ALBUM.name());
+					articleDetailIntent.putExtra(ArticleDetailActivity.ARTIST, albumData.getArtist());
+					articleDetailIntent.putExtra(ArticleDetailActivity.ALBUM, albumData.getName());
+					startActivity(articleDetailIntent);
+				}
+			});
+		}
 	}
 
 	private void updateDescriptionsSwitcher(String artist, String album, String mbid, String text,

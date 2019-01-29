@@ -3,7 +3,6 @@ package com.asimq.artists.bandninja.viewmodels;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import android.app.Application;
@@ -13,19 +12,16 @@ import android.arch.lifecycle.MediatorLiveData;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.asimq.artists.bandninja.asynctasks.AlbumArtistTuple;
+import com.asimq.artists.bandninja.asynctasks.FetchAllSavedAlbumDataTask;
 import com.asimq.artists.bandninja.asynctasks.FetchTrackDataTask;
-import com.asimq.artists.bandninja.asynctasks.ProcessAlbumsByArtistAsyncTask;
 import com.asimq.artists.bandninja.asynctasks.SaveAlbumDataTask;
 import com.asimq.artists.bandninja.asynctasks.SaveTracksTask;
 import com.asimq.artists.bandninja.json.Album;
 import com.asimq.artists.bandninja.json.AlbumInfo;
-import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.Track;
 import com.asimq.artists.bandninja.repositories.AlbumInfoRepository;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.AlbumData;
-import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.TrackData;
 import com.asimq.artists.bandninja.room.dao.AlbumDataDao;
 import com.asimq.artists.bandninja.room.dao.TrackDataDao;
@@ -39,8 +35,7 @@ public class AlbumDetailViewModel extends AndroidViewModel {
 	private LiveData<List<AlbumData>> mLiveAlbumDatas;
 	private final TrackDataDao trackDataDao;
 	private final AlbumDataDao albumDataDao;
-	private final MediatorLiveData<List<AlbumData>> mObservableAlbumDatas;
-	private final MediatorLiveData<List<TrackData>> mObservableTrackDatas;
+	private MediatorLiveData<List<AlbumData>> mObservableAlbumDatas = new MediatorLiveData<>();
 	private final BandItemRepository bandItemRepository;
 
 	private MediatorLiveData<List<AlbumInfo>> albumsLiveDataObservable = new MediatorLiveData<>();
@@ -61,19 +56,16 @@ public class AlbumDetailViewModel extends AndroidViewModel {
 		this.bandItemRepository = bandItemRepository;
 		this.trackDataDao = trackDataDao;
 		this.albumDataDao = albumDataDao;
-		this.mObservableAlbumDatas = new MediatorLiveData<>();
-		this.mObservableAlbumDatas.setValue(new ArrayList<>());
-		LiveData<List<AlbumData>> albumDatas = bandItemRepository.getAllAlbumDatas();
-		this.mObservableAlbumDatas.addSource(albumDatas, mObservableAlbumDatas::setValue);
-		this.mObservableTrackDatas = new MediatorLiveData<>();
-		this.mObservableTrackDatas.setValue(new ArrayList<>());
-		LiveData<List<TrackData>> trackDatas = bandItemRepository.getAllTrackLiveDatas();
-		this.mObservableTrackDatas.addSource(trackDatas, mObservableTrackDatas::setValue);
 	}
 
 	public void obtainTrackInformation(Context context, String artistName, String albumName) {
 		new FetchTrackDataTask(context, albumTracksObservable)
 				.executeOnExecutor(Executors.newSingleThreadExecutor(), artistName, albumName);
+	}
+
+	public void obtainAllAlbumDatas(Context context) {
+		new FetchAllSavedAlbumDataTask(context, mObservableAlbumDatas).
+				executeOnExecutor(Executors.newSingleThreadExecutor());
 	}
 
 	public LiveData<List<TrackData>> getAlbumTracksObservable() {
@@ -97,9 +89,6 @@ public class AlbumDetailViewModel extends AndroidViewModel {
 		return mObservableAlbumDatas;
 	}
 
-	public LiveData<List<TrackData>> getAllTrackDatas() {
-		return mObservableTrackDatas;
-	}
 
 	public LiveData<List<Album>> getAlbumsByArtist(@NonNull String artistName) {
 		mLiveAlbums = albumInfoRepository.getAlbums(artistName);

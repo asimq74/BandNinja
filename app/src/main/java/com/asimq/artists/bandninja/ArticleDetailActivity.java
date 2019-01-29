@@ -206,7 +206,7 @@ public class ArticleDetailActivity extends AppCompatActivity
                 .get(ArtistDetailViewModel.class);
         albumDetailViewModel = ViewModelProviders.of(this, albumDetailViewModelFactory)
                 .get(AlbumDetailViewModel.class);
-        albumDetailViewModel.getAlbumTracksObservable().observe(ArticleDetailActivity.this, trackDatas->buildTracks(trackDatas));
+        albumDetailViewModel.getAlbumTracksObservable().observe(ArticleDetailActivity.this, trackDatas -> buildTracks(trackDatas));
         if (Entities.ARTIST.name().equals(entityType)) {
             artistDetailViewModel.getArtistDetail(mbId).observe(this, artistData -> populateInitialView(artistData));
         } else if (Entities.ALBUM.name().equals(entityType)) {

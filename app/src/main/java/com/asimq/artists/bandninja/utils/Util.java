@@ -87,6 +87,14 @@ public class Util {
 		return result.toString();
 	}
 
+	public static int stringToInt(String param) {
+		try {
+			return Integer.valueOf(param);
+		} catch(NumberFormatException e) {
+			return -1;
+		}
+	}
+
 	public static String getLocalityAndPostalCode(Context context, double latitude, double longitude) {
 		StringBuilder result = new StringBuilder();
 		try {

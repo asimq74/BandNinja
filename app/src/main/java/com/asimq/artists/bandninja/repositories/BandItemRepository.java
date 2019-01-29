@@ -19,7 +19,10 @@ public interface BandItemRepository {
 	LiveData<List<TrackData>> getAllTrackLiveDatas();
 
 	@NonNull
-	LiveData<List<AlbumData>> getAllAlbumDatas();
+	LiveData<List<AlbumData>> getAllAlbumLiveDatas();
+
+	@NonNull
+	List<AlbumData> getAllAlbumDatas();
 
 	@NonNull
 	LiveData<ArtistData> getLiveArtistDataByName(@NonNull String name);

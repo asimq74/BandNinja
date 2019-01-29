@@ -4,9 +4,11 @@ import android.app.Application;
 import android.content.Context;
 
 import com.asimq.artists.bandninja.ArticleDetailActivity;
+import com.asimq.artists.bandninja.DetailsActivity;
 import com.asimq.artists.bandninja.MainActivity;
 import com.asimq.artists.bandninja.MusicItemsListFragment;
 import com.asimq.artists.bandninja.MyApplication;
+import com.asimq.artists.bandninja.asynctasks.FetchAllSavedAlbumDataTask;
 import com.asimq.artists.bandninja.asynctasks.FetchTrackDataTask;
 import com.asimq.artists.bandninja.asynctasks.ProcessAlbumsByArtistAsyncTask;
 import com.asimq.artists.bandninja.asynctasks.ProcessSearchResultsAsyncTask;
@@ -72,5 +74,7 @@ public interface ApplicationComponent {
 
     void inject(FetchTrackDataTask fetchTrackDataTask);
 
+    void inject(FetchAllSavedAlbumDataTask fetchAllSavedAlbumDataTask);
 
+    void inject(DetailsActivity detailsActivity);
 }

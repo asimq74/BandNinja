@@ -80,10 +80,15 @@ public class BandItemDataSource implements BandItemRepository {
 		return albumDataDao.fetchAlbumDatas(mbid);
 	}
 
+	@NonNull
+	@Override
+	public List<AlbumData> getAllAlbumDatas() {
+		return albumDataDao.fetchAllAlbumDatas();
+	}
 
 	@NonNull
 	@Override
-	public LiveData<List<AlbumData>> getAllAlbumDatas() {
+	public LiveData<List<AlbumData>> getAllAlbumLiveDatas() {
 		return albumDataDao.fetchAllLiveAlbumDatas();
 	}
 

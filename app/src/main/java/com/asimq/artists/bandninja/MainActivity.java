@@ -98,8 +98,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	private ApplicationComponent applicationComponent;
 	@Inject
 	ArtistDataDao artistDataDao;
-	@BindView(R.id.fab)
-	FloatingActionButton fab;
 	private Map<String, String> genreMap = new HashMap<>();
 	ListPopupWindow listPopupWindow;
 	@BindView(R.id.locationView)
@@ -420,6 +418,29 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			return true;
 		}
 		return false;
+	}
+
+	@BindView(R.id.header_view_author)
+	TextView headerAuthor;
+	@BindView(R.id.header_view_title)
+	TextView headerTitle;
+	@BindView(R.id.header_view_published_date)
+	TextView headerPublishedDate;
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		SharedPreferences sharedPreferences = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
+		SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String locationFromPreferences = sharedPreferences.getString("location", null);
+		StringBuilder titleViewBuilder = new StringBuilder(defaultSharedPreferences.getString(getString(R.string.display_name_key), ""));
+		if (null != locationFromPreferences) {
+			mLocation = new Gson().fromJson(locationFromPreferences, Location.class);
+			String localityAndPostalCode = Util.getLocalityAndPostalCode(this, mLocation.getLatitude(), mLocation.getLongitude());
+			titleViewBuilder.append("\n").append(localityAndPostalCode);
+		}
+		headerTitle.setText(R.string.app_name);
+		headerAuthor.setText(titleViewBuilder.toString());
 	}
 
 	@Override
