@@ -25,6 +25,12 @@ public class SearchResultsViewModel extends AndroidViewModel {
 	private final BandItemRepository bandItemRepository;
 	private MediatorLiveData<List<Artist>> artistsLiveDataObservable = new MediatorLiveData<>();
 	private MediatorLiveData<Boolean> isRefreshingObservable = new MediatorLiveData<>();
+	private MediatorLiveData<Map<String, Artist>> searchResultsByArtistObservable = new MediatorLiveData<>();
+
+	public MediatorLiveData<Map<String, Artist>> getSearchResultsByArtistObservable(@NonNull String query) {
+		searchResultsByArtistObservable.setValue(searchResultsRepository.getSearchResultsByArtistName(query));
+		return searchResultsByArtistObservable;
+	}
 
 	public SearchResultsViewModel(@NonNull Application application,
 			@NonNull SearchResultsRepository searchResultsRepository,

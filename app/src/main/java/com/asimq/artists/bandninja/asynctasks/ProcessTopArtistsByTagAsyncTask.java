@@ -21,8 +21,10 @@ import com.google.gson.internal.LinkedHashTreeMap;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
@@ -125,7 +127,7 @@ public class ProcessTopArtistsByTagAsyncTask extends AsyncTask<String, Void, Voi
                     new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
                     return;
                 }
-                List<String> artistKeys = new ArrayList<>();
+                Set<String> artistKeys = new LinkedHashSet<>();
                 artistKeys.addAll(resultsMap.keySet());
                 new ArtistDataAsyncTask(artistsLiveDataObservable, isRefreshingObservable)
                         .executeOnExecutor(Executors.newSingleThreadExecutor(), artistKeys);
@@ -150,7 +152,7 @@ public class ProcessTopArtistsByTagAsyncTask extends AsyncTask<String, Void, Voi
         super.onCancelled();
     }
 
-    class ArtistDataAsyncTask extends AsyncTask<List<String>, Void, List<ArtistData>> {
+    class ArtistDataAsyncTask extends AsyncTask<Set<String>, Void, List<ArtistData>> {
 
         private final MediatorLiveData<List<Artist>> artistsLiveDataObservable;
         private final MediatorLiveData<Boolean> isRefreshingObservable;
@@ -162,8 +164,8 @@ public class ProcessTopArtistsByTagAsyncTask extends AsyncTask<String, Void, Voi
         }
 
         @Override
-        protected List<ArtistData> doInBackground(List<String>... lists) {
-            List<String> artistNames = lists[0];
+        protected List<ArtistData> doInBackground(Set<String>... sets) {
+            Set<String> artistNames = sets[0];
             return bandItemRepository.getArtistDatasByNames(artistNames);
         }
 

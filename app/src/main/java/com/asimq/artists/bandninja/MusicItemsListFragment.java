@@ -1,5 +1,7 @@
 package com.asimq.artists.bandninja;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -448,9 +450,6 @@ public class MusicItemsListFragment extends Fragment {
 		populateArtists(artists);
 	}
 
-	protected void displaySearchResultsByArtist(@NonNull String artistName) {
-		searchResultsViewModel.searchForArtist(getActivity().getApplicationContext(), artistName);
-	}
 
 	void handleRefreshing(Entities type, boolean isRefreshing) {
 		Log.d(TAG, String.format("%s are refreshing: %s", type.name(), (isRefreshing ? true : false)));
@@ -666,6 +665,17 @@ public class MusicItemsListFragment extends Fragment {
 				albums -> buildAlbums(albums));
 		return view;
 	}
+
+	protected void displaySearchResultsByArtist(@NonNull String artistName) {
+//		searchResultsViewModel.searchForArtist(getActivity().getApplicationContext(), artistName);
+		searchResultsViewModel.getSearchResultsByArtistObservable(artistName).observe(this, artistsByName -> getArtistDatasFromStorage(artistsByName));
+	}
+
+	protected void getArtistDatasFromStorage(Map<String, Artist> artistsByName) {
+		List<ArtistData> artistDatas = new ArrayList<>();
+		artistDetailViewModel.populateArtistDatasFromStorage(artistsByName, artistDatas);
+	}
+
 
 	@Override
 	public void onDetach() {

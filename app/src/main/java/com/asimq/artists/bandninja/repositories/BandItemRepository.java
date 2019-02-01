@@ -1,11 +1,11 @@
 package com.asimq.artists.bandninja.repositories;
 
 import java.util.List;
+import java.util.Set;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
-import android.arch.persistence.room.Query;
 import android.support.annotation.NonNull;
 
 import com.asimq.artists.bandninja.room.AlbumData;
@@ -16,51 +16,52 @@ import com.asimq.artists.bandninja.room.TrackData;
 public interface BandItemRepository {
 
 	@NonNull
-	LiveData<List<TrackData>> getAllTrackLiveDatas();
-
-	@NonNull
-	LiveData<List<AlbumData>> getAllAlbumLiveDatas();
-
-	@NonNull
-	List<AlbumData> getAllAlbumDatas();
-
-	@NonNull
-	LiveData<ArtistData> getLiveArtistDataByName(@NonNull String name);
-
-	@NonNull
-	List<ArtistData> getArtistDatasByNames(@NonNull List<String> names);
-
-	@NonNull
-	ArtistData getArtistDataByName(@NonNull String name);
-
-	@NonNull
 	List<AlbumData> getAlbumDatas(@NonNull String mbid);
 
 	@NonNull
 	List<AlbumData> getAlbumDatasByAlbumNames(@NonNull List<String> names);
 
 	@NonNull
+	List<AlbumData> getAllAlbumDatas();
+
+	@NonNull
+	LiveData<List<AlbumData>> getAllAlbumLiveDatas();
+
+	@NonNull
 	LiveData<List<ArtistData>> getAllArtistData();
+
+	@NonNull
+	LiveData<List<TrackData>> getAllTrackLiveDatas();
 
 	@NonNull
 	LiveData<ArtistData> getArtistData(@NonNull String mbid);
 
 	@NonNull
+	ArtistData getArtistDataByName(@NonNull String name);
+
+	@NonNull
+	List<ArtistData> getArtistDatasByNames(@NonNull Set<String> names);
+
+	LiveData<List<ArtistData>> getArtistLiveDatasByNames(@NonNull Set<String> names);
+
+	@NonNull
 	LiveData<List<AlbumData>> getLiveAlbumDatas(@NonNull String mbid);
+
+	@NonNull
+	LiveData<ArtistData> getLiveArtistDataByName(@NonNull String name);
 
 	List<TagData> getTopTagDatas();
 
-	@Query("SELECT * from tags")
 	@NonNull
 	LiveData<List<TagData>> getTopTagLiveDatas();
 
-	List<TrackData> getTrackDatasByArtistName(@NonNull String artistName);
-
-	List<TrackData> getTrackLiveDatasByArtistAndAlbum(@NonNull String artistName, @NonNull String albumName);
-
 	List<TrackData> getTrackDatas(@NonNull String mbid);
 
+	List<TrackData> getTrackDatasByArtistName(@NonNull String artistName);
+
 	LiveData<List<TrackData>> getTrackLiveDatas(@NonNull String mbid);
+
+	List<TrackData> getTrackLiveDatasByArtistAndAlbum(@NonNull String artistName, @NonNull String albumName);
 
 	void saveAlbumData(@NonNull AlbumData albumData);
 

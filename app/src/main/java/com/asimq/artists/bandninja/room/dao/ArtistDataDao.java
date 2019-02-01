@@ -1,8 +1,10 @@
 package com.asimq.artists.bandninja.room.dao;
 
 import java.util.List;
+import java.util.Set;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MediatorLiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
@@ -36,7 +38,11 @@ public interface ArtistDataDao {
 
 	@Query("SELECT * from artists where name IN (:names)")
 	@NonNull
-	List<ArtistData> fetchArtistDataByNames(@NonNull List<String> names);
+	List<ArtistData> fetchArtistDataByNames(@NonNull Set<String> names);
+
+	@Query("SELECT * from artists where name IN (:names)")
+	@NonNull
+	LiveData<List<ArtistData>> fetchArtistLiveDatasByNames(@NonNull Set<String> names);
 
 	@Query("SELECT * from artists where mbid = :mbid")
 	@NonNull

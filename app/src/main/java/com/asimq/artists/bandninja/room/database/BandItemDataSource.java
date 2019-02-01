@@ -1,10 +1,12 @@
 package com.asimq.artists.bandninja.room.database;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MediatorLiveData;
 import android.support.annotation.NonNull;
 
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
@@ -40,13 +42,18 @@ public class BandItemDataSource implements BandItemRepository {
 	}
 
 	@Override
+	public LiveData<List<ArtistData>> getArtistLiveDatasByNames(@NonNull Set<String> names) {
+		return artistDataDao.fetchArtistLiveDatasByNames(names);
+	}
+
+	@Override
 	public List<TrackData> getTrackLiveDatasByArtistAndAlbum(@NonNull String artistName, @NonNull String albumName) {
 		return trackDataDao.getTrackLiveDatasByArtistAndAlbum(artistName, albumName);
 	}
 
 	@NonNull
 	@Override
-	public List<ArtistData> getArtistDatasByNames(@NonNull List<String> names) {
+	public List<ArtistData> getArtistDatasByNames(@NonNull Set<String> names) {
 		return artistDataDao.fetchArtistDataByNames(names);
 	}
 

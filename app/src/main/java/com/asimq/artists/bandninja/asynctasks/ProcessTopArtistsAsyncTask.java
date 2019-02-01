@@ -1,5 +1,15 @@
 package com.asimq.artists.bandninja.asynctasks;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executors;
+
+import javax.inject.Inject;
+
 import android.arch.lifecycle.MediatorLiveData;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -10,7 +20,6 @@ import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.ArtistWrapper;
 import com.asimq.artists.bandninja.json.ArtistsWrapper;
-import com.asimq.artists.bandninja.json.ResultsWrapper;
 import com.asimq.artists.bandninja.remote.retrofit.BackgroundRetrofitClientInstance;
 import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
@@ -19,227 +28,218 @@ import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.utils.Util;
 import com.google.gson.internal.LinkedHashTreeMap;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executors;
-
-import javax.inject.Inject;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ProcessTopArtistsAsyncTask extends AsyncTask<Void, Void, Void> {
 
-    public static final String API_KEY = BuildConfig.LastFMApiKey;
-    public static final String DEFAULT_FORMAT = "json";
-    public static final int SEARCH_RESULTS_LIMIT = 10;
-    private static Map<String, Boolean> mapOfAttachmentTasks = new LinkedHashTreeMap<>();
-    private final String TAG = this.getClass().getSimpleName();
-    private final Map<String, Artist> resultsMap = new LinkedHashTreeMap<>();
-    private final Map<String, Integer> listenersMap = new LinkedHashTreeMap<>();
-    private final List<String> dataAlreadyExistsKeys = new ArrayList<>();
-    private final MediatorLiveData<List<Artist>> artistsLiveDataObservable;
-    private final MediatorLiveData<Boolean> isRefreshingObservable;
-    @Inject
-    BandItemRepository bandItemRepository;
+	class ArtistDataAsyncTask extends AsyncTask<Set<String>, Void, List<ArtistData>> {
 
-    public ProcessTopArtistsAsyncTask(Context applicationContext,
-                                      MediatorLiveData<List<Artist>> artistsLiveDataObservable,
-                                      MediatorLiveData<Boolean> isRefreshingObservable) {
-        final MyApplication application = (MyApplication) applicationContext;
-        application.getApplicationComponent().inject(this);
-        this.artistsLiveDataObservable = artistsLiveDataObservable;
-        this.isRefreshingObservable = isRefreshingObservable;
-    }
+		private final MediatorLiveData<List<Artist>> artistsLiveDataObservable;
+		private final MediatorLiveData<Boolean> isRefreshingObservable;
 
-    class EmptyDataProcessor extends AsyncTask<Void, Void, Void> {
+		public ArtistDataAsyncTask(MediatorLiveData<List<Artist>> artistsLiveDataObservable,
+				MediatorLiveData<Boolean> isRefreshingObservable) {
+			this.artistsLiveDataObservable = artistsLiveDataObservable;
+			this.isRefreshingObservable = isRefreshingObservable;
+		}
 
-        @Override
-        protected Void doInBackground(Void... voids) {
-            return null;
-        }
+		@Override
+		protected List<ArtistData> doInBackground(Set<String>... lists) {
+			Set<String> artistNames = lists[0];
+			return bandItemRepository.getArtistDatasByNames(artistNames);
+		}
 
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            isRefreshingObservable.setValue(false);
-            artistsLiveDataObservable.setValue(new ArrayList<>());
-        }
-    }
+		@Override
+		protected void onPostExecute(List<ArtistData> artistDatas) {
+			if (null != artistDatas) {
+				for (ArtistData artistData : artistDatas) {
+					dataAlreadyExistsKeys.add(artistData.getName());
+					Artist artist = new Artist(artistData);
+					resultsMap.put(artist.getName(), artist);
+				}
+			}
+			Log.d(TAG, "results map after artist data task = " + resultsMap);
+			if (resultsMap.size() == artistDatas.size()) {
+				ArrayList artists = new ArrayList(resultsMap.values());
+				Collections.sort(artists);
+				artistsLiveDataObservable.setValue(artists);
+				isRefreshingObservable.setValue(false);
+				return;
+			}
+			for (String artistName : resultsMap.keySet()) {
+				if (!dataAlreadyExistsKeys.contains(artistName)) {
+					new ArtistInfoAsyncTask(artistsLiveDataObservable, artistName)
+							.executeOnExecutor(Executors.newSingleThreadExecutor(), artistName);
+				}
+			}
+		}
+	}
 
-    public static synchronized void addTask(String taskQueryString) {
-        mapOfAttachmentTasks.put(taskQueryString, true);
-    }
+	class ArtistInfoAsyncTask extends AsyncTask<String, Void, Void> {
 
-    public static synchronized void removeTask(String taskQueryString) {
-        mapOfAttachmentTasks.remove(taskQueryString);
-    }
+		private final MediatorLiveData<List<Artist>> artistsLiveDataObservable;
+		private final String taskQueryString;
 
-    public static synchronized boolean isTasksEmpty() {
-        return mapOfAttachmentTasks.isEmpty();
-    }
+		public ArtistInfoAsyncTask(MediatorLiveData<List<Artist>> artistsLiveDataObservable,
+				String taskQueryString) {
+			this.artistsLiveDataObservable = artistsLiveDataObservable;
+			this.taskQueryString = taskQueryString;
+			addTask(taskQueryString);
+		}
 
-    @Override
-    protected Void doInBackground(Void... voids) {
-        final GetMusicInfo service = BackgroundRetrofitClientInstance.getRetrofitInstance()
-                .create(GetMusicInfo.class);
-        Call<ArtistsWrapper> topArtistsCall = service.getTopArtists("chart.gettopartists",
-                API_KEY, DEFAULT_FORMAT, SEARCH_RESULTS_LIMIT);
-        topArtistsCall.enqueue(new Callback<ArtistsWrapper>() {
+		@Override
+		protected Void doInBackground(String... strings) {
+			String artistName = strings[0];
+			final GetMusicInfo service
+					= RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
+			Call<ArtistWrapper> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
+					API_KEY, DEFAULT_FORMAT);
+			artistInfoCall.enqueue(new Callback<ArtistWrapper>() {
+				@Override
+				public void onFailure(Call<ArtistWrapper> call, Throwable t) {
+				}
 
-            @Override
-            public void onFailure(Call<ArtistsWrapper> call, Throwable t) {
-                Log.e(TAG, "error calling service", t);
-                new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
-            }
+				@Override
+				public void onResponse(Call<ArtistWrapper> call, Response<ArtistWrapper> response) {
+					final ArtistWrapper artistWrapper = response.body();
+					if (artistWrapper == null) {
+						return;
+					}
+					Artist artist = artistWrapper.getArtist();
+					String name = artist.getName();
+					if (listenersMap.containsKey(name)) {
+						artist.setListeners(listenersMap.get(name));
+					}
+					resultsMap.put(name, artist);
+					new SaveArtistDataTask(bandItemRepository).execute(new ArtistData(artist));
+					removeTask(taskQueryString);
+					if (isTasksEmpty()) {
+						Log.d(TAG, "final results map = " + resultsMap);
+						ArrayList artists = new ArrayList(resultsMap.values());
+						Collections.sort(artists);
+						artistsLiveDataObservable.setValue(artists);
+						isRefreshingObservable.setValue(false);
+					}
+				}
+			});
+			return null;
+		}
+	}
 
-            @Override
-            public void onResponse(Call<ArtistsWrapper> call, Response<ArtistsWrapper> response) {
-                final ArtistsWrapper artistPojo = response.body();
-                if (artistPojo == null) {
-                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
-                    return;
-                }
+	class EmptyDataProcessor extends AsyncTask<Void, Void, Void> {
 
-                Log.i(TAG, "result: " + artistPojo.getTopArtists());
-                List<Artist> artists = artistPojo.getTopArtists().getArtists();
-                if (null == artists) {
-                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
-                    return;
-                }
-                artists = Util.removeAllItemsWithoutMbidOrImages(artists);
-                Collections.sort(artists);
-                if (artists.isEmpty()) {
-                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
-                }
-                for (Artist artist : artists) {
-                    resultsMap.put(artist.getName(), artist);
-                    listenersMap.put(artist.getName(), artist.getListeners());
-                }
-                if (null == resultsMap || resultsMap.keySet().isEmpty()) {
-                    Log.e(TAG, "no results returned");
-                    new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
-                    return;
-                }
-                List<String> artistKeys = new ArrayList<>();
-                artistKeys.addAll(resultsMap.keySet());
-                new ArtistDataAsyncTask(artistsLiveDataObservable, isRefreshingObservable)
-                        .executeOnExecutor(Executors.newSingleThreadExecutor(), artistKeys);
-            }
-        });
-        return null;
-    }
+		@Override
+		protected Void doInBackground(Void... voids) {
+			return null;
+		}
 
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-        isRefreshingObservable.setValue(true);
-    }
+		@Override
+		protected void onPostExecute(Void aVoid) {
+			super.onPostExecute(aVoid);
+			isRefreshingObservable.setValue(false);
+			artistsLiveDataObservable.setValue(new ArrayList<>());
+		}
+	}
+	public static final String API_KEY = BuildConfig.LastFMApiKey;
+	public static final String DEFAULT_FORMAT = "json";
+	public static final int SEARCH_RESULTS_LIMIT = 10;
+	private static Map<String, Boolean> mapOfAttachmentTasks = new LinkedHashTreeMap<>();
 
-    @Override
-    protected void onPostExecute(Void aVoid) {
-        super.onPostExecute(aVoid);
-    }
+	public static synchronized void addTask(String taskQueryString) {
+		mapOfAttachmentTasks.put(taskQueryString, true);
+	}
 
-    @Override
-    protected void onCancelled() {
-        super.onCancelled();
-    }
+	public static synchronized boolean isTasksEmpty() {
+		return mapOfAttachmentTasks.isEmpty();
+	}
 
-    class ArtistDataAsyncTask extends AsyncTask<List<String>, Void, List<ArtistData>> {
+	public static synchronized void removeTask(String taskQueryString) {
+		mapOfAttachmentTasks.remove(taskQueryString);
+	}
+	private final String TAG = this.getClass().getSimpleName();
+	private final MediatorLiveData<List<Artist>> artistsLiveDataObservable;
+	@Inject
+	BandItemRepository bandItemRepository;
+	private final List<String> dataAlreadyExistsKeys = new ArrayList<>();
+	private final MediatorLiveData<Boolean> isRefreshingObservable;
+	private final Map<String, Integer> listenersMap = new LinkedHashTreeMap<>();
+	private final Map<String, Artist> resultsMap = new LinkedHashTreeMap<>();
 
-        private final MediatorLiveData<List<Artist>> artistsLiveDataObservable;
-        private final MediatorLiveData<Boolean> isRefreshingObservable;
+	public ProcessTopArtistsAsyncTask(Context applicationContext,
+			MediatorLiveData<List<Artist>> artistsLiveDataObservable,
+			MediatorLiveData<Boolean> isRefreshingObservable) {
+		final MyApplication application = (MyApplication) applicationContext;
+		application.getApplicationComponent().inject(this);
+		this.artistsLiveDataObservable = artistsLiveDataObservable;
+		this.isRefreshingObservable = isRefreshingObservable;
+	}
 
-        public ArtistDataAsyncTask(MediatorLiveData<List<Artist>> artistsLiveDataObservable,
-                                   MediatorLiveData<Boolean> isRefreshingObservable) {
-            this.artistsLiveDataObservable = artistsLiveDataObservable;
-            this.isRefreshingObservable = isRefreshingObservable;
-        }
+	@Override
+	protected Void doInBackground(Void... voids) {
+		final GetMusicInfo service = BackgroundRetrofitClientInstance.getRetrofitInstance()
+				.create(GetMusicInfo.class);
+		Call<ArtistsWrapper> topArtistsCall = service.getTopArtists("chart.gettopartists",
+				API_KEY, DEFAULT_FORMAT, SEARCH_RESULTS_LIMIT);
+		topArtistsCall.enqueue(new Callback<ArtistsWrapper>() {
 
-        @Override
-        protected List<ArtistData> doInBackground(List<String>... lists) {
-            List<String> artistNames = lists[0];
-            return bandItemRepository.getArtistDatasByNames(artistNames);
-        }
+			@Override
+			public void onFailure(Call<ArtistsWrapper> call, Throwable t) {
+				Log.e(TAG, "error calling service", t);
+				new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
+			}
 
-        @Override
-        protected void onPostExecute(List<ArtistData> artistDatas) {
-            if (null != artistDatas) {
-                for (ArtistData artistData : artistDatas) {
-                    dataAlreadyExistsKeys.add(artistData.getName());
-                    Artist artist = new Artist(artistData);
-                    resultsMap.put(artist.getName(), artist);
-                }
-            }
-            Log.d(TAG, "results map after artist data task = " + resultsMap);
-            if (resultsMap.size() == artistDatas.size()) {
-                ArrayList artists = new ArrayList(resultsMap.values());
-                Collections.sort(artists);
-                artistsLiveDataObservable.setValue(artists);
-                isRefreshingObservable.setValue(false);
-                return;
-            }
-            for (String artistName : resultsMap.keySet()) {
-                if (!dataAlreadyExistsKeys.contains(artistName)) {
-                    new ArtistInfoAsyncTask(artistsLiveDataObservable, artistName)
-                            .executeOnExecutor(Executors.newSingleThreadExecutor(), artistName);
-                }
-            }
-        }
-    }
+			@Override
+			public void onResponse(Call<ArtistsWrapper> call, Response<ArtistsWrapper> response) {
+				final ArtistsWrapper artistPojo = response.body();
+				if (artistPojo == null) {
+					new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
+					return;
+				}
 
-    class ArtistInfoAsyncTask extends AsyncTask<String, Void, Void> {
+				Log.i(TAG, "result: " + artistPojo.getTopArtists());
+				List<Artist> artists = artistPojo.getTopArtists().getArtists();
+				if (null == artists) {
+					new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
+					return;
+				}
+				artists = Util.removeAllItemsWithoutMbidOrImages(artists);
+				Collections.sort(artists);
+				if (artists.isEmpty()) {
+					new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
+				}
+				for (Artist artist : artists) {
+					resultsMap.put(artist.getName(), artist);
+					listenersMap.put(artist.getName(), artist.getListeners());
+				}
+				if (null == resultsMap || resultsMap.keySet().isEmpty()) {
+					Log.e(TAG, "no results returned");
+					new EmptyDataProcessor().executeOnExecutor(Executors.newSingleThreadExecutor());
+					return;
+				}
+				Set<String> artistKeys = new LinkedHashSet<>();
+				artistKeys.addAll(resultsMap.keySet());
+				new ArtistDataAsyncTask(artistsLiveDataObservable, isRefreshingObservable)
+						.executeOnExecutor(Executors.newSingleThreadExecutor(), artistKeys);
+			}
+		});
+		return null;
+	}
 
-        private final MediatorLiveData<List<Artist>> artistsLiveDataObservable;
-        private final String taskQueryString;
+	@Override
+	protected void onCancelled() {
+		super.onCancelled();
+	}
 
-        public ArtistInfoAsyncTask(MediatorLiveData<List<Artist>> artistsLiveDataObservable,
-                                   String taskQueryString) {
-            this.artistsLiveDataObservable = artistsLiveDataObservable;
-            this.taskQueryString = taskQueryString;
-            addTask(taskQueryString);
-        }
+	@Override
+	protected void onPostExecute(Void aVoid) {
+		super.onPostExecute(aVoid);
+	}
 
-        @Override
-        protected Void doInBackground(String... strings) {
-            String artistName = strings[0];
-            final GetMusicInfo service
-                    = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
-            Call<ArtistWrapper> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
-                    API_KEY, DEFAULT_FORMAT);
-            artistInfoCall.enqueue(new Callback<ArtistWrapper>() {
-                @Override
-                public void onFailure(Call<ArtistWrapper> call, Throwable t) {
-                }
-
-                @Override
-                public void onResponse(Call<ArtistWrapper> call, Response<ArtistWrapper> response) {
-                    final ArtistWrapper artistWrapper = response.body();
-                    if (artistWrapper == null) {
-                        return;
-                    }
-                    Artist artist = artistWrapper.getArtist();
-                    String name = artist.getName();
-                    if (listenersMap.containsKey(name)) {
-                        artist.setListeners(listenersMap.get(name));
-                    }
-                    resultsMap.put(name, artist);
-                    new SaveArtistDataTask(bandItemRepository).execute(new ArtistData(artist));
-                    removeTask(taskQueryString);
-                    if (isTasksEmpty()) {
-                        Log.d(TAG, "final results map = " + resultsMap);
-                        ArrayList artists = new ArrayList(resultsMap.values());
-                        Collections.sort(artists);
-                        artistsLiveDataObservable.setValue(artists);
-                        isRefreshingObservable.setValue(false);
-                    }
-                }
-            });
-            return null;
-        }
-    }
+	@Override
+	protected void onPreExecute() {
+		super.onPreExecute();
+		isRefreshingObservable.setValue(true);
+	}
 }
