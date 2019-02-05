@@ -36,6 +36,10 @@ public interface AlbumDataDao {
 	@NonNull
 	LiveData<List<AlbumData>> fetchLiveAlbumDatasByArtist(@NonNull String artist);
 
+	@Query("SELECT * from albums where artist = :artist")
+	@NonNull
+	List<AlbumData> fetchAlbumDatasByArtist(@NonNull String artist);
+
 	@Query("SELECT * from albums where name IN (:names)")
 	@NonNull
 	List<AlbumData> fetchAlbumDatasByAlbumNames(@NonNull List<String> names);
