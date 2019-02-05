@@ -120,7 +120,7 @@ public class ProcessTopArtistsByTagAsyncTask extends AsyncTask<String, Void, Voi
                 }
                 for (Artist artist : artists) {
                     resultsMap.put(artist.getName(), artist);
-                    listenersMap.put(artist.getName(), artist.getListeners());
+                    listenersMap.put(artist.getName(), Util.stringToInt(artist.getStats().getListeners()));
                 }
                 if (null == resultsMap || resultsMap.keySet().isEmpty()) {
                     Log.e(TAG, "no results returned");
@@ -228,7 +228,7 @@ public class ProcessTopArtistsByTagAsyncTask extends AsyncTask<String, Void, Voi
                     Artist artist = artistWrapper.getArtist();
                     String name = artist.getName();
                     if (listenersMap.containsKey(name)) {
-                        artist.setListeners(listenersMap.get(name));
+                        artist.getStats().setListeners(listenersMap.get(name) + "");
                     }
                     resultsMap.put(name, artist);
                     new SaveArtistDataTask(bandItemRepository).execute(new ArtistData(artist));

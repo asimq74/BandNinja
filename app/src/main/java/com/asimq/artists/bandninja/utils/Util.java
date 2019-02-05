@@ -3,7 +3,6 @@ package com.asimq.artists.bandninja.utils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -25,10 +24,8 @@ import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.widget.TextSwitcher;
 import android.widget.TextView;
 
-import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.Image;
 import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.json.Tag;
@@ -47,7 +44,47 @@ public class Util {
 		SUCCESS, FAILURE
 	}
 
+	public static class MySpannable extends ClickableSpan {
+
+		private boolean isUnderline = true;
+
+		/**
+		 * Constructor
+		 */
+		public MySpannable(boolean isUnderline) {
+			this.isUnderline = isUnderline;
+		}
+
+		@Override
+		public void onClick(View widget) {
+
+		}
+
+		@Override
+		public void updateDrawState(TextPaint ds) {
+			ds.setUnderlineText(isUnderline);
+			ds.setColor(Color.parseColor("#1b76d3"));
+		}
+	}
 	private static List<String> BLOCKED_TAGS = Arrays.asList("albums I own", "favorite albums");
+
+	private static SpannableStringBuilder addClickablePartTextViewResizable(final Spanned strSpanned, final TextView tv,
+			final int maxLine, final String spanableText, final boolean viewMore) {
+		String str = strSpanned.toString();
+		SpannableStringBuilder ssb = new SpannableStringBuilder(strSpanned);
+
+		if (str.contains(spanableText)) {
+
+			ssb.setSpan(new MySpannable(false) {
+				@Override
+				public void onClick(View widget) {
+				}
+			}, str.indexOf(spanableText), str.indexOf(spanableText) + spanableText.length(), 0);
+
+		}
+		return ssb;
+
+	}
 
 	public static boolean containsImageUrls(List<Image> images) {
 		if (null == images || images.isEmpty()) {
@@ -69,6 +106,36 @@ public class Util {
 		return images.get(images.size() - 1).getText();
 	}
 
+	public static String getKeyFromAlbumData(@NonNull AlbumData albumData) {
+		return getKeyFromArtistAndAlbum(albumData.getArtist(), albumData.getName());
+	}
+
+	public static String getKeyFromArtistAndAlbum(@NonNull String artist, @NonNull String album) {
+		return String.format("%s|%s", artist, album);
+	}
+
+	public static String getKeyFromTrackData(@NonNull TrackData trackData) {
+		return getKeyFromArtistAndAlbum(trackData.getArtistName(), trackData.getAlbumName());
+	}
+
+	public static String getLocalityAndPostalCode(Context context, double latitude, double longitude) {
+		StringBuilder result = new StringBuilder();
+		try {
+			Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+			List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+			if (addresses.size() > 0) {
+				Address address = addresses.get(0);
+				result.append(address.getLocality()).append(", ");
+				result.append(address.getAdminArea()).append(" ");
+				result.append(address.getPostalCode());
+			}
+		} catch (IOException e) {
+			Log.e("tag", e.getMessage());
+		}
+
+		return result.toString();
+	}
+
 	public static String getPostalCode(Context context, double latitude, double longitude) {
 		StringBuilder result = new StringBuilder();
 		try {
@@ -87,31 +154,6 @@ public class Util {
 		return result.toString();
 	}
 
-	public static int stringToInt(String param) {
-		try {
-			return Integer.valueOf(param);
-		} catch(NumberFormatException e) {
-			return -1;
-		}
-	}
-
-	public static String getLocalityAndPostalCode(Context context, double latitude, double longitude) {
-		StringBuilder result = new StringBuilder();
-		try {
-			Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-			List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
-			if (addresses.size() > 0) {
-				Address address = addresses.get(0);
-                result.append(address.getLocality()).append(", ");
-                result.append(address.getAdminArea()).append(" ");
-				result.append(address.getPostalCode());
-			}
-		} catch (IOException e) {
-			Log.e("tag", e.getMessage());
-		}
-
-		return result.toString();
-	}
 	@NonNull
 	public static String getTagsAsString(@NonNull List<Tag> tags) {
 		StringBuilder sb = new StringBuilder();
@@ -124,55 +166,35 @@ public class Util {
 		return sb.toString();
 	}
 
-	public static String getKeyFromAlbumData(@NonNull AlbumData albumData) {
-		return getKeyFromArtistAndAlbum(albumData.getArtist(), albumData.getName());
+	@NonNull
+	public static List<Tag> getTagsFromString(@NonNull String tagString) {
+		List<Tag> tags = new ArrayList<>();
+		if (tagString.isEmpty()) {
+			return tags;
+		}
+		if (tagString.indexOf(",") < 0) {
+			tags.add(new Tag(tagString));
+			return tags;
+		}
+		List<String> tagStringList = Arrays.asList(tagString.split("\\s*,\\s*"));
+		for (String tagText : tagStringList) {
+			tags.add(new Tag(tagText));
+		}
+		return tags;
 	}
 
-	public static String getKeyFromTrackData(@NonNull TrackData trackData) {
-		return getKeyFromArtistAndAlbum(trackData.getArtistName(), trackData.getAlbumName());
+	public static boolean isConnected(@NonNull Context context) {
+		ConnectivityManager cm =
+				(ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+		NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+		return activeNetwork != null &&
+				activeNetwork.isConnectedOrConnecting();
 	}
 
-	public static class MySpannable extends ClickableSpan {
-
-		private boolean isUnderline = true;
-
-		/**
-		 * Constructor
-		 */
-		public MySpannable(boolean isUnderline) {
-			this.isUnderline = isUnderline;
-		}
-
-		@Override
-		public void updateDrawState(TextPaint ds) {
-			ds.setUnderlineText(isUnderline);
-			ds.setColor(Color.parseColor("#1b76d3"));
-		}
-
-		@Override
-		public void onClick(View widget) {
-
-
-		}
-	}
-
-	private static SpannableStringBuilder addClickablePartTextViewResizable(final Spanned strSpanned, final TextView tv,
-																			final int maxLine, final String spanableText, final boolean viewMore) {
-		String str = strSpanned.toString();
-		SpannableStringBuilder ssb = new SpannableStringBuilder(strSpanned);
-
-		if (str.contains(spanableText)) {
-
-
-			ssb.setSpan(new MySpannable(false){
-				@Override
-				public void onClick(View widget) {
-				}
-			}, str.indexOf(spanableText), str.indexOf(spanableText) + spanableText.length(), 0);
-
-		}
-		return ssb;
-
+	public static boolean isGooglePlayServicesAvailable(@NonNull Context context) {
+		return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
+				== ConnectionResult.SUCCESS;
 	}
 
 	public static void makeTextViewResizable(final TextView tv, final int maxLine, final String expandText, final boolean viewMore) {
@@ -222,71 +244,13 @@ public class Util {
 
 	}
 
-	public static String getKeyFromArtistAndAlbum(@NonNull String artist, @NonNull String album) {
-		return String.format("%s|%s", artist, album);
-	}
-
-	@NonNull
-	public static List<Tag> getTagsFromString(@NonNull String tagString) {
-		List<Tag> tags = new ArrayList<>();
-		if (tagString.isEmpty()) {
-			return tags;
-		}
-		if (tagString.indexOf(",") < 0) {
-			tags.add(new Tag(tagString));
-			return tags;
-		}
-		List<String> tagStringList = Arrays.asList(tagString.split("\\s*,\\s*"));
-		for (String tagText : tagStringList) {
-			tags.add(new Tag(tagText));
-		}
-		return tags;
-	}
-
-	public static boolean isConnected(@NonNull Context context) {
-		ConnectivityManager cm =
-				(ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-		NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-		return activeNetwork != null &&
-				activeNetwork.isConnectedOrConnecting();
-	}
-
-	public static boolean isGooglePlayServicesAvailable(@NonNull Context context) {
-		return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
-				== ConnectionResult.SUCCESS;
-	}
-
-
-	class ArtistComparator implements Comparator<Artist>
-	{
-		private List<String> sortOrder;
-
-		public int compare(Artist c1, Artist c2)
-		{
-			int a1 = c1.getListeners();
-			int a2 = c2.getListeners();
-			return a1 - a2;
-		}
-	}
-
-	public static void populateHTMLForSwitcher(@NonNull TextSwitcher switcher, @NonNull String content) {
+	public static void populateHTMLForTextView(@NonNull TextView textView, @NonNull String content) {
 		Spanned text = Html.fromHtml(content
 				.replaceAll("(\n)", "<br />")
 				.replaceAll("(\r)", "<br />"));
-		switcher.setText(text);
-		TextView tv = (TextView) switcher.getCurrentView();
-		tv.setText(text);
-		tv.setMovementMethod(LinkMovementMethod.getInstance());
+		textView.setText(text);
+		textView.setMovementMethod(LinkMovementMethod.getInstance());
 	}
-
-    public static void populateHTMLForTextView(@NonNull TextView textView, @NonNull String content) {
-        Spanned text = Html.fromHtml(content
-                .replaceAll("(\n)", "<br />")
-                .replaceAll("(\r)", "<br />"));
-        textView.setText(text);
-        textView.setMovementMethod(LinkMovementMethod.getInstance());
-    }
 
 	public static List removeAllItemsWithoutMbidOrImages(List<? extends MusicItem> musicItems) {
 		if (android.os.Build.VERSION.SDK_INT < 24) {
@@ -332,5 +296,13 @@ public class Util {
 
 		// Return the null
 		return l;
+	}
+
+	public static int stringToInt(String param) {
+		try {
+			return Integer.valueOf(param);
+		} catch (NumberFormatException e) {
+			return -1;
+		}
 	}
 }

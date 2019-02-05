@@ -17,8 +17,6 @@ public class Artist extends BaseMusicItem implements Comparable<Artist> {
 	private Bio bio = new Bio();
 	@SerializedName("image")
 	private List<Image> images = new ArrayList<>();
-	@SerializedName("listeners")
-	private int listeners = 0;
 	@SerializedName("mbid")
 	private String mbid = "";
 	@SerializedName("name")
@@ -51,12 +49,12 @@ public class Artist extends BaseMusicItem implements Comparable<Artist> {
 		image.setText(artistData.getImage());
 		this.getImages().add(image);
 		this.getTagWrapper().setTags(Util.getTagsFromString(artistData.getTagsText()));
-		this.listeners = artistData.getListeners();
+		this.stats.setListeners(artistData.getListeners() + "");
 	}
 
 	@Override
 	public int compareTo(@NonNull Artist artist) {
-		return artist.getListeners() - getListeners();
+		return Util.stringToInt(artist.getStats().getListeners()) - Util.stringToInt(getStats().getListeners());
 	}
 
 	public Bio getBio() {
@@ -65,10 +63,6 @@ public class Artist extends BaseMusicItem implements Comparable<Artist> {
 
 	public List<Image> getImages() {
 		return images;
-	}
-
-	public int getListeners() {
-		return listeners;
 	}
 
 	public String getMbid() {
@@ -111,10 +105,6 @@ public class Artist extends BaseMusicItem implements Comparable<Artist> {
 		this.images = images;
 	}
 
-	public void setListeners(int listeners) {
-		this.listeners = listeners;
-	}
-
 	public void setMbid(String mbid) {
 		this.mbid = mbid;
 	}
@@ -150,8 +140,7 @@ public class Artist extends BaseMusicItem implements Comparable<Artist> {
 	@Override
 	public String toString() {
 		return "Artist{" +
-				"listeners='" + listeners + '\'' +
-				", mbid='" + mbid + '\'' +
+				"mbid='" + mbid + '\'' +
 				", name='" + name + '\'' +
 				", images=" + images +
 				", streamable='" + streamable + '\'' +

@@ -34,7 +34,7 @@ public class ArtistData {
 		this.image = Util.getImageUrl(artist);
 		this.bio = artist.getBio().getContent();
 		this.tagsText = Util.getTagsAsString(artist.getTagWrapper().getTags());
-		this.listeners = artist.getListeners();
+		this.listeners = Util.stringToInt(artist.getStats().getListeners());
 	}
 
 	public String getBio() {

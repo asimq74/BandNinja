@@ -106,9 +106,8 @@ public class ApplicationModule {
 	@Provides
 	@Singleton
 	SearchResultsViewModelFactory provideSearchResultsViewModelFactory(
-			SearchResultsRepository searchResultsRepository,
-			BandItemRepository bandItemRepository) {
-		return new SearchResultsViewModelFactory(mApplication, searchResultsRepository, bandItemRepository);
+			SearchResultsRepository searchResultsRepository) {
+		return new SearchResultsViewModelFactory(mApplication, searchResultsRepository);
 	}
 
 	@Provides
