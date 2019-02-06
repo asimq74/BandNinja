@@ -95,45 +95,6 @@ public class MusicItemsListFragment extends Fragment {
 
 	}
 
-	private class OnAlbumCardClickedListener implements View.OnClickListener {
-
-		private final List<Album> albums;
-
-		public OnAlbumCardClickedListener(List<Album> albums) {
-			this.albums = albums;
-		}
-
-		@Override
-		public void onClick(View view) {
-			final CardSliderLayoutManager lm = (CardSliderLayoutManager) recyclerView.getLayoutManager();
-
-			if (lm.isSmoothScrolling()) {
-				return;
-			}
-
-			final int activeCardPosition = lm.getActiveCardPosition();
-			if (activeCardPosition == RecyclerView.NO_POSITION) {
-				return;
-			}
-
-			final int clickedPosition = recyclerView.getChildAdapterPosition(view);
-			if (clickedPosition == activeCardPosition) {
-				Album album = albums.get(clickedPosition);
-				Intent articleDetailIntent = new Intent(getActivity(), ArticleDetailActivity.class);
-				articleDetailIntent.putExtra(ArticleDetailActivity.MBID, album.getMbid());
-				articleDetailIntent.putExtra(ArticleDetailActivity.ENTITY_TYPE, Entities.ALBUM.name());
-				articleDetailIntent.putExtra(ArticleDetailActivity.ARTIST, album.getArtist().getName());
-				final CardView cardView = (CardView) view;
-				final View sharedView = cardView.getChildAt(cardView.getChildCount() - 1);
-				ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-						Objects.requireNonNull(getActivity()), sharedView, DetailsActivity.EXTRA_IMAGE);
-				startActivity(articleDetailIntent, options.toBundle());
-			} else if (clickedPosition > activeCardPosition) {
-				recyclerView.smoothScrollToPosition(clickedPosition);
-			}
-		}
-	}
-
 	private class OnAlbumDataCardClickedListener implements View.OnClickListener {
 
 		private final List<AlbumData> albums;
@@ -390,7 +351,7 @@ public class MusicItemsListFragment extends Fragment {
 	}
 
 	protected void displayAlbumsByArtist(@NonNull String artistName) {
-		albumDetailViewModel.searchForAlbums(getActivity().getApplicationContext(), artistName);
+		albumDetailViewModel.searchForAlbums(artistName);
 	}
 
 	protected void displayArtistsFromStorage(@NonNull List<Artist> artists) {

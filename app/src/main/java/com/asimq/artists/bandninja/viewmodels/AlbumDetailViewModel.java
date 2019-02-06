@@ -72,9 +72,9 @@ public class AlbumDetailViewModel extends AndroidViewModel {
 		return albumTracksObservable;
 	}
 
-	public void searchForAlbums(@NonNull Context context, @NonNull String artistName) {
-		albumInfoRepository.searchForAlbums(context, albumsLiveDataObservable,
-				isRefreshingObservable, artistName);
+	public void searchForAlbums(@NonNull String artistName) {
+		albumInfoRepository.searchForAlbums(albumsLiveDataObservable, isRefreshingObservable,
+				bandItemRepository, artistName);
 	}
 
 	public MediatorLiveData<List<AlbumInfo>> getAlbumsLiveDataObservable() {

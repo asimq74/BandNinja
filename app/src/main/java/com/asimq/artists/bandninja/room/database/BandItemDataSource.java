@@ -6,7 +6,6 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MediatorLiveData;
 import android.support.annotation.NonNull;
 
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
@@ -36,25 +35,10 @@ public class BandItemDataSource implements BandItemRepository {
 		this.tagDataDao = tagDataDao;
 	}
 
-	@Override
-	public List<TrackData> getTrackDatasByArtistName(@NonNull String artistName) {
-		return trackDataDao.fetchTrackDatasByArtist(artistName);
-	}
-
-	@Override
-	public LiveData<List<ArtistData>> getArtistLiveDatasByNames(@NonNull Set<String> names) {
-		return artistDataDao.fetchArtistLiveDatasByNames(names);
-	}
-
-	@Override
-	public List<TrackData> getTrackLiveDatasByArtistAndAlbum(@NonNull String artistName, @NonNull String albumName) {
-		return trackDataDao.getTrackLiveDatasByArtistAndAlbum(artistName, albumName);
-	}
-
 	@NonNull
 	@Override
-	public List<ArtistData> getArtistDatasByNames(@NonNull Set<String> names) {
-		return artistDataDao.fetchArtistDataByNames(names);
+	public List<AlbumData> getAlbumDatas(@NonNull String mbid) {
+		return albumDataDao.fetchAlbumDatas(mbid);
 	}
 
 	@NonNull
@@ -63,28 +47,13 @@ public class BandItemDataSource implements BandItemRepository {
 		return albumDataDao.fetchAlbumDatasByAlbumNames(names);
 	}
 
-	@NonNull
 	@Override
-	public ArtistData getArtistDataByName(@NonNull String name) {
-		return artistDataDao.fetchArtistDataByName(name);
-	}
-
-	@NonNull
-	@Override
-	public LiveData<List<TrackData>> getAllTrackLiveDatas() {
-		return trackDataDao.fetchAllTrackLiveDatas();
-	}
-
-	@NonNull
-	@Override
-	public LiveData<ArtistData> getLiveArtistDataByName(@NonNull String name) {
-		return artistDataDao.fetchLiveArtistDataByName(name);
-	}
-
-	@NonNull
-	@Override
-	public List<AlbumData> getAlbumDatas(@NonNull String mbid) {
-		return albumDataDao.fetchAlbumDatas(mbid);
+	public List<AlbumData> getAlbumsWithTracks(String artist) {
+		List<AlbumData> byName = albumDataDao.fetchAlbumDatasByArtist(artist);
+		for (AlbumData albumData : byName) {
+			albumData.setTrackDatas(trackDataDao.fetchTrackDatasByArtistAndAlbum(albumData.getArtist(), albumData.getName()));
+		}
+		return byName;
 	}
 
 	@NonNull
@@ -107,14 +76,43 @@ public class BandItemDataSource implements BandItemRepository {
 
 	@NonNull
 	@Override
+	public LiveData<List<TrackData>> getAllTrackLiveDatas() {
+		return trackDataDao.fetchAllTrackLiveDatas();
+	}
+
+	@NonNull
+	@Override
 	public LiveData<ArtistData> getArtistData(@NonNull String mbid) {
 		return artistDataDao.fetchLiveArtistDataById(mbid);
 	}
 
 	@NonNull
 	@Override
+	public ArtistData getArtistDataByName(@NonNull String name) {
+		return artistDataDao.fetchArtistDataByName(name);
+	}
+
+	@NonNull
+	@Override
+	public List<ArtistData> getArtistDatasByNames(@NonNull Set<String> names) {
+		return artistDataDao.fetchArtistDataByNames(names);
+	}
+
+	@Override
+	public LiveData<List<ArtistData>> getArtistLiveDatasByNames(@NonNull Set<String> names) {
+		return artistDataDao.fetchArtistLiveDatasByNames(names);
+	}
+
+	@NonNull
+	@Override
 	public LiveData<List<AlbumData>> getLiveAlbumDatas(@NonNull String mbid) {
 		return albumDataDao.fetchLiveAlbumDatas(mbid);
+	}
+
+	@NonNull
+	@Override
+	public LiveData<ArtistData> getLiveArtistDataByName(@NonNull String name) {
+		return artistDataDao.fetchLiveArtistDataByName(name);
 	}
 
 	@Override
@@ -134,8 +132,30 @@ public class BandItemDataSource implements BandItemRepository {
 	}
 
 	@Override
+	public List<TrackData> getTrackDatasByArtistName(@NonNull String artistName) {
+		return trackDataDao.fetchTrackDatasByArtist(artistName);
+	}
+
+	@Override
 	public LiveData<List<TrackData>> getTrackLiveDatas(@NonNull String mbid) {
 		return trackDataDao.fetchLiveTrackDatas(mbid);
+	}
+
+	@Override
+	public List<TrackData> getTrackLiveDatasByArtistAndAlbum(@NonNull String artistName, @NonNull String albumName) {
+		return trackDataDao.getTrackLiveDatasByArtistAndAlbum(artistName, albumName);
+	}
+
+	@Override
+	public void insertAlbumWithTracks(AlbumData albumData) {
+		List<TrackData> trackDataList = albumData.getTrackDatas();
+		for (TrackData trackData : trackDataList) {
+			trackData.setAlbumId(albumData.getMbid());
+			trackData.setAlbumName(albumData.getName());
+			trackData.setArtistName(albumData.getArtist());
+			trackDataDao.insertTrackData(trackData);
+		}
+		albumDataDao.insertAlbumData(albumData);
 	}
 
 	@Override

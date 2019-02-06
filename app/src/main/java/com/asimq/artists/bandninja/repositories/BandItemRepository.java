@@ -71,11 +71,15 @@ public interface BandItemRepository {
 
 	void saveMultipleArtists(@NonNull List<ArtistData> artistDataList);
 
-	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	void saveMultipleTagDatas(@NonNull List<TagData> tagDatas);
 
 	void saveMultipleTrackDatas(@NonNull List<TrackData> trackDatas);
 
 	void saveTrackData(@NonNull TrackData trackData);
+
+	void insertAlbumWithTracks(AlbumData albumData);
+
+	@NonNull
+	List<AlbumData> getAlbumsWithTracks(String artist);
 
 }

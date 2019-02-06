@@ -49,4 +49,5 @@ public interface AlbumDataDao {
 
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	void insertMultipleAlbumDatas(@NonNull List<AlbumData> albumDatas);
+
 }

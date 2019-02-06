@@ -23,9 +23,9 @@ public interface AlbumInfoRepository {
 
     LiveData<AlbumInfo> getAlbumInfo(@NonNull String mbId);
 
-    void searchForAlbums(@NonNull Context context,
-                         @NonNull MediatorLiveData<List<AlbumInfo>> albumsLiveDataObservable,
-                         @NonNull MediatorLiveData<Boolean> isRefreshingObservable,
-                         @NonNull String artistName);
+    void searchForAlbums(@NonNull MediatorLiveData<List<AlbumInfo>> albumsLiveDataObservable,
+        @NonNull MediatorLiveData<Boolean> isRefreshingObservable,
+        @NonNull BandItemRepository bandItemRepository,
+        @NonNull String artistName);
 
 }

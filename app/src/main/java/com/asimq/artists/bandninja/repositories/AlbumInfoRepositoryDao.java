@@ -1,5 +1,6 @@
 package com.asimq.artists.bandninja.repositories;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import com.asimq.artists.bandninja.BuildConfig;
 import com.asimq.artists.bandninja.asynctasks.AlbumArtistTuple;
 import com.asimq.artists.bandninja.asynctasks.FetchTrackDataTask;
 import com.asimq.artists.bandninja.asynctasks.ProcessAlbumsByArtistAsyncTask;
+import com.asimq.artists.bandninja.asynctasks.albums.AlbumDatasByAlbumNameFromStorageTask;
 import com.asimq.artists.bandninja.json.Album;
 import com.asimq.artists.bandninja.json.AlbumInfo;
 import com.asimq.artists.bandninja.json.AlbumInfoWrapper;
@@ -23,8 +25,10 @@ import com.asimq.artists.bandninja.json.TopAlbumsWrapper;
 import com.asimq.artists.bandninja.json.Track;
 import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
+import com.asimq.artists.bandninja.room.AlbumData;
 import com.asimq.artists.bandninja.room.TrackData;
 import com.asimq.artists.bandninja.utils.Util;
+import com.google.gson.internal.LinkedTreeMap;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -38,12 +42,13 @@ public class AlbumInfoRepositoryDao implements AlbumInfoRepository {
 	public static final int LIMIT = 10;
 
 	@Override
-	public void searchForAlbums(@NonNull Context context,
-								@NonNull MediatorLiveData<List<AlbumInfo>> albumsLiveDataObservable,
+	public void searchForAlbums(@NonNull MediatorLiveData<List<AlbumInfo>> albumsLiveDataObservable,
 								@NonNull MediatorLiveData<Boolean> isRefreshingObservable,
+								@NonNull BandItemRepository bandItemRepository,
 								@NonNull String artistName) {
-		new ProcessAlbumsByArtistAsyncTask(context, albumsLiveDataObservable, isRefreshingObservable)
-				.executeOnExecutor(Executors.newSingleThreadExecutor(), artistName);
+		List<AlbumData> albumDatas = new ArrayList<>();
+		new AlbumDatasByAlbumNameFromStorageTask(bandItemRepository, albumDatas, isRefreshingObservable,
+				albumsLiveDataObservable).executeOnExecutor(Executors.newSingleThreadExecutor(), artistName);
 	}
 
 	@Override

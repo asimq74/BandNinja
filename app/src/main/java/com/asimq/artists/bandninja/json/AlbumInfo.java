@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.asimq.artists.bandninja.room.AlbumData;
+import com.asimq.artists.bandninja.room.TrackData;
 import com.asimq.artists.bandninja.utils.Util;
 import com.google.gson.annotations.SerializedName;
 
@@ -55,6 +56,9 @@ public class AlbumInfo extends BaseMusicItem implements Comparable<AlbumInfo>{
 		this.playcount = albumData.getPlaycount();
 		this.tagWrapper.setTags(Util.getTagsFromString(albumData.getTags()));
 		this.releaseDate = albumData.getReleaseDate();
+		for (TrackData trackData : albumData.getTrackDatas()) {
+			this.getTrackWrapper().getTracks().add(new Track(trackData));
+		}
 	}
 
 	public AlbumInfo(@NonNull Album album) {
@@ -67,6 +71,7 @@ public class AlbumInfo extends BaseMusicItem implements Comparable<AlbumInfo>{
 		this.wiki.setSummary(album.getWiki().getSummary());
 		this.playcount = album.getPlaycount() +"";
 		this.tagWrapper.setTags(album.getTagWrapper().getTags());
+		this.trackWrapper.setTracks(album.getTrackWrapper().getTracks());
 	}
 
 	public String getReleaseDate() {

@@ -51,11 +51,8 @@ public class ProcessAlbumsByArtistAsyncTask extends AsyncTask<String, Void, Void
     @Inject
     BandItemRepository bandItemRepository;
 
-    public ProcessAlbumsByArtistAsyncTask(Context applicationContext,
-                                          MediatorLiveData<List<AlbumInfo>> albumsLiveDataObservable,
+    public ProcessAlbumsByArtistAsyncTask(MediatorLiveData<List<AlbumInfo>> albumsLiveDataObservable,
                                           MediatorLiveData<Boolean> isRefreshingObservable) {
-        final MyApplication application = (MyApplication) applicationContext;
-        application.getApplicationComponent().inject(this);
         this.albumsLiveDataObservable = albumsLiveDataObservable;
         this.isRefreshingObservable = isRefreshingObservable;
     }

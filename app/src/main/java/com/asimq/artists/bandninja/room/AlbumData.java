@@ -1,10 +1,16 @@
 package com.asimq.artists.bandninja.room;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.Relation;
 import android.support.annotation.NonNull;
 
 import com.asimq.artists.bandninja.json.AlbumInfo;
+import com.asimq.artists.bandninja.json.Track;
 import com.asimq.artists.bandninja.json.Wiki;
 import com.asimq.artists.bandninja.utils.Util;
 
@@ -33,6 +39,16 @@ public class AlbumData implements Comparable<AlbumData> {
     private String wiki = "";
     @ColumnInfo(name = "summary")
     private String summary = "";
+    @Ignore
+    public List<TrackData> trackDatas = new ArrayList<>();
+
+    public List<TrackData> getTrackDatas() {
+        return trackDatas;
+    }
+
+    public void setTrackDatas(List<TrackData> trackDatas) {
+        this.trackDatas = trackDatas;
+    }
 
     public AlbumData() {
     }
@@ -49,6 +65,9 @@ public class AlbumData implements Comparable<AlbumData> {
         this.url = albumInfo.getUrl();
         this.wiki = getWiki(albumInfo).getContent();
         this.summary = getWiki(albumInfo).getSummary();
+        for (Track track : albumInfo.getTrackWrapper().getTracks()) {
+            this.trackDatas.add(new TrackData(track));
+        }
     }
 
     @Override

@@ -20,7 +20,7 @@ public class SaveAlbumDataTask extends AsyncTask<AlbumData, Void, AlbumData> {
     @Override
     protected AlbumData doInBackground(AlbumData... params) {
         final AlbumData data = params[0];
-        repository.saveAlbumData(data);
+        repository.insertAlbumWithTracks(data);
         return data;
     }
 
