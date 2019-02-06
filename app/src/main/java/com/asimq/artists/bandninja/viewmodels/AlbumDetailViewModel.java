@@ -73,6 +73,7 @@ public class AlbumDetailViewModel extends AndroidViewModel {
 	}
 
 	public void searchForAlbums(@NonNull String artistName) {
+		isRefreshingObservable.setValue(true);
 		albumInfoRepository.searchForAlbums(albumsLiveDataObservable, isRefreshingObservable,
 				bandItemRepository, artistName);
 	}
