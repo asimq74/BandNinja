@@ -49,11 +49,11 @@ public class BandItemDataSource implements BandItemRepository {
 
 	@Override
 	public List<AlbumData> getAlbumsWithTracks(String artist) {
-		List<AlbumData> byName = albumDataDao.fetchAlbumDatasByArtist(artist);
-		for (AlbumData albumData : byName) {
+		List<AlbumData> albumDatasByArtist = albumDataDao.fetchAlbumDatasByArtist(artist);
+		for (AlbumData albumData : albumDatasByArtist) {
 			albumData.setTrackDatas(trackDataDao.fetchTrackDatasByArtistAndAlbum(albumData.getArtist(), albumData.getName()));
 		}
-		return byName;
+		return albumDatasByArtist;
 	}
 
 	@NonNull

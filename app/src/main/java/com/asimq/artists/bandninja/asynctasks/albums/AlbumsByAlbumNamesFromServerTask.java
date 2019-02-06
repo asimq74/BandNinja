@@ -81,13 +81,10 @@ public class AlbumsByAlbumNamesFromServerTask extends AsyncTask<String, Void, Vo
 						final AlbumInfo albumInfo = new AlbumInfo(album);
 						Log.d(TAG, String.format("adding album %s from server", album.getName()));
 						albumInfos.add(albumInfo);
-						Log.d(TAG, String.format("saving album data for %s to database", album.getName()));
-						new SaveAlbumDataTask(bandItemRepository).executeOnExecutor(Executors.newSingleThreadExecutor(),
-								new AlbumData(albumInfo));
 					}
-					Collections.sort(albumInfos);
-					Log.d(TAG, "final results = " + albumInfos);
-					new FoundAlbumsProcessor(isRefreshingObservable, musicItemObservable).executeOnExecutor(Executors.newSingleThreadExecutor(), albumInfos);
+					Log.d(TAG, String.format("attempting to obtain album infos from server for artist %s", artistName));
+					new AlbumInfosByNamesFromServerTask(bandItemRepository,isRefreshingObservable, musicItemObservable)
+							.executeOnExecutor(Executors.newSingleThreadExecutor(), albumInfos);
 				}
 			});
 

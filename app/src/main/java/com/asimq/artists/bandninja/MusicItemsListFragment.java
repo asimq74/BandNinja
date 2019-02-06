@@ -577,8 +577,7 @@ public class MusicItemsListFragment extends Fragment {
 		searchResultsViewModel.getSearchResultsByArtistObservable().observe(this, this::getArtistDatasFromStorage);
 		albumDetailViewModel.getIsRefreshingObservable().observe(this,
 				isRefreshing -> handleRefreshing(Entities.ALBUM, isRefreshing));
-		albumDetailViewModel.getAlbumsLiveDataObservable().observe(this,
-				albums -> buildAlbums(albums));
+		albumDetailViewModel.getAlbumsLiveDataObservable().observe(this, this::buildAlbums);
 		artistDetailViewModel.getArtistsObservable().observe(this, this::buildArtists);
 		artistDetailViewModel.getIsRefreshingObservable().observe(this,
 				isRefreshing -> handleRefreshing(Entities.ARTIST, isRefreshing));
