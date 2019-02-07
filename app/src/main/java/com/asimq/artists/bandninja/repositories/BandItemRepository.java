@@ -15,6 +15,8 @@ import com.asimq.artists.bandninja.room.TrackData;
 
 public interface BandItemRepository {
 
+	AlbumData getAlbumDataByNameAndId(@NonNull String name, @NonNull String mbid);
+
 	@NonNull
 	List<AlbumData> getAlbumDatas(@NonNull String mbid);
 
@@ -34,7 +36,7 @@ public interface BandItemRepository {
 	LiveData<List<TrackData>> getAllTrackLiveDatas();
 
 	@NonNull
-	LiveData<ArtistData> getArtistData(@NonNull String mbid);
+	LiveData<ArtistData> getArtistLiveDataById(@NonNull String mbid);
 
 	@NonNull
 	ArtistData getArtistDataByName(@NonNull String name);
@@ -48,7 +50,7 @@ public interface BandItemRepository {
 	LiveData<List<AlbumData>> getLiveAlbumDatas(@NonNull String mbid);
 
 	@NonNull
-	LiveData<ArtistData> getLiveArtistDataByName(@NonNull String name);
+	LiveData<ArtistData> getArtistLiveDataByName(@NonNull String name);
 
 	List<TagData> getTopTagDatas();
 

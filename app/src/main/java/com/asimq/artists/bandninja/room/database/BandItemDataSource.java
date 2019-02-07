@@ -25,6 +25,22 @@ public class BandItemDataSource implements BandItemRepository {
 	private final TagDataDao tagDataDao;
 	private final TrackDataDao trackDataDao;
 
+	@Override
+	public AlbumData getAlbumDataByNameAndId(@NonNull String name, @NonNull String mbid) {
+		AlbumData albumData = albumDataDao.fetchAlbumDataByNameAndId(name, mbid);
+		albumData.setTrackDatas(trackDataDao.fetchTrackDatasByArtistAndAlbum(albumData.getArtist(), albumData.getName()));
+		return albumData;
+	}
+
+	@Override
+	public List<AlbumData> getAlbumsWithTracks(String artist) {
+		List<AlbumData> albumDatasByArtist = albumDataDao.fetchAlbumDatasByArtist(artist);
+		for (AlbumData albumData : albumDatasByArtist) {
+			albumData.setTrackDatas(trackDataDao.fetchTrackDatasByArtistAndAlbum(albumData.getArtist(), albumData.getName()));
+		}
+		return albumDatasByArtist;
+	}
+
 	@Inject
 	public BandItemDataSource(ArtistDataDao artistDataDao,
 			TrackDataDao trackDataDao, AlbumDataDao albumDataDao,
@@ -47,14 +63,6 @@ public class BandItemDataSource implements BandItemRepository {
 		return albumDataDao.fetchAlbumDatasByAlbumNames(names);
 	}
 
-	@Override
-	public List<AlbumData> getAlbumsWithTracks(String artist) {
-		List<AlbumData> albumDatasByArtist = albumDataDao.fetchAlbumDatasByArtist(artist);
-		for (AlbumData albumData : albumDatasByArtist) {
-			albumData.setTrackDatas(trackDataDao.fetchTrackDatasByArtistAndAlbum(albumData.getArtist(), albumData.getName()));
-		}
-		return albumDatasByArtist;
-	}
 
 	@NonNull
 	@Override
@@ -82,7 +90,7 @@ public class BandItemDataSource implements BandItemRepository {
 
 	@NonNull
 	@Override
-	public LiveData<ArtistData> getArtistData(@NonNull String mbid) {
+	public LiveData<ArtistData> getArtistLiveDataById(@NonNull String mbid) {
 		return artistDataDao.fetchLiveArtistDataById(mbid);
 	}
 
@@ -111,7 +119,7 @@ public class BandItemDataSource implements BandItemRepository {
 
 	@NonNull
 	@Override
-	public LiveData<ArtistData> getLiveArtistDataByName(@NonNull String name) {
+	public LiveData<ArtistData> getArtistLiveDataByName(@NonNull String name) {
 		return artistDataDao.fetchLiveArtistDataByName(name);
 	}
 

@@ -12,7 +12,6 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MediatorLiveData;
 import android.support.annotation.NonNull;
 
-import com.asimq.artists.bandninja.asynctasks.SaveArtistDataTask;
 import com.asimq.artists.bandninja.asynctasks.artists.ArtistDatasByNamesFromStorageTask;
 import com.asimq.artists.bandninja.asynctasks.artists.EmptyArtistsProcessor;
 import com.asimq.artists.bandninja.json.Artist;
@@ -25,25 +24,22 @@ public class ArtistDetailViewModel extends AndroidViewModel {
 	private final BandItemRepository bandItemRepository;
 	private MediatorLiveData<Boolean> isRefreshingObservable = new MediatorLiveData<>();
 	private LiveData<ArtistData> mLiveArtistData;
-	private LiveData<List<ArtistData>> mObservableArtistDatasFromStorage = new MediatorLiveData<>();
 
 	public ArtistDetailViewModel(@NonNull Application application, @NonNull BandItemRepository bandItemRepository) {
 		super(application);
 		this.bandItemRepository = bandItemRepository;
 	}
 
-	public LiveData<List<ArtistData>> getArtistDataLiveDatasFromStorage(Map<String, Artist> searchResultsByName) {
-		final Set<String> names = searchResultsByName.keySet();
-		if (null == names || names.isEmpty()) {
-			return mObservableArtistDatasFromStorage;
+	public LiveData<ArtistData> getArtistLiveDataById(@NonNull String mbid) {
+		if (mLiveArtistData == null) {
+			mLiveArtistData = bandItemRepository.getArtistLiveDataById(mbid);
 		}
-		mObservableArtistDatasFromStorage = bandItemRepository.getArtistLiveDatasByNames(names);
-		return mObservableArtistDatasFromStorage;
+		return mLiveArtistData;
 	}
 
-	public LiveData<ArtistData> getArtistDetail(@NonNull String mbid) {
+	public LiveData<ArtistData> getArtistLiveDataByName(@NonNull String artistName) {
 		if (mLiveArtistData == null) {
-			mLiveArtistData = bandItemRepository.getArtistData(mbid);
+			mLiveArtistData = bandItemRepository.getArtistLiveDataByName(artistName);
 		}
 		return mLiveArtistData;
 	}
@@ -64,13 +60,7 @@ public class ArtistDetailViewModel extends AndroidViewModel {
 					.executeOnExecutor(Executors.newSingleThreadExecutor());
 			return;
 		}
-		new ArtistDatasByNamesFromStorageTask(bandItemRepository, searchResultsByName, new ArrayList<>(),
-				isRefreshingObservable, artistsObservable).executeOnExecutor(Executors.newSingleThreadExecutor(), names);
+		new ArtistDatasByNamesFromStorageTask(bandItemRepository, searchResultsByName, isRefreshingObservable,
+				artistsObservable).executeOnExecutor(Executors.newSingleThreadExecutor(), names);
 	}
-
-	public void saveArtist(@NonNull Artist artist) {
-		ArtistData artistData = new ArtistData(artist);
-		new SaveArtistDataTask(bandItemRepository).execute(artistData);
-	}
-
 }

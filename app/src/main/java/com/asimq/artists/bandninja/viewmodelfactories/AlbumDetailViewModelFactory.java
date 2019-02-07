@@ -18,22 +18,18 @@ public class AlbumDetailViewModelFactory implements ViewModelProvider.Factory {
 
 	private final AlbumInfoRepository albumInfoRepository;
 	private final Application application;
-	private final TrackDataDao trackDataDao;
-	private final AlbumDataDao albumDataDao;
 	private final BandItemRepository bandItemRepository;
 
 	@Inject
 	public AlbumDetailViewModelFactory(@NonNull Application application, @NonNull AlbumInfoRepository albumInfoRepository,
-									   BandItemRepository bandItemRepository, @NonNull TrackDataDao trackDataDao, @NonNull AlbumDataDao albumDataDao) {
+									   BandItemRepository bandItemRepository) {
 		this.application = application;
 		this.albumInfoRepository = albumInfoRepository;
 		this.bandItemRepository = bandItemRepository;
-		this.trackDataDao = trackDataDao;
-		this.albumDataDao = albumDataDao;
 	}
 
 	@Override
 	public AlbumDetailViewModel create(@NonNull Class modelClass) {
-		return new AlbumDetailViewModel(application, albumInfoRepository, bandItemRepository, trackDataDao, albumDataDao);
+		return new AlbumDetailViewModel(application, albumInfoRepository, bandItemRepository);
 	}
 }
