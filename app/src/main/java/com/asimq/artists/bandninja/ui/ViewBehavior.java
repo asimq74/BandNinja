@@ -7,8 +7,6 @@ import android.support.design.widget.CoordinatorLayout;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
-import com.asimq.artists.bandninja.R;
-
 
 public class ViewBehavior extends CoordinatorLayout.Behavior<HeaderView> {
 
@@ -39,7 +37,6 @@ public class ViewBehavior extends CoordinatorLayout.Behavior<HeaderView> {
 
 	@Override
 	public boolean onDependentViewChanged(CoordinatorLayout parent, HeaderView child, View dependency) {
-		shouldInitProperties(child, dependency);
 
 		int maxScroll = ((AppBarLayout) dependency).getTotalScrollRange();
 		float percentage = Math.abs(dependency.getY()) / (float) maxScroll;
@@ -68,22 +65,6 @@ public class ViewBehavior extends CoordinatorLayout.Behavior<HeaderView> {
 			}
 		}
 		return true;
-	}
-
-	private void shouldInitProperties(HeaderView child, View dependency) {
-
-		if (mStartMarginLeft == 0)
-			mStartMarginLeft = mContext.getResources().getDimensionPixelOffset(R.dimen.header_view_start_margin_left);
-
-		if (mEndMargintLeft == 0)
-			mEndMargintLeft = mContext.getResources().getDimensionPixelOffset(R.dimen.header_view_end_margin_left);
-
-		if (mStartMarginBottom == 0)
-			mStartMarginBottom = mContext.getResources().getDimensionPixelOffset(R.dimen.header_view_start_margin_bottom);
-
-		if (mMarginRight == 0)
-			mMarginRight = mContext.getResources().getDimensionPixelOffset(R.dimen.header_view_end_margin_right);
-
 	}
 
 }

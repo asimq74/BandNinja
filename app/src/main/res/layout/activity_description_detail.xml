@@ -27,7 +27,6 @@
                 android:id="@+id/photo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fitsSystemWindows="true"
                 android:scaleType="centerCrop"
                 app:layout_collapseMode="parallax"/>
 
@@ -39,7 +38,7 @@
 
                 <include
                     android:id="@+id/toolbar_header_view"
-                    layout="@layout/header_view"
+                    layout="@layout/toolbar_header_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="@dimen/header_view_end_margin_right"
@@ -122,7 +121,6 @@
         layout="@layout/header_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_behavior="com.example.xyzreader.ui.ViewBehavior"
-    />
+        app:layout_behavior="com.asimq.artists.bandninja.ui.ViewBehavior"/>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -6,15 +6,11 @@ import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.asimq.artists.bandninja.BuildConfig;
-import com.asimq.artists.bandninja.MyApplication;
-import com.asimq.artists.bandninja.R;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
 import com.asimq.artists.bandninja.json.AlbumInfo;
 import com.asimq.artists.bandninja.json.AlbumInfoWrapper;
@@ -24,6 +20,7 @@ import com.asimq.artists.bandninja.json.TopTagsWrapper;
 import com.asimq.artists.bandninja.json.Track;
 import com.asimq.artists.bandninja.remote.retrofit.BackgroundRetrofitClientInstance;
 import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;
+import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.AlbumData;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.TagData;
@@ -32,7 +29,6 @@ import com.asimq.artists.bandninja.room.dao.AlbumDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.room.dao.TagDataDao;
 import com.asimq.artists.bandninja.room.dao.TrackDataDao;
-import com.asimq.artists.bandninja.utils.Util;
 import com.asimq.artists.bandninja.utils.Util.ServiceStatus;
 
 import retrofit2.Call;
@@ -64,8 +60,7 @@ public class BandDataSyncAsyncTask extends AsyncTask<Void, Void, ServiceStatus> 
 
 		@Override
 		protected List<ArtistData> doInBackground(Void... params) {
-			List<ArtistData> artistDatas = new ArrayList<>();
-			artistDatas = artistDataDao.fetchAllArtistDatas();
+			List<ArtistData> artistDatas = artistDataDao.fetchAllArtistDatas();
 			for (ArtistData artistData : artistDatas) {
 				downloadArtistInfoToStorage(artistData.getName());
 			}
@@ -93,30 +88,27 @@ public class BandDataSyncAsyncTask extends AsyncTask<Void, Void, ServiceStatus> 
 			Log.d(TAG, "update tags task finished!");
 		}
 	}
+
 	public static final String API_KEY = BuildConfig.LastFMApiKey;
 	public static final String DEFAULT_FORMAT = "json";
 	private static final String TAG = BandDataSyncAsyncTask.class.getSimpleName();
 	@Inject
 	AlbumDataDao albumDataDao;
-	private ApplicationComponent applicationComponent;
 	@Inject
 	ArtistDataDao artistDataDao;
+	@Inject
+	BandItemRepository bandItemRepository;
 	@Inject
 	TagDataDao tagDataDao;
 	@Inject
 	TrackDataDao trackDataDao;
 
-	public BandDataSyncAsyncTask(Context context) {
-		final MyApplication application = (MyApplication) context;
-		applicationComponent = application.getApplicationComponent();
+	public BandDataSyncAsyncTask(ApplicationComponent applicationComponent) {
 		applicationComponent.inject(this);
 	}
 
 	@Override
 	protected ServiceStatus doInBackground(Void... voids) {
-		if (!Util.isConnected(applicationComponent.context())) {
-			return ServiceStatus.FAILURE;
-		}
 		doWork();
 		return ServiceStatus.SUCCESS;
 	}
@@ -214,13 +206,12 @@ public class BandDataSyncAsyncTask extends AsyncTask<Void, Void, ServiceStatus> 
 	@Override
 	protected void onPostExecute(ServiceStatus serviceStatus) {
 		super.onPostExecute(serviceStatus);
-		final Context context = applicationComponent.context();
 		if (serviceStatus == ServiceStatus.FAILURE) {
-			final String failureMessage = context.getString(R.string.updateDataServiceFailedCheckConnection);
-			Log.e(TAG, failureMessage);
-			Toast.makeText(context, failureMessage, Toast.LENGTH_LONG).show();
+//			final String failureMessage = context.getString(R.string.updateDataServiceFailedCheckConnection);
+//			Log.e(TAG, failureMessage);
+//			Toast.makeText(context, failureMessage, Toast.LENGTH_LONG).show();
 			return;
 		}
-		Log.d(TAG, context.getString(R.string.updateDataServiceSuccessful));
+//		Log.d(TAG, context.getString(R.string.updateDataServiceSuccessful));
 	}
 }

@@ -1,5 +1,15 @@
 package com.asimq.artists.bandninja;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executors;
+
+import javax.inject.Inject;
+
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +19,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -51,16 +60,6 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Executors;
-
-import javax.inject.Inject;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -87,18 +86,31 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			}
 		}
 	}
-
+	public static final String EXTRA_CURRENT_ALBUM = "EXTRA_CURRENT_ALBUM";
+	public static final String EXTRA_CURRENT_ARTIST = "EXTRA_CURRENT_ARTIST";
+	public static final String EXTRA_CURRENT_METHOD = "EXTRA_CURRENT_METHOD";
+	public static final String EXTRA_CURRENT_TAG = "EXTRA_CURRENT_TAG";
 	private static final String JOB_TAG = "MyJobService";
 	public static final String ON_DISPLAYING_ARTISTS_BY_TAG = "onDisplayingArtistsByTag";
 	public static final String ON_DISPLAYING_TOP_ARTISTS = "onDisplayingTopArtists";
-	public static final String ON_SEARCH_FOR_AN_ARTIST = "onSearchForAnArtist";
 	public static final String ON_QUERY_TEXT_SUBMIT = "onQueryTextSubmit";
+	public static final String ON_SEARCH_FOR_AN_ARTIST = "onSearchForAnArtist";
 	final String TAG = this.getClass().getSimpleName();
 	AdView adView;
 	private ApplicationComponent applicationComponent;
 	@Inject
 	ArtistDataDao artistDataDao;
+	private String currentAlbum = "";
+	private String currentArtist = "";
+	private String currentMethod = "";
+	private String currentTag = "";
 	private Map<String, String> genreMap = new HashMap<>();
+	@BindView(R.id.header_view_author)
+	TextView headerAuthor;
+	@BindView(R.id.header_view_published_date)
+	TextView headerPublishedDate;
+	@BindView(R.id.header_view_title)
+	TextView headerTitle;
 	ListPopupWindow listPopupWindow;
 	@BindView(R.id.locationView)
 	TextView locationView;
@@ -221,16 +233,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	}
 
 	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		currentTag = savedInstanceState.getString(EXTRA_CURRENT_TAG);
-		currentArtist = savedInstanceState.getString(EXTRA_CURRENT_ARTIST);
-		currentAlbum = savedInstanceState.getString(EXTRA_CURRENT_ALBUM);
-		currentMethod = savedInstanceState.getString(EXTRA_CURRENT_METHOD);
-		Log.d(TAG, String.format("current state %s, %s, %s, %s", currentMethod, currentArtist, currentAlbum, currentTag));
-		super.onRestoreInstanceState(savedInstanceState);
-	}
-
-	@Override
 	protected void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
 		if (getIntent() != null && getIntent().getExtras() != null) {
@@ -240,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			currentMethod = getIntent().getStringExtra(EXTRA_CURRENT_METHOD);
 			Set<String> keySet = getIntent().getExtras().keySet();
 			for (String key : keySet) {
-				Log.d(TAG, String.format("key: %s value: %s" , key, getIntent().getStringExtra(key)));
+				Log.d(TAG, String.format("key: %s value: %s", key, getIntent().getStringExtra(key)));
 			}
 		} else {
 			Log.d(TAG, "intent was null");
@@ -347,26 +349,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		outState.putString(EXTRA_CURRENT_TAG, currentTag);
-		outState.putString(EXTRA_CURRENT_ARTIST, currentArtist);
-		outState.putString(EXTRA_CURRENT_ALBUM, currentAlbum);
-		outState.putString(EXTRA_CURRENT_METHOD, currentMethod);
-		Log.d(TAG, String.format("current saved state %s, %s, %s, %s", currentMethod, currentArtist, currentAlbum, currentTag));
-	}
-
-	private String currentTag = "";
-	private String currentArtist = "";
-	private String currentAlbum = "";
-	private String currentMethod = "";
-
-	public static final String EXTRA_CURRENT_TAG = "EXTRA_CURRENT_TAG";
-	public static final String EXTRA_CURRENT_ARTIST = "EXTRA_CURRENT_ARTIST";
-	public static final String EXTRA_CURRENT_ALBUM = "EXTRA_CURRENT_ALBUM";
-	public static final String EXTRA_CURRENT_METHOD = "EXTRA_CURRENT_METHOD";
-
-	@Override
 	public void onDisplayArtistList(@NonNull List<Artist> artists) {
 		MusicItemsListFragment musicItemsListFragment = (MusicItemsListFragment)
 				getSupportFragmentManager().findFragmentById(R.id.musicItemsListFragment);
@@ -420,12 +402,15 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		return false;
 	}
 
-	@BindView(R.id.header_view_author)
-	TextView headerAuthor;
-	@BindView(R.id.header_view_title)
-	TextView headerTitle;
-	@BindView(R.id.header_view_published_date)
-	TextView headerPublishedDate;
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		currentTag = savedInstanceState.getString(EXTRA_CURRENT_TAG);
+		currentArtist = savedInstanceState.getString(EXTRA_CURRENT_ARTIST);
+		currentAlbum = savedInstanceState.getString(EXTRA_CURRENT_ALBUM);
+		currentMethod = savedInstanceState.getString(EXTRA_CURRENT_METHOD);
+		Log.d(TAG, String.format("current state %s, %s, %s, %s", currentMethod, currentArtist, currentAlbum, currentTag));
+		super.onRestoreInstanceState(savedInstanceState);
+	}
 
 	@Override
 	protected void onResume() {
@@ -441,6 +426,16 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		}
 		headerTitle.setText(R.string.app_name);
 		headerAuthor.setText(titleViewBuilder.toString());
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putString(EXTRA_CURRENT_TAG, currentTag);
+		outState.putString(EXTRA_CURRENT_ARTIST, currentArtist);
+		outState.putString(EXTRA_CURRENT_ALBUM, currentAlbum);
+		outState.putString(EXTRA_CURRENT_METHOD, currentMethod);
+		Log.d(TAG, String.format("current saved state %s, %s, %s, %s", currentMethod, currentArtist, currentAlbum, currentTag));
 	}
 
 	@Override

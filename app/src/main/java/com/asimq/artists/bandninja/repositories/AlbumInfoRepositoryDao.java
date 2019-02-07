@@ -88,15 +88,14 @@ public class AlbumInfoRepositoryDao implements AlbumInfoRepository {
 		topAlbumsWrapperCall.enqueue(new Callback<TopAlbumsWrapper>() {
 			@Override
 			public void onFailure(Call<TopAlbumsWrapper> call, Throwable t) {
-				albumsMutableLiveData.setValue(Collections.EMPTY_LIST);
+				albumsMutableLiveData.setValue(Collections.emptyList());
 			}
 
 			@Override
 			public void onResponse(Call<TopAlbumsWrapper> call, Response<TopAlbumsWrapper> response) {
 				final TopAlbumsWrapper topAlbumsWrapper = response.body();
 				List<Album> albums = topAlbumsWrapper.getTopAlbums().getAlbums();
-				if (null == topAlbumsWrapper || null == topAlbumsWrapper.getTopAlbums()
-						|| albums.isEmpty()) {
+				if (null == topAlbumsWrapper.getTopAlbums() || albums.isEmpty()) {
 					return;
 				}
 				albums = Util.removeAllItemsWithoutMbidOrImages(albums);
