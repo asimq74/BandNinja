@@ -133,13 +133,13 @@ public class SettingsActivity extends PreferenceActivity implements GoogleApiCli
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-
-        if (mLocation != null) {
-            processLocation();
-        }
-
-        startLocationUpdates();
+//        mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+//
+//        if (mLocation != null) {
+//            processLocation();
+//        }
+//
+//        startLocationUpdates();
     }
 
     @Override
@@ -168,7 +168,7 @@ public class SettingsActivity extends PreferenceActivity implements GoogleApiCli
     public void onLocationChanged(Location location) {
         if (location != null)
             mLocation = location;
-        processLocation();
+//        processLocation();
     }
 
     @TargetApi(Build.VERSION_CODES.M)
