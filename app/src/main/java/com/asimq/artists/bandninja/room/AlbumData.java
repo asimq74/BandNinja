@@ -6,7 +6,6 @@ import java.util.List;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.Relation;
 import android.support.annotation.NonNull;
 
 import com.asimq.artists.bandninja.json.AlbumInfo;
@@ -17,165 +16,162 @@ import com.asimq.artists.bandninja.utils.Util;
 @Entity(tableName = "albums", primaryKeys = {"name", "mbid"})
 public class AlbumData implements Comparable<AlbumData> {
 
-    @ColumnInfo(name = "artist")
-    private String artist = "";
-    @ColumnInfo(name = "image")
-    private String image = "";
-    @NonNull
-    @ColumnInfo(name = "mbid")
-    private String mbid = "";
-    @NonNull
-    @ColumnInfo(name = "name")
-    private String name = "";
-    @ColumnInfo(name = "playcount")
-    private String playcount = "";
-    @ColumnInfo(name = "releasedate")
-    private String releaseDate = "";
-    @ColumnInfo(name = "tags")
-    private String tags = "";
-    @ColumnInfo(name = "url")
-    private String url = "";
-    @ColumnInfo(name = "wiki")
-    private String wiki = "";
-    @ColumnInfo(name = "summary")
-    private String summary = "";
-    @Ignore
-    public List<TrackData> trackDatas = new ArrayList<>();
+	@ColumnInfo(name = "artist")
+	private String artist = "";
+	@ColumnInfo(name = "image")
+	private String image = "";
+	@NonNull
+	@ColumnInfo(name = "mbid")
+	private String mbid = "";
+	@NonNull
+	@ColumnInfo(name = "name")
+	private String name = "";
+	@ColumnInfo(name = "playcount")
+	private String playcount = "";
+	@ColumnInfo(name = "releasedate")
+	private String releaseDate = "";
+	@ColumnInfo(name = "summary")
+	private String summary = "";
+	@ColumnInfo(name = "tags")
+	private String tags = "";
+	@Ignore
+	public List<TrackData> trackDatas = new ArrayList<>();
+	@ColumnInfo(name = "url")
+	private String url = "";
+	@ColumnInfo(name = "wiki")
+	private String wiki = "";
 
-    public List<TrackData> getTrackDatas() {
-        return trackDatas;
-    }
+	public AlbumData() {
+	}
 
-    public void setTrackDatas(List<TrackData> trackDatas) {
-        this.trackDatas = trackDatas;
-    }
+	public AlbumData(@NonNull AlbumInfo albumInfo) {
+		this.artist = albumInfo.getArtist();
+		this.image = Util.getImageUrl(albumInfo);
+		this.mbid = albumInfo.getMbid();
+		this.name = albumInfo.getName();
+		this.playcount = albumInfo.getPlaycount();
+		this.releaseDate = albumInfo.getReleaseDate();
+		this.tags = Util.getTagsAsString(albumInfo.getTagWrapper().getTags());
+		this.url = albumInfo.getUrl();
+		this.wiki = getWiki(albumInfo).getContent();
+		this.summary = getWiki(albumInfo).getSummary();
+		for (Track track : albumInfo.getTrackWrapper().getTracks()) {
+			this.trackDatas.add(new TrackData(track));
+		}
+	}
 
-    public AlbumData() {
-    }
+	@Override
+	public int compareTo(@NonNull AlbumData albumData) {
+		return Util.stringToInt(albumData.getPlaycount()) - Util.stringToInt(getPlaycount());
+	}
 
+	public String getArtist() {
+		return artist;
+	}
 
-    public AlbumData(@NonNull AlbumInfo albumInfo) {
-        this.artist = albumInfo.getArtist();
-        this.image = Util.getImageUrl(albumInfo);
-        this.mbid = albumInfo.getMbid();
-        this.name = albumInfo.getName();
-        this.playcount = albumInfo.getPlaycount();
-        this.releaseDate = albumInfo.getReleaseDate();
-        this.tags = Util.getTagsAsString(albumInfo.getTagWrapper().getTags());
-        this.url = albumInfo.getUrl();
-        this.wiki = getWiki(albumInfo).getContent();
-        this.summary = getWiki(albumInfo).getSummary();
-        for (Track track : albumInfo.getTrackWrapper().getTracks()) {
-            this.trackDatas.add(new TrackData(track));
-        }
-    }
+	public String getImage() {
+		return image;
+	}
 
-    @Override
-    public int compareTo(@NonNull AlbumData albumData) {
-        int playcount = Util.stringToInt(albumData.getPlaycount());
-        int playcount1 = Util.stringToInt(getPlaycount());
-        return playcount - playcount1;
-    }
+	@NonNull
+	public String getMbid() {
+		return mbid;
+	}
 
-    private Wiki getWiki(@NonNull AlbumInfo albumInfo) {
-        return albumInfo.getWiki();
-    }
+	@NonNull
+	public String getName() {
+		return name;
+	}
 
-    @Override
-    public String toString() {
-        return "AlbumData{" +
-                "artist='" + artist + '\'' +
-                ", image='" + image + '\'' +
-                ", mbid='" + mbid + '\'' +
-                ", name='" + name + '\'' +
-                ", playcount='" + playcount + '\'' +
-                ", releaseDate='" + releaseDate + '\'' +
-                ", tags='" + tags + '\'' +
-                ", url='" + url + '\'' +
-                ", summary='" + summary + '\'' +
-                ", wiki='" + wiki + '\'' +
-                '}';
-    }
+	public String getPlaycount() {
+		return playcount;
+	}
 
-    public String getArtist() {
-        return artist;
-    }
+	public String getReleaseDate() {
+		return releaseDate;
+	}
 
-    public void setArtist(String artist) {
-        this.artist = artist;
-    }
+	public String getSummary() {
+		return summary;
+	}
 
-    public String getImage() {
-        return image;
-    }
+	public String getTags() {
+		return tags;
+	}
 
-    public void setImage(String image) {
-        this.image = image;
-    }
+	public List<TrackData> getTrackDatas() {
+		return trackDatas;
+	}
 
-    @NonNull
-    public String getMbid() {
-        return mbid;
-    }
+	public String getUrl() {
+		return url;
+	}
 
-    public void setMbid(@NonNull String mbid) {
-        this.mbid = mbid;
-    }
+	private Wiki getWiki(@NonNull AlbumInfo albumInfo) {
+		return albumInfo.getWiki();
+	}
 
-    @NonNull
-    public String getName() {
-        return name;
-    }
+	public String getWiki() {
+		return wiki;
+	}
 
-    public void setName(@NonNull String name) {
-        this.name = name;
-    }
+	public void setArtist(String artist) {
+		this.artist = artist;
+	}
 
-    public String getSummary() {
-        return summary;
-    }
+	public void setImage(String image) {
+		this.image = image;
+	}
 
-    public void setSummary(String summary) {
-        this.summary = summary;
-    }
+	public void setMbid(@NonNull String mbid) {
+		this.mbid = mbid;
+	}
 
-    public String getPlaycount() {
-        return playcount;
-    }
+	public void setName(@NonNull String name) {
+		this.name = name;
+	}
 
-    public void setPlaycount(String playcount) {
-        this.playcount = playcount;
-    }
+	public void setPlaycount(String playcount) {
+		this.playcount = playcount;
+	}
 
-    public String getReleaseDate() {
-        return releaseDate;
-    }
+	public void setReleaseDate(String releaseDate) {
+		this.releaseDate = releaseDate;
+	}
 
-    public void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
-    }
+	public void setSummary(String summary) {
+		this.summary = summary;
+	}
 
-    public String getTags() {
-        return tags;
-    }
+	public void setTags(String tags) {
+		this.tags = tags;
+	}
 
-    public void setTags(String tags) {
-        this.tags = tags;
-    }
+	public void setTrackDatas(List<TrackData> trackDatas) {
+		this.trackDatas = trackDatas;
+	}
 
-    public String getUrl() {
-        return url;
-    }
+	public void setUrl(String url) {
+		this.url = url;
+	}
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+	public void setWiki(String wiki) {
+		this.wiki = wiki;
+	}
 
-    public String getWiki() {
-        return wiki;
-    }
-
-    public void setWiki(String wiki) {
-        this.wiki = wiki;
-    }
+	@Override
+	public String toString() {
+		return "AlbumData{" +
+				"artist='" + artist + '\'' +
+				", image='" + image + '\'' +
+				", mbid='" + mbid + '\'' +
+				", name='" + name + '\'' +
+				", playcount='" + playcount + '\'' +
+				", releaseDate='" + releaseDate + '\'' +
+				", tags='" + tags + '\'' +
+				", url='" + url + '\'' +
+				", summary='" + summary + '\'' +
+				", wiki='" + wiki + '\'' +
+				'}';
+	}
 }

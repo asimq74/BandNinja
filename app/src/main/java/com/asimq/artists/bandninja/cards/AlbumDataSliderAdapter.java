@@ -1,5 +1,7 @@
 package com.asimq.artists.bandninja.cards;
 
+import java.util.List;
+
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,11 +10,7 @@ import android.view.ViewGroup;
 
 import com.asimq.artists.bandninja.R;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
-import com.asimq.artists.bandninja.json.BaseMusicItem;
-import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.room.AlbumData;
-
-import java.util.List;
 
 public class AlbumDataSliderAdapter extends RecyclerView.Adapter<SliderCard> {
 
@@ -21,7 +19,7 @@ public class AlbumDataSliderAdapter extends RecyclerView.Adapter<SliderCard> {
 	private final List<AlbumData> musicItems;
 
 	public AlbumDataSliderAdapter(ApplicationComponent applicationComponent, List<AlbumData> musicItems,
-                                  View.OnClickListener listener) {
+			View.OnClickListener listener) {
 		this.context = applicationComponent.context();
 		this.musicItems = musicItems;
 		this.listener = listener;
@@ -43,7 +41,6 @@ public class AlbumDataSliderAdapter extends RecyclerView.Adapter<SliderCard> {
 		AlbumData musicItem = musicItems.get(position);
 		holder.setContent(context, musicItem);
 	}
-
 
 	@Override
 	public SliderCard onCreateViewHolder(ViewGroup parent, int viewType) {

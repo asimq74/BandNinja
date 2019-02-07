@@ -1,10 +1,6 @@
 package com.asimq.artists.bandninja;
 
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -39,11 +35,9 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.asimq.artists.bandninja.json.Track;
 import com.asimq.artists.bandninja.room.AlbumData;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.TrackData;
-import com.asimq.artists.bandninja.room.dao.TrackDataDao;
 import com.asimq.artists.bandninja.ui.HeaderView;
 import com.asimq.artists.bandninja.utils.Util.Entities;
 import com.asimq.artists.bandninja.viewmodelfactories.AlbumDetailViewModelFactory;
@@ -63,11 +57,11 @@ import butterknife.OnClick;
 public class ArticleDetailActivity extends AppCompatActivity
 		implements AppBarLayout.OnOffsetChangedListener {
 
-	private class Adapter extends RecyclerView.Adapter<ViewHolder> {
+	private class ParagraphsAdapter extends RecyclerView.Adapter<ParagraphsViewHolder> {
 
 		private String[] paragraphs;
 
-		public Adapter(String[] paragraphs) {
+		public ParagraphsAdapter(String[] paragraphs) {
 			this.paragraphs = paragraphs;
 		}
 
@@ -77,7 +71,7 @@ public class ArticleDetailActivity extends AppCompatActivity
 		}
 
 		@Override
-		public void onBindViewHolder(ViewHolder holder, int position) {
+		public void onBindViewHolder(ParagraphsViewHolder holder, int position) {
 			holder.bodyParagraphView.setText(Html.fromHtml(paragraphs[position]
 					.replaceAll("(\n)", "<br />")
 					.replaceAll("(\r)", "<br />")));
@@ -86,10 +80,20 @@ public class ArticleDetailActivity extends AppCompatActivity
 		}
 
 		@Override
-		public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-			return new ViewHolder(getLayoutInflater().inflate(R.layout.list_item_detail, parent, false));
+		public ParagraphsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+			return new ParagraphsViewHolder(getLayoutInflater().inflate(R.layout.list_item_detail, parent, false));
 		}
 
+	}
+
+	public static class ParagraphsViewHolder extends RecyclerView.ViewHolder {
+
+		TextView bodyParagraphView;
+
+		public ParagraphsViewHolder(View view) {
+			super(view);
+			bodyParagraphView = view.findViewById(R.id.article_body);
+		}
 	}
 
 	public class SnackBarListener implements View.OnClickListener {
@@ -145,24 +149,13 @@ public class ArticleDetailActivity extends AppCompatActivity
 
 	public static class TracksViewHolder extends RecyclerView.ViewHolder {
 
-		public TextView trackListItemView;
+		TextView trackListItemView;
 
 		public TracksViewHolder(View view) {
 			super(view);
 			trackListItemView = view.findViewById(R.id.trackListItemView);
 		}
 	}
-
-	public static class ViewHolder extends RecyclerView.ViewHolder {
-
-		public TextView bodyParagraphView;
-
-		public ViewHolder(View view) {
-			super(view);
-			bodyParagraphView = view.findViewById(R.id.article_body);
-		}
-	}
-
 	public static final String ALBUM = "ALBUM";
 	public static final String ARTIST = "ARTIST";
 	public static final String ENTITY_TYPE = "ENTITY_TYPE";
@@ -181,8 +174,7 @@ public class ArticleDetailActivity extends AppCompatActivity
 	private CardView cardView;
 	@BindView(R.id.collapsing_toolbar)
 	CollapsingToolbarLayout collapsingToolbarLayout;
-	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sss", Locale.US);
-	private String entityType = "ARTIST";
+	private String entityType = Entities.ARTIST.name();
 	@BindView(R.id.float_header_view)
 	HeaderView floatHeaderView;
 	private AlbumData globalAlbumData = new AlbumData();
@@ -190,18 +182,14 @@ public class ArticleDetailActivity extends AppCompatActivity
 	private boolean isHideToolbarView = false;
 	@BindView(R.id.body_text_recycler_view)
 	RecyclerView mRecyclerView;
-	private String mbId = "";
+	private String musicItemId = "";
 	@BindView(R.id.progressBar)
 	ProgressBar progressBar;
-	private String publishedDate = "";
 	private SnackBarListener snackBarListener = new SnackBarListener();
 	@BindView(R.id.toolbar)
 	Toolbar toolbar;
 	@BindView(R.id.toolbar_header_view)
 	HeaderView toolbarHeaderView;
-	@Inject
-	TrackDataDao trackDataDao;
-	private Map<String, Track> tracksByAlbumMap = new HashMap<>();
 	@BindView(R.id.tracksRecyclerView)
 	RecyclerView tracksRecyclerView;
 
@@ -248,6 +236,10 @@ public class ArticleDetailActivity extends AppCompatActivity
 		ButterKnife.bind(this);
 		final MyApplication application = (MyApplication) getApplicationContext();
 		application.getApplicationComponent().inject(this);
+		artistDetailViewModel = ViewModelProviders.of(this, artistDetailViewModelFactory)
+				.get(ArtistDetailViewModel.class);
+		albumDetailViewModel = ViewModelProviders.of(this, albumDetailViewModelFactory)
+				.get(AlbumDetailViewModel.class);
 		collapsingToolbarLayout.setTitle(" ");
 		cardView = findViewById(R.id.cardView);
 		appBarLayout = findViewById(R.id.app_bar_layout);
@@ -262,13 +254,13 @@ public class ArticleDetailActivity extends AppCompatActivity
 		});
 		if (savedInstanceState == null) {
 			if (getIntent() != null && getIntent().getExtras() != null) {
-				mbId = getIntent().getStringExtra(MBID);
+				musicItemId = getIntent().getStringExtra(MBID);
 				entityType = getIntent().getStringExtra(ENTITY_TYPE);
 				artistName = getIntent().getStringExtra(ARTIST);
 				albumName = getIntent().getStringExtra(ALBUM);
 			}
 		} else {
-			mbId = savedInstanceState.getString(MBID);
+			musicItemId = savedInstanceState.getString(MBID);
 			entityType = savedInstanceState.getString(ENTITY_TYPE);
 			artistName = savedInstanceState.getString(ARTIST);
 			albumName = getIntent().getStringExtra(ALBUM);
@@ -300,7 +292,7 @@ public class ArticleDetailActivity extends AppCompatActivity
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		outState.putString(MBID, mbId);
+		outState.putString(MBID, musicItemId);
 		outState.putString(ENTITY_TYPE, entityType);
 		outState.putString(ARTIST, artistName);
 		outState.putString(ALBUM, albumName);
@@ -310,17 +302,13 @@ public class ArticleDetailActivity extends AppCompatActivity
 	@Override
 	protected void onStart() {
 		super.onStart();
-		artistDetailViewModel = ViewModelProviders.of(this, artistDetailViewModelFactory)
-				.get(ArtistDetailViewModel.class);
-		albumDetailViewModel = ViewModelProviders.of(this, albumDetailViewModelFactory)
-				.get(AlbumDetailViewModel.class);
 		if (Entities.ARTIST.name().equals(entityType)) {
-			final LiveData<ArtistData> artistLiveData = mbId.isEmpty() ?
-					artistDetailViewModel.getArtistLiveDataByName(artistName) : artistDetailViewModel.getArtistLiveDataById(mbId);
+			final LiveData<ArtistData> artistLiveData = musicItemId.isEmpty() ?
+					artistDetailViewModel.getArtistLiveDataByName(artistName) : artistDetailViewModel.getArtistLiveDataById(musicItemId);
 			artistLiveData.observe(this, this::populateInitialView);
 		} else if (Entities.ALBUM.name().equals(entityType)) {
 			albumDetailViewModel.getObservableAlbumData().observe(this, this::populateInitialView);
-			albumDetailViewModel.obtainAlbumData(albumName, mbId);
+			albumDetailViewModel.obtainAlbumData(albumName, musicItemId);
 		}
 	}
 
@@ -334,9 +322,8 @@ public class ArticleDetailActivity extends AppCompatActivity
 
 	private void populateInitialView(@NonNull ArtistData artistData) {
 		globalArtistData = artistData;
-		publishedDate = "";
-		toolbarHeaderView.bindTo(artistData.getName(), publishedDate, publishedDate);
-		floatHeaderView.bindTo(artistData.getName(), publishedDate, publishedDate);
+		toolbarHeaderView.bindTo(artistData.getName(), "", "");
+		floatHeaderView.bindTo(artistData.getName(), "", "");
 		final ImageView photoView = findViewById(R.id.photo);
 		final String photoUrl = artistData.getImage();
 		Picasso.with(ArticleDetailActivity.this).load(photoUrl).into(photoView, new Callback() {
@@ -400,7 +387,7 @@ public class ArticleDetailActivity extends AppCompatActivity
 	}
 
 	private void populateUI(@NonNull String[] paragraphs) {
-		Adapter adapter = new Adapter(paragraphs);
+		ParagraphsAdapter adapter = new ParagraphsAdapter(paragraphs);
 		adapter.setHasStableIds(true);
 		mRecyclerView.setAdapter(adapter);
 		StaggeredGridLayoutManager sglm =

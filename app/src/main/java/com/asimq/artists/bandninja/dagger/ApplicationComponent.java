@@ -1,5 +1,7 @@
 package com.asimq.artists.bandninja.dagger;
 
+import javax.inject.Singleton;
+
 import android.app.Application;
 import android.content.Context;
 
@@ -9,11 +11,6 @@ import com.asimq.artists.bandninja.MainActivity;
 import com.asimq.artists.bandninja.MusicItemsListFragment;
 import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.asynctasks.FetchAllSavedAlbumDataTask;
-import com.asimq.artists.bandninja.asynctasks.FetchTrackDataTask;
-import com.asimq.artists.bandninja.asynctasks.ProcessAlbumsByArtistAsyncTask;
-import com.asimq.artists.bandninja.asynctasks.ProcessSearchResultsAsyncTask;
-import com.asimq.artists.bandninja.asynctasks.ProcessTopArtistsAsyncTask;
-import com.asimq.artists.bandninja.asynctasks.ProcessTopArtistsByTagAsyncTask;
 import com.asimq.artists.bandninja.repositories.SearchResultsModelRepositoryDao;
 import com.asimq.artists.bandninja.service.BandDataSyncAsyncTask;
 import com.asimq.artists.bandninja.service.DataSyncJobService;
@@ -22,8 +19,6 @@ import com.asimq.artists.bandninja.viewmodels.AlbumDetailViewModel;
 import com.asimq.artists.bandninja.viewmodels.ArtistDetailViewModel;
 import com.asimq.artists.bandninja.viewmodels.SearchResultsViewModel;
 import com.asimq.artists.bandninja.widget.TopArtistsAppWidgetRemoteViewsFactory;
-
-import javax.inject.Singleton;
 
 import dagger.Component;
 
@@ -36,45 +31,35 @@ import dagger.Component;
 @Component(modules = ApplicationModule.class)
 public interface ApplicationComponent {
 
-    Application application();
+	Application application();
 
-    Context context();
+	Context context();
 
-    void inject(MyApplication application);
+	void inject(MyApplication application);
 
-    void inject(MainActivity mainActivity);
+	void inject(MainActivity mainActivity);
 
-    void inject(MusicItemsListFragment musicItemsListFragment);
+	void inject(MusicItemsListFragment musicItemsListFragment);
 
-    void inject(SearchResultsViewModel searchResultsViewModel);
+	void inject(SearchResultsViewModel searchResultsViewModel);
 
-    void inject(AlbumDetailViewModel albumDetailViewModel);
+	void inject(AlbumDetailViewModel albumDetailViewModel);
 
-    void inject(ArtistDetailViewModel artistDetailViewModel);
+	void inject(ArtistDetailViewModel artistDetailViewModel);
 
-    void inject(DataSyncJobService dataSyncJobService);
+	void inject(DataSyncJobService dataSyncJobService);
 
-    void inject(CustomMultiSelectListPreference customMultiSelectListPreference);
+	void inject(CustomMultiSelectListPreference customMultiSelectListPreference);
 
-    void inject(BandDataSyncAsyncTask bandDataSyncAsyncTask);
+	void inject(BandDataSyncAsyncTask bandDataSyncAsyncTask);
 
-    void inject(ArticleDetailActivity articleDetailActivity);
+	void inject(ArticleDetailActivity articleDetailActivity);
 
-    void inject(TopArtistsAppWidgetRemoteViewsFactory topArtistsAppWidgetRemoteViewsFactory);
+	void inject(TopArtistsAppWidgetRemoteViewsFactory topArtistsAppWidgetRemoteViewsFactory);
 
-    void inject(SearchResultsModelRepositoryDao searchResultsModelRepositoryDao);
+	void inject(SearchResultsModelRepositoryDao searchResultsModelRepositoryDao);
 
-    void inject(ProcessSearchResultsAsyncTask processSearchResultsAsyncTask);
+	void inject(FetchAllSavedAlbumDataTask fetchAllSavedAlbumDataTask);
 
-    void inject(ProcessTopArtistsByTagAsyncTask processTopArtistsByTagAsyncTask);
-
-    void inject(ProcessTopArtistsAsyncTask processTopArtistsAsyncTask);
-
-    void inject(ProcessAlbumsByArtistAsyncTask processAlbumsByArtistAsyncTask);
-
-    void inject(FetchTrackDataTask fetchTrackDataTask);
-
-    void inject(FetchAllSavedAlbumDataTask fetchAllSavedAlbumDataTask);
-
-    void inject(DetailsActivity detailsActivity);
+	void inject(DetailsActivity detailsActivity);
 }
