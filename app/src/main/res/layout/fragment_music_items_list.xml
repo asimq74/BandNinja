@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:clipChildren="false"
-    android:orientation="vertical"
-    android:paddingBottom="@dimen/fab_margin"
-    android:paddingStart="@dimen/list_side_margin"
-    android:paddingEnd="@dimen/list_side_margin"
-    tools:context=".MusicItemsListFragment">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:clipChildren="false"
+              android:orientation="vertical"
+              android:paddingBottom="@dimen/fab_margin"
+              android:paddingEnd="@dimen/list_side_margin"
+              android:paddingStart="@dimen/list_side_margin"
+              tools:context=".MusicItemsListFragment">
 
 
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
-        tools:visibility="visible" />
+        android:visibility="gone"/>
 
     <RelativeLayout
         android:id="@+id/mainTitleLayout"
@@ -29,13 +28,13 @@
             android:id="@+id/mainTitleView_1"
             style="@style/MainTitle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"/>
 
         <TextView
             android:id="@+id/mainTitleView_2"
             style="@style/MainTitle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"/>
 
     </RelativeLayout>
 
@@ -47,7 +46,7 @@
         android:layout_marginStart="@dimen/recycler_view_left_offset"
         android:clipChildren="false"
         android:overScrollMode="never"
-        app:viewUpdater="com.asimq.artists.bandninja.cards.CardsUpdater" />
+        app:viewUpdater="com.asimq.artists.bandninja.cards.CardsUpdater"/>
 
     <FrameLayout
         android:id="@+id/tagsLayout"
@@ -57,29 +56,47 @@
 
         <TextView
             android:id="@+id/ts_place"
+            style="@style/PlaceTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/PlaceTextView"
-            android:layout_marginStart="@dimen/left_offset" />
+            android:layout_marginStart="@dimen/left_offset"/>
 
     </FrameLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/descriptionLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/card_corner_radius"
+        android:orientation="vertical"
         android:animateLayoutChanges="true">
 
 
         <TextView
             android:id="@+id/ts_description"
+            style="@style/DescriptionTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/DescriptionTextView"
             android:layout_marginEnd="@dimen/card_corner_radius"
-            android:layout_marginStart="@dimen/left_offset" />
+            android:layout_marginStart="@dimen/left_offset"/>
 
-    </RelativeLayout>
+        <android.support.design.widget.TabLayout
+            android:id="@+id/sliding_tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/card_corner_radius"
+            android:layout_marginStart="@dimen/left_offset"
+            app:tabMode="fixed"/>
+
+        <TextView
+                  android:id="@+id/article_body"
+                  style="@style/ArticleBody"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:layout_marginEnd="@dimen/card_corner_radius"
+                  android:layout_marginStart="@dimen/left_offset"
+                  android:text="@string/lorem_ipsum" />
+
+    </LinearLayout>
 
 </LinearLayout>

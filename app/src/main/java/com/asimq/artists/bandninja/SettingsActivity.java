@@ -44,6 +44,8 @@ import com.google.gson.Gson;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends PreferenceActivity {
+	private SwitchPreference locationSwitchPreference;
+
 
 	public static class MyPreferenceFragment extends PreferenceFragment {
 
@@ -122,25 +124,36 @@ public class SettingsActivity extends PreferenceActivity {
 
 			// notification preference change listener
 			bindPreferenceSummaryToValue(findPreference(getString(R.string.favorite_genre_key)));
-
-			final SwitchPreference locationSwitchPreference = (SwitchPreference) findPreference(this.getResources()
+			final SettingsActivity settingsActivity = (SettingsActivity) getActivity();
+			settingsActivity.locationSwitchPreference = (SwitchPreference) findPreference(this.getResources()
 					.getString(R.string.location_switch_key));
+			SharedPreferences sharedPref = getActivity().getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
+			String locationFromPrefsJson = sharedPref.getString("location", "");
+			if (null != settingsActivity.locationSwitchPreference && !locationFromPrefsJson.isEmpty()) {
+				Location location = new Gson().fromJson(locationFromPrefsJson, Location.class);
+				String postalCode = Util.getPostalCode(getActivity(), location.getLatitude(), location.getLongitude());
+				settingsActivity.locationSwitchPreference.setSummary(postalCode);
+			}
+
+
 // SwitchPreference preference change listener
-			locationSwitchPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+			settingsActivity.locationSwitchPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
 				@Override
 				public boolean onPreferenceChange(Preference preference, Object o) {
-					if (locationSwitchPreference.isChecked()) {
+					if (settingsActivity.locationSwitchPreference.isChecked()) {
 						// Checked the switch programmatically
 						Toast.makeText(getActivity(),
 								getString(R.string.locationServicesDisabled),
 								Toast.LENGTH_LONG).show();
-						locationSwitchPreference.setChecked(false);
+						settingsActivity.locationSwitchPreference.setSummary(R.string.pref_description_location);
+						settingsActivity.locationSwitchPreference.setChecked(false);
 					} else {
 						if (!(Util.isConnected(getActivity()))) {
 							Toast.makeText(getActivity(),
 									getString(R.string.locationServicesRequireInternet),
 									Toast.LENGTH_LONG).show();
-							locationSwitchPreference.setChecked(false);
+							settingsActivity.locationSwitchPreference.setSummary(R.string.pref_description_location);
+							settingsActivity.locationSwitchPreference.setChecked(false);
 							return false;
 						}
 
@@ -148,15 +161,16 @@ public class SettingsActivity extends PreferenceActivity {
 							Toast.makeText(getActivity(),
 									getString(R.string.locationServicesRequireGooglePlay),
 									Toast.LENGTH_LONG).show();
-							locationSwitchPreference.setChecked(false);
+							settingsActivity.locationSwitchPreference.setSummary(R.string.pref_description_location);
+							settingsActivity.locationSwitchPreference.setChecked(false);
 							return false;
 						}
 
 						Toast.makeText(getActivity(),
 								getString(R.string.locationServicesEnabled),
 								Toast.LENGTH_LONG).show();
-						locationSwitchPreference.setChecked(true);
-						((SettingsActivity) getActivity()).determineWhetherToAskForPermissions();
+						settingsActivity.locationSwitchPreference.setChecked(true);
+						settingsActivity.determineWhetherToAskForPermissions();
 					}
 					return true;
 				}
@@ -257,19 +271,24 @@ public class SettingsActivity extends PreferenceActivity {
 		}
 	}
 
-	private void processLocation() {
-
-		String address = "";
-		address = Util.getPostalCode(this, mLastLocation.getLatitude(), mLastLocation.getLongitude());
-		if (!address.isEmpty()) {
+	protected void processLocation() {
+		if (mLastLocation == null) {
+			return;
+		}
+		String postalCode = "";
+		postalCode = Util.getPostalCode(this, mLastLocation.getLatitude(), mLastLocation.getLongitude());
+		if (!postalCode.isEmpty()) {
 			SharedPreferences sharedPref = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
 			SharedPreferences.Editor editor = sharedPref.edit();
-			Log.d(TAG, "Postal code found: " + address);
+			Log.d(TAG, "Postal code found: " + postalCode);
 			String json = mLastLocation == null ? null : new Gson().toJson(mLastLocation);
 			editor.putString("location", json);
 			editor.commit();
 			String locationInserted = sharedPref.getString("location", "");
 			Log.d(TAG, "location inserted: " + locationInserted);
+			if (null != locationSwitchPreference) {
+				locationSwitchPreference.setSummary(postalCode);
+			}
 		}
 	}
 

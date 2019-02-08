@@ -13,6 +13,9 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TabLayout;
+import android.support.design.widget.TabLayout.BaseOnTabSelectedListener;
+import android.support.design.widget.TabLayout.Tab;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
@@ -222,6 +225,8 @@ public class MusicItemsListFragment extends Fragment {
 	@Inject
 	AlbumDetailViewModelFactory albumDetailViewModelFactory;
 	private ApplicationComponent applicationComponent;
+	@BindView(R.id.article_body)
+	TextView articleBody;
 	private long artistAnimDuration;
 	@Inject
 	ArtistDataDao artistDataDao;
@@ -256,6 +261,8 @@ public class MusicItemsListFragment extends Fragment {
 	@Inject
 	SearchResultsViewModelFactory searchResultsViewModelFactory;
 	private SliderAdapter sliderAdapter;
+	@BindView(R.id.sliding_tabs)
+	TabLayout tabLayout;
 	@BindView(R.id.tagsLayout)
 	View tagsLayout;
 
@@ -569,6 +576,52 @@ public class MusicItemsListFragment extends Fragment {
 		searchResultsViewModel.searchForArtistByTag(tag);
 	}
 
+	private void populateSummary(Artist artist, Entities type, TextView textView) {
+		final String summaryText = artist.getBio().getSummary();
+		if (summaryText.isEmpty()) {
+			textView.setText(R.string.summaryUnavailable);
+		} else {
+			Util.populateHTMLForTextView(textView, summaryText);
+			Util.makeTextViewResizable(textView, 7, getString(R.string.readMore), true);
+		}
+		if (!summaryText.isEmpty()) {
+			textView.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Intent articleDetailIntent = new Intent(getActivity(), ArticleDetailActivity.class);
+					articleDetailIntent.putExtra(ArticleDetailActivity.MBID, artist.getMbid());
+					articleDetailIntent.putExtra(ArticleDetailActivity.ENTITY_TYPE, type.name());
+					articleDetailIntent.putExtra(ArticleDetailActivity.ARTIST, artist.getName());
+					articleDetailIntent.putExtra(ArticleDetailActivity.ALBUM, "");
+					startActivity(articleDetailIntent);
+				}
+			});
+		}
+	}
+
+	private void populateSummary(AlbumInfo albumInfo, Entities type, TextView textView) {
+		final String summaryText = albumInfo.getWiki().getSummary();
+		if (summaryText.isEmpty()) {
+			textView.setText(R.string.summaryUnavailable);
+		} else {
+			Util.populateHTMLForTextView(textView, summaryText);
+			Util.makeTextViewResizable(textView, 7, getString(R.string.readMore), true);
+		}
+		if (!summaryText.isEmpty()) {
+			textView.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Intent articleDetailIntent = new Intent(getActivity(), ArticleDetailActivity.class);
+					articleDetailIntent.putExtra(ArticleDetailActivity.MBID, albumInfo.getMbid());
+					articleDetailIntent.putExtra(ArticleDetailActivity.ENTITY_TYPE, type.name());
+					articleDetailIntent.putExtra(ArticleDetailActivity.ARTIST, albumInfo.getArtist());
+					articleDetailIntent.putExtra(ArticleDetailActivity.ALBUM, albumInfo.getName());
+					startActivity(articleDetailIntent);
+				}
+			});
+		}
+	}
+
 	protected void populateTopAlbums() {
 		Intent detailsIntent = new Intent(getActivity(), DetailsActivity.class);
 		detailsIntent.putExtra(DetailsActivity.EXTRA_IMAGE, "");
@@ -588,21 +641,11 @@ public class MusicItemsListFragment extends Fragment {
 	}
 
 	private void processAlbumInfo(@NonNull AlbumInfo albumInfo) {
-		String tagsText = null != albumInfo.getTagWrapper() ? Util.getTagsAsString(albumInfo.getTagWrapper().getTags()) : "";
-		place.setText(tagsText);
-		final Wiki wiki = albumInfo.getWiki();
-		if (null != wiki) {
-			updateDescriptionsSwitcher(albumInfo.getArtist(), albumInfo.getName(), albumInfo.getMbid(), wiki.getSummary(), Entities.ALBUM);
-		}
+		updateDescriptionsSwitcher(albumInfo, Entities.ALBUM);
 	}
 
 	private void processArtistInfo(Artist artist) {
-		if (null == artist) {
-			return;
-		}
-		String tagsText = Util.getTagsAsString(artist.getTagWrapper().getTags());
-		place.setText(tagsText);
-		updateDescriptionsSwitcher(artist.getName(), "", artist.getMbid(), artist.getBio().getSummary(), Entities.ARTIST);
+		updateDescriptionsSwitcher(artist, Entities.ARTIST);
 	}
 
 	private void setArtistText(String text, boolean left2right) {
@@ -672,28 +715,58 @@ public class MusicItemsListFragment extends Fragment {
 		}
 	}
 
-	private void updateDescriptionsSwitcher(String artist, String album, String mbid, String text,
-			Entities type) {
+	private void updateDescriptionsSwitcher(AlbumInfo albumInfo, Entities type) {
+		tabLayout.removeAllTabs();
+		tabLayout.addTab(tabLayout.newTab().setText("Summary"));
+		tabLayout.addTab(tabLayout.newTab().setText("Genres"));
+		populateSummary(albumInfo, type, articleBody);
+		tabLayout.setOnTabSelectedListener(new BaseOnTabSelectedListener() {
+			@Override
+			public void onTabReselected(Tab tab) {
 
-		if (text.isEmpty()) {
-			descriptionTextView.setText(R.string.summaryUnavailable);
-		} else {
-			Util.populateHTMLForTextView(descriptionTextView, text);
-			Util.makeTextViewResizable(descriptionTextView, 3, getString(R.string.readMore), true);
-		}
-		if (!text.isEmpty()) {
-			descriptionTextView.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					Intent articleDetailIntent = new Intent(getActivity(), ArticleDetailActivity.class);
-					articleDetailIntent.putExtra(ArticleDetailActivity.MBID, mbid);
-					articleDetailIntent.putExtra(ArticleDetailActivity.ENTITY_TYPE, type.name());
-					articleDetailIntent.putExtra(ArticleDetailActivity.ARTIST, artist);
-					articleDetailIntent.putExtra(ArticleDetailActivity.ALBUM, album);
-					startActivity(articleDetailIntent);
+			}
+
+			@Override
+			public void onTabSelected(Tab tab) {
+				if (tab.getText().equals("Summary")) {
+					populateSummary(albumInfo, type, articleBody);
+				} else {
+					articleBody.setText(Util.getTagsAsString(albumInfo.getTagWrapper().getTags()));
 				}
-			});
-		}
+			}
+
+			@Override
+			public void onTabUnselected(Tab tab) {
+
+			}
+		});
+	}
+
+	private void updateDescriptionsSwitcher(Artist artist, Entities type) {
+		tabLayout.removeAllTabs();
+		tabLayout.addTab(tabLayout.newTab().setText("Summary"));
+		tabLayout.addTab(tabLayout.newTab().setText("Genres"));
+		populateSummary(artist, type, articleBody);
+		tabLayout.setOnTabSelectedListener(new BaseOnTabSelectedListener() {
+			@Override
+			public void onTabReselected(Tab tab) {
+
+			}
+
+			@Override
+			public void onTabSelected(Tab tab) {
+				if (tab.getText().equals("Summary")) {
+					populateSummary(artist, type, articleBody);
+				} else {
+					articleBody.setText(Util.getTagsAsString(artist.getTagWrapper().getTags()));
+				}
+			}
+
+			@Override
+			public void onTabUnselected(Tab tab) {
+
+			}
+		});
 	}
 
 }

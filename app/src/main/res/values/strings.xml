@@ -60,7 +60,7 @@
 
     <string name="pref_title_location">Enable location</string>
     <string name="pref_description_location">Enable location to recieve customized ads</string>
-
+    <string name="hint">Editor #%d</string>
     <string name="pref_title_display_name">Display name</string>
     <string name="pref_default_display_name">John Smith</string>
 
