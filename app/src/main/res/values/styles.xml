@@ -30,18 +30,21 @@
         <item name="android:textColor">@color/colorPrimary</item>
     </style>
 
-    <style name="MainTitle" parent="@style/BaseArticleBody">
-        <item name="android:textSize">@dimen/placeTextSize</item>
+    <style name="MainTitle" parent="@style/TextAppearance.AppCompat.Display1">
         <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:layout_marginStart">@dimen/detail_inner_horiz_margin</item>
+        <item name="android:layout_marginEnd">@dimen/detail_inner_horiz_margin</item>
+        <item name="android:textColorLink">@color/colorAccent</item>
     </style>
 
-    <style name="ArticleBody" parent="@style/BaseArticleBody" />
+    <style name="ArticleBody" parent="@style/BaseArticleBody"/>
 
     <style name="BaseExpandedTitle" parent="@style/TextAppearance.AppCompat.Headline">
         <item name="android:textColor">@android:color/white</item>
     </style>
 
-    <style name="ExpandedTitle" parent="@style/BaseExpandedTitle" />
+    <style name="ExpandedTitle" parent="@style/BaseExpandedTitle"/>
 
     <style name="BaseExpandedSubTitle">
         <item name="android:textColor">@android:color/white</item>
@@ -49,7 +52,7 @@
         <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="ExpandedSubTitle" parent="@style/BaseExpandedSubTitle" />
+    <style name="ExpandedSubTitle" parent="@style/BaseExpandedSubTitle"/>
 
     <style name="FabStyle">
         <item name="android:layout_width">wrap_content</item>

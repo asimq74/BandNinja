@@ -60,9 +60,4 @@ public class SliderAdapter<T extends BaseMusicItem> extends RecyclerView.Adapter
 		return new SliderCard(view);
 	}
 
-	@Override
-	public void onViewRecycled(SliderCard holder) {
-		holder.clearContent();
-	}
-
 }

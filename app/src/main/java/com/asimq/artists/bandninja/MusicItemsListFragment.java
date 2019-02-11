@@ -294,9 +294,9 @@ public class MusicItemsListFragment extends Fragment {
 	@BindView(R.id.mainTitleLayout)
 	View mainTitleLayout;
 	@BindView(R.id.mainTitleView_1)
-	TextView mainTitleView1;
+	android.support.v7.widget.AppCompatTextView mainTitleView1;
 	@BindView(R.id.mainTitleView_2)
-	TextView mainTitleView2;
+	android.support.v7.widget.AppCompatTextView mainTitleView2;
 	@BindView(R.id.progressBar)
 	ProgressBar progressBar;
 	@BindView(R.id.recycler_view)
@@ -458,7 +458,6 @@ public class MusicItemsListFragment extends Fragment {
 
 		recyclerView.setLayoutManager(new CardSliderLayoutManager(Objects.requireNonNull(getActivity())));
 		layoutManger = (CardSliderLayoutManager) recyclerView.getLayoutManager();
-
 		CARD_SNAP_HELPER.attachToRecyclerView(recyclerView);
 	}
 

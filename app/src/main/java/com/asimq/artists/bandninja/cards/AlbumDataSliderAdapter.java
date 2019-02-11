@@ -25,12 +25,6 @@ public class AlbumDataSliderAdapter extends RecyclerView.Adapter<SliderCard> {
 		this.listener = listener;
 	}
 
-	public void clear() {
-		final int size = musicItems.size();
-		musicItems.clear();
-		notifyItemRangeRemoved(0, size);
-	}
-
 	@Override
 	public int getItemCount() {
 		return musicItems.size();
@@ -53,11 +47,6 @@ public class AlbumDataSliderAdapter extends RecyclerView.Adapter<SliderCard> {
 		}
 
 		return new SliderCard(view);
-	}
-
-	@Override
-	public void onViewRecycled(SliderCard holder) {
-		holder.clearContent();
 	}
 
 }
