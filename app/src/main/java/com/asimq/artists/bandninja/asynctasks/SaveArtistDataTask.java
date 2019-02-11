@@ -10,7 +10,6 @@ import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 
 public class SaveArtistDataTask extends AsyncTask<ArtistData, Void, ArtistData> {
 
-	final String TAG = this.getClass().getSimpleName();
 	private final BandItemRepository repository;
 
 	public SaveArtistDataTask(@NonNull BandItemRepository repository) {
@@ -27,9 +26,4 @@ public class SaveArtistDataTask extends AsyncTask<ArtistData, Void, ArtistData> 
 		return data;
 	}
 
-	@Override
-	protected void onPostExecute(ArtistData output) {
-		super.onPostExecute(output);
-		Log.d(TAG, "inserted artist: " + output);
-	}
 }

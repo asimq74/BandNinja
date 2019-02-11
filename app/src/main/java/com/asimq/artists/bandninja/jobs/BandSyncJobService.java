@@ -21,6 +21,7 @@ public class BandSyncJobService extends JobService {
 		Log.d(TAG, "Started job at " + currentDateTimeString);
 		final MyApplication application = (MyApplication) getApplicationContext();
 		new BandDataSyncAsyncTask(application.getApplicationComponent()).executeOnExecutor(Executors.newSingleThreadExecutor());
+		jobFinished(job, true);
 		return false;
 	}
 

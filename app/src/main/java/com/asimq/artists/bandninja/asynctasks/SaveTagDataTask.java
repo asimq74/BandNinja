@@ -12,7 +12,6 @@ import java.util.List;
 
 public class SaveTagDataTask extends AsyncTask<List<TagData>, Void, List<TagData>> {
 
-	final String TAG = this.getClass().getSimpleName();
 	private final BandItemRepository repository;
 
 	public SaveTagDataTask(@NonNull BandItemRepository repository) {
@@ -26,9 +25,4 @@ public class SaveTagDataTask extends AsyncTask<List<TagData>, Void, List<TagData
 		return data;
 	}
 
-	@Override
-	protected void onPostExecute(List<TagData> output) {
-		super.onPostExecute(output);
-		Log.d(TAG, "inserted tags: " + output);
-	}
 }

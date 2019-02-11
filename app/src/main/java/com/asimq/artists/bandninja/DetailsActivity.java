@@ -48,7 +48,6 @@ public class DetailsActivity extends AppCompatActivity implements OnDetailsInter
         AppBarLayout.OnOffsetChangedListener, MusicItemsListFragment.DetailsActivityCallback {
 
 
-
     public static final String EXTRA_IMAGE = "extraImage";
     public static final String EXTRA_TITLE = "extraTitle";
     final String TAG = this.getClass().getSimpleName();
@@ -125,7 +124,7 @@ public class DetailsActivity extends AppCompatActivity implements OnDetailsInter
         });
 
         String itemTitle = getIntent().getStringExtra(EXTRA_TITLE);
-        collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+        collapsingToolbarLayout = findViewById(R.id.collapsing_toolbar);
         collapsingToolbarLayout.setTitle(itemTitle);
         collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
 
@@ -133,7 +132,6 @@ public class DetailsActivity extends AppCompatActivity implements OnDetailsInter
         floatHeaderView.bindTo(itemTitle, "", "");
         String extraImageUrl = getIntent().getStringExtra(EXTRA_IMAGE);
         loadImageIntoToolbar(extraImageUrl);
-        description.setText(itemTitle);
         if (itemTitle.equals(getString(R.string.topAlbums))) {
             onDisplayTopAlbums();
             return;

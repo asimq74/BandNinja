@@ -44,6 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/recycler_view_height"
         android:layout_marginStart="@dimen/recycler_view_left_offset"
+        android:layout_marginEnd="@dimen/right_offset"
         android:clipChildren="false"
         android:overScrollMode="never"
         app:viewUpdater="com.asimq.artists.bandninja.cards.CardsUpdater"/>
@@ -61,14 +62,14 @@
             style="@style/DescriptionTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/card_corner_radius"
+            android:layout_marginEnd="@dimen/right_offset"
             android:layout_marginStart="@dimen/left_offset"/>
 
         <android.support.design.widget.TabLayout
             android:id="@+id/sliding_tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/card_corner_radius"
+            android:layout_marginEnd="@dimen/right_offset"
             android:layout_marginStart="@dimen/left_offset"
             app:tabGravity="fill"
             app:tabMaxWidth="0dp"
@@ -80,14 +81,14 @@
             android:layout_width="match_parent"
             android:minLines="7"
             android:layout_height="match_parent"
-            android:layout_marginEnd="@dimen/card_corner_radius"
+            android:layout_marginEnd="@dimen/right_offset"
             android:layout_marginStart="@dimen/left_offset"
             android:text="@string/lorem_ipsum"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/tracksRecyclerView"
             android:visibility="gone"
-            android:layout_marginEnd="@dimen/card_corner_radius"
+            android:layout_marginEnd="@dimen/right_offset"
             android:layout_marginStart="@dimen/left_offset"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

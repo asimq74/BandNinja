@@ -9,6 +9,7 @@
               style="@style/BaseTrackBody"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
+              android:gravity="end"
               android:paddingEnd="@dimen/recycler_view_left_offset"
               tools:text="13"/>
 

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MediatorLiveData;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -314,8 +315,10 @@ public class ArticleDetailActivity extends AppCompatActivity
 					artistDetailViewModel.getArtistLiveDataByName(artistName) : artistDetailViewModel.getArtistLiveDataById(musicItemId);
 			artistLiveData.observe(this, this::populateInitialView);
 		} else if (Entities.ALBUM.name().equals(entityType)) {
-			albumDetailViewModel.getObservableAlbumData().observe(this, this::populateInitialView);
+			final MediatorLiveData<AlbumData> albumLiveData = albumDetailViewModel.getObservableAlbumData();
+			albumLiveData.observe(this, this::populateInitialView);
 			albumDetailViewModel.obtainAlbumData(albumName, musicItemId);
+//			albumLiveData.removeObservers(this);
 		}
 	}
 

@@ -1,0 +1,5 @@
+<resources>
+    <dimen name="recycler_view_left_offset">32dp</dimen>
+    <dimen name="left_offset">84dp</dimen>
+    <dimen name="right_offset">84dp</dimen>
+</resources>
