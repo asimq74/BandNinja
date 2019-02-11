@@ -20,8 +20,6 @@
 
     <RelativeLayout
         android:id="@+id/mainTitleLayout"
-        android:layout_marginStart="@dimen/recycler_view_left_offset"
-        android:layout_marginEnd="@dimen/right_offset"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -33,13 +31,14 @@
             app:autoSizeMaxTextSize="34sp"
             app:autoSizeStepGranularity="2sp"
             android:maxLines="1"
-            tools:text="Del the funky homosapienDel the funky homosapienDel the funky homosapien"
+            tools:text="Del Tha funkee Homosapien"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/mainTitleView_2"
             style="@style/MainTitle"
+            tools:text="Del Tha funkee Homosapien"
             app:autoSizeTextType="uniform"
             app:autoSizeMinTextSize="14sp"
             app:autoSizeMaxTextSize="34sp"
