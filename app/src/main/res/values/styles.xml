@@ -20,6 +20,11 @@
         <item name="android:textColorLink">@color/colorAccent</item>
     </style>
 
+    <style name="BaseTrackBody" parent="@style/TextAppearance.AppCompat.Body1">
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:textColorLink">@color/colorAccent</item>
+    </style>
+
     <style name="PopupItemBody" parent="@style/TextAppearance.AppCompat.Medium">
         <item name="android:padding">@dimen/spacing_medium</item>
         <item name="android:textColor">@color/colorPrimary</item>

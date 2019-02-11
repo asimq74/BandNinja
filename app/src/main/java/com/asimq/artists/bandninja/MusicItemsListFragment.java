@@ -20,6 +20,8 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +37,7 @@ import com.asimq.artists.bandninja.json.AlbumInfo;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.BaseMusicItem;
 import com.asimq.artists.bandninja.json.MusicItem;
-import com.asimq.artists.bandninja.json.Wiki;
+import com.asimq.artists.bandninja.json.Track;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.AlbumData;
 import com.asimq.artists.bandninja.room.ArtistData;
@@ -215,6 +217,50 @@ public class MusicItemsListFragment extends Fragment {
 		}
 	}
 
+	private class TracksAdapter extends RecyclerView.Adapter<TracksViewHolder> {
+
+		private List<Track> tracks;
+
+		public TracksAdapter(List<Track> tracks) {
+			this.tracks = tracks;
+		}
+
+		@Override
+		public int getItemCount() {
+			return tracks.size();
+		}
+
+		@Override
+		public void onBindViewHolder(TracksViewHolder holder, int position) {
+			final Track track = tracks.get(position);
+			holder.number.setText(position + 1 + "");
+			holder.trackListItemView.setText(track.getName());
+			holder.trackListItemView.setMovementMethod(LinkMovementMethod.getInstance());
+			holder.duration.setText(Util.toMinsAndSeconds(track.getDuration()));
+			holder.trackListItemView.setMovementMethod(LinkMovementMethod.getInstance());
+
+		}
+
+		@Override
+		public TracksViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+			return new TracksViewHolder(getLayoutInflater().inflate(R.layout.track_listing_item, parent, false));
+		}
+
+	}
+
+	public static class TracksViewHolder extends RecyclerView.ViewHolder {
+
+		TextView trackListItemView;
+		TextView number;
+		TextView duration;
+
+		public TracksViewHolder(View view) {
+			super(view);
+			trackListItemView = view.findViewById(R.id.trackListItemView);
+			number = view.findViewById(R.id.number);
+			duration = view.findViewById(R.id.duration);
+		}
+	}
 	public final CardSnapHelper CARD_SNAP_HELPER = new CardSnapHelper();
 	final String TAG = this.getClass().getSimpleName();
 	@Inject
@@ -251,8 +297,6 @@ public class MusicItemsListFragment extends Fragment {
 	TextView mainTitleView1;
 	@BindView(R.id.mainTitleView_2)
 	TextView mainTitleView2;
-	@BindView(R.id.ts_place)
-	TextView place;
 	@BindView(R.id.progressBar)
 	ProgressBar progressBar;
 	@BindView(R.id.recycler_view)
@@ -263,8 +307,8 @@ public class MusicItemsListFragment extends Fragment {
 	private SliderAdapter sliderAdapter;
 	@BindView(R.id.sliding_tabs)
 	TabLayout tabLayout;
-	@BindView(R.id.tagsLayout)
-	View tagsLayout;
+	@BindView(R.id.tracksRecyclerView)
+	RecyclerView tracksRecyclerView;
 
 	public MusicItemsListFragment() {
 		// Required empty public constructor
@@ -366,7 +410,6 @@ public class MusicItemsListFragment extends Fragment {
 
 	private void hideFieldsExceptTitle() {
 		recyclerView.setVisibility(View.GONE);
-		tagsLayout.setVisibility(View.GONE);
 		descriptionLayout.setVisibility(View.GONE);
 	}
 
@@ -600,6 +643,8 @@ public class MusicItemsListFragment extends Fragment {
 	}
 
 	private void populateSummary(AlbumInfo albumInfo, Entities type, TextView textView) {
+		textView.setVisibility(View.VISIBLE);
+		tracksRecyclerView.setVisibility(View.GONE);
 		final String summaryText = albumInfo.getWiki().getSummary();
 		if (summaryText.isEmpty()) {
 			textView.setText(R.string.summaryUnavailable);
@@ -633,10 +678,29 @@ public class MusicItemsListFragment extends Fragment {
 		searchResultsViewModel.searchForTopArtists();
 	}
 
+	private void populateTracks(AlbumInfo albumInfo, TextView textView) {
+		final List<Track> tracks = albumInfo.getTrackWrapper().getTracks();
+		if (tracks.isEmpty()) {
+			textView.setText(R.string.tracksUnavailable);
+		} else {
+			textView.setVisibility(View.GONE);
+			tracksRecyclerView.setVisibility(View.VISIBLE);
+			populateTracksRecyclerView(tracks);
+		}
+	}
+
+	private void populateTracksRecyclerView(@NonNull List<Track> tracks) {
+		TracksAdapter adapter = new TracksAdapter(tracks);
+		adapter.setHasStableIds(true);
+		tracksRecyclerView.setAdapter(adapter);
+		StaggeredGridLayoutManager sglm =
+				new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
+		tracksRecyclerView.setLayoutManager(sglm);
+	}
+
 	private void processAlbumData(@NonNull AlbumData albumData) {
 		mainTitleView1.setText(formatAlbumDataTitle(albumData));
 		mainTitleView2.setText(formatAlbumDataTitle(albumData));
-		place.setText(albumData.getTags());
 		updateDescriptionsSwitcher(albumData);
 	}
 
@@ -688,7 +752,6 @@ public class MusicItemsListFragment extends Fragment {
 	private void setVisibilityOnMainFields(int visibility) {
 		recyclerView.setVisibility(visibility);
 		mainTitleLayout.setVisibility(visibility);
-		tagsLayout.setVisibility(visibility);
 		descriptionLayout.setVisibility(visibility);
 	}
 
@@ -717,10 +780,16 @@ public class MusicItemsListFragment extends Fragment {
 
 	private void updateDescriptionsSwitcher(AlbumInfo albumInfo, Entities type) {
 		tabLayout.removeAllTabs();
-		tabLayout.addTab(tabLayout.newTab().setText("Summary"));
-		tabLayout.addTab(tabLayout.newTab().setText("Genres"));
+		tabLayout.addTab(tabLayout.newTab().setText(R.string.summary));
+		tabLayout.addTab(tabLayout.newTab().setText(R.string.tracks));
+		tabLayout.addTab(tabLayout.newTab().setText(R.string.genres));
 		populateSummary(albumInfo, type, articleBody);
-		tabLayout.setOnTabSelectedListener(new BaseOnTabSelectedListener() {
+		tabLayout.setOnTabSelectedListener(getBaseOnTabSelectedListener(albumInfo, type));
+	}
+
+	@NonNull
+	private BaseOnTabSelectedListener getBaseOnTabSelectedListener(AlbumInfo albumInfo, Entities type) {
+		return new BaseOnTabSelectedListener() {
 			@Override
 			public void onTabReselected(Tab tab) {
 
@@ -728,10 +797,12 @@ public class MusicItemsListFragment extends Fragment {
 
 			@Override
 			public void onTabSelected(Tab tab) {
-				if (tab.getText().equals("Summary")) {
+				if (tab.getText().equals(getString(R.string.summary))) {
 					populateSummary(albumInfo, type, articleBody);
+				} else if (tab.getText().equals(getString(R.string.tracks))) {
+					populateTracks(albumInfo, articleBody);
 				} else {
-					articleBody.setText(Util.getTagsAsString(albumInfo.getTagWrapper().getTags()));
+					populateGenres(albumInfo, articleBody);
 				}
 			}
 
@@ -739,13 +810,25 @@ public class MusicItemsListFragment extends Fragment {
 			public void onTabUnselected(Tab tab) {
 
 			}
-		});
+		};
+	}
+
+	protected void populateGenres(AlbumInfo albumInfo, TextView textView) {
+		textView.setVisibility(View.VISIBLE);
+		tracksRecyclerView.setVisibility(View.GONE);
+		articleBody.setText(Util.getTagsAsString(albumInfo.getTagWrapper().getTags()));
+	}
+
+	protected void populateGenres(Artist artist, TextView textView) {
+		textView.setVisibility(View.VISIBLE);
+		tracksRecyclerView.setVisibility(View.GONE);
+		articleBody.setText(Util.getTagsAsString(artist.getTagWrapper().getTags()));
 	}
 
 	private void updateDescriptionsSwitcher(Artist artist, Entities type) {
 		tabLayout.removeAllTabs();
-		tabLayout.addTab(tabLayout.newTab().setText("Summary"));
-		tabLayout.addTab(tabLayout.newTab().setText("Genres"));
+		tabLayout.addTab(tabLayout.newTab().setText(R.string.summary));
+		tabLayout.addTab(tabLayout.newTab().setText(R.string.genres));
 		populateSummary(artist, type, articleBody);
 		tabLayout.setOnTabSelectedListener(new BaseOnTabSelectedListener() {
 			@Override
@@ -755,10 +838,10 @@ public class MusicItemsListFragment extends Fragment {
 
 			@Override
 			public void onTabSelected(Tab tab) {
-				if (tab.getText().equals("Summary")) {
+				if (tab.getText().equals(getString(R.string.summary))) {
 					populateSummary(artist, type, articleBody);
 				} else {
-					articleBody.setText(Util.getTagsAsString(artist.getTagWrapper().getTags()));
+					populateGenres(artist, articleBody);
 				}
 			}
 

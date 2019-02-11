@@ -37,10 +37,15 @@
     <string name="locationServicesDisabled">Location Disabled</string>
     <string name="readMore">READ MORE...</string>
     <string name="summaryUnavailable">Summary Unavailable</string>
+    <string name="tracksUnavailable">Tracks Unavailable</string>
 
     <string name="topArtists">Top Artists</string>
     <string name="topArtistsByGenre">Top Artists By Genre</string>
     <string name="topAlbums">Top Albums</string>
+
+    <string name="summary">Summary</string>
+    <string name="tracks">Tracks</string>
+    <string name="genres">Genres</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->

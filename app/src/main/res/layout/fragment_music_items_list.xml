@@ -48,29 +48,13 @@
         android:overScrollMode="never"
         app:viewUpdater="com.asimq.artists.bandninja.cards.CardsUpdater"/>
 
-    <FrameLayout
-        android:id="@+id/tagsLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/text_margin">
-
-        <TextView
-            android:id="@+id/ts_place"
-            style="@style/PlaceTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/left_offset"/>
-
-    </FrameLayout>
-
     <LinearLayout
         android:id="@+id/descriptionLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/card_corner_radius"
-        android:orientation="vertical"
-        android:animateLayoutChanges="true">
-
+        android:animateLayoutChanges="true"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/ts_description"
@@ -86,16 +70,28 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/card_corner_radius"
             android:layout_marginStart="@dimen/left_offset"
+            app:tabGravity="fill"
+            app:tabMaxWidth="0dp"
             app:tabMode="fixed"/>
 
         <TextView
-                  android:id="@+id/article_body"
-                  style="@style/ArticleBody"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:layout_marginEnd="@dimen/card_corner_radius"
-                  android:layout_marginStart="@dimen/left_offset"
-                  android:text="@string/lorem_ipsum" />
+            android:id="@+id/article_body"
+            style="@style/ArticleBody"
+            android:layout_width="match_parent"
+            android:minLines="7"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/card_corner_radius"
+            android:layout_marginStart="@dimen/left_offset"
+            android:text="@string/lorem_ipsum"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/tracksRecyclerView"
+            android:visibility="gone"
+            android:layout_marginEnd="@dimen/card_corner_radius"
+            android:layout_marginStart="@dimen/left_offset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"/>
 
     </LinearLayout>
 

@@ -197,6 +197,19 @@ public class Util {
 				== ConnectionResult.SUCCESS;
 	}
 
+	public static String toMinsAndSeconds(String secondsString) {
+		int milliseconds = stringToInt(secondsString);
+  	if (milliseconds < 0) {
+  		return milliseconds + "";
+		}
+		long minutes = milliseconds / 60;
+		long seconds = milliseconds  % 60;
+		final String secondsFormattedString = seconds < 10 ? "0" + seconds : seconds + "";
+
+		return String.format("%d:%s", minutes, secondsFormattedString);
+
+	}
+
 	public static void makeTextViewResizable(final TextView tv, final int maxLine, final String expandText, final boolean viewMore) {
 
 		if (tv.getTag() == null) {

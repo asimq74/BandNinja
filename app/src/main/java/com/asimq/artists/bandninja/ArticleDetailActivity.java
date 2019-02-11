@@ -39,6 +39,7 @@ import com.asimq.artists.bandninja.room.AlbumData;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.TrackData;
 import com.asimq.artists.bandninja.ui.HeaderView;
+import com.asimq.artists.bandninja.utils.Util;
 import com.asimq.artists.bandninja.utils.Util.Entities;
 import com.asimq.artists.bandninja.viewmodelfactories.AlbumDetailViewModelFactory;
 import com.asimq.artists.bandninja.viewmodelfactories.ArtistDetailViewModelFactory;
@@ -135,14 +136,16 @@ public class ArticleDetailActivity extends AppCompatActivity
 		@Override
 		public void onBindViewHolder(TracksViewHolder holder, int position) {
 			final TrackData track = tracks.get(position);
-			holder.trackListItemView.setText(String.format("%s. %s - %s", position + 1, track.getName(), track.getDuration()));
+			holder.number.setText(position + 1 + "");
+			holder.trackListItemView.setText(track.getName());
 			holder.trackListItemView.setMovementMethod(LinkMovementMethod.getInstance());
+			holder.duration.setText(Util.toMinsAndSeconds(track.getDuration()));
 
 		}
 
 		@Override
 		public TracksViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-			return new TracksViewHolder(getLayoutInflater().inflate(R.layout.track_list_item_detail, parent, false));
+			return new TracksViewHolder(getLayoutInflater().inflate(R.layout.track_listing_item, parent, false));
 		}
 
 	}
@@ -150,10 +153,14 @@ public class ArticleDetailActivity extends AppCompatActivity
 	public static class TracksViewHolder extends RecyclerView.ViewHolder {
 
 		TextView trackListItemView;
+		TextView number;
+		TextView duration;
 
 		public TracksViewHolder(View view) {
 			super(view);
 			trackListItemView = view.findViewById(R.id.trackListItemView);
+			number = view.findViewById(R.id.number);
+			duration = view.findViewById(R.id.duration);
 		}
 	}
 	public static final String ALBUM = "ALBUM";

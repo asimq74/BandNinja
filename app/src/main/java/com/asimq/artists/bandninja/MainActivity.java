@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		}
 		setContentView(R.layout.activity_main);
 		mDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
-		scheduleJob();
+//		scheduleJob();
 		ButterKnife.bind(this);
 		final MyApplication application = (MyApplication) getApplicationContext();
 		applicationComponent = application.getApplicationComponent();
