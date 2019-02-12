@@ -139,6 +139,7 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 	public void searchForArtistByTag(@NonNull String tagName, @NonNull MediatorLiveData<Boolean> isRefreshingObservable,
 			@NonNull MediatorLiveData<Map<String, Artist>> searchResultsByArtistObservable) {
 		Map<String, Artist> resultsByArtistName = new LinkedTreeMap<>();
+		isRefreshingObservable.setValue(true);
 		final GetMusicInfo service = BackgroundRetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
 		Call<TopArtistsByTagWrapper> artistInfoByTagCall = service.getArtistByTag("tag.gettopartists", tagName,
 				API_KEY, DEFAULT_FORMAT);
@@ -180,6 +181,7 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 	@Override
 	public void searchForTopArtists(@NonNull MediatorLiveData<Boolean> isRefreshingObservable,
 			@NonNull MediatorLiveData<Map<String, Artist>> searchResultsByArtistObservable) {
+		isRefreshingObservable.setValue(true);
 		Map<String, Artist> resultsByArtistName = new LinkedTreeMap<>();
 		final GetMusicInfo service = BackgroundRetrofitClientInstance.getRetrofitInstance()
 				.create(GetMusicInfo.class);
@@ -223,6 +225,7 @@ public class SearchResultsModelRepositoryDao implements SearchResultsRepository 
 	@Override
 	public void searchResultsByArtistName(@NonNull String query, @NonNull MediatorLiveData<Boolean> isRefreshingObservable,
 			@NonNull MediatorLiveData<Map<String, Artist>> searchResultsByArtistObservable) {
+		isRefreshingObservable.setValue(true);
 		Map<String, Artist> resultsByArtistName = new LinkedTreeMap<>();
 		final GetMusicInfo service = BackgroundRetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
 		Call<ResultsWrapper> call = service.getArtists("artist.search", query,
