@@ -414,22 +414,14 @@ public class MusicItemsListFragment extends Fragment {
 	}
 
 	private void initMusicItemNameText(@NonNull List<? extends MusicItem> musicItems) {
-		String musicItemName = musicItems.get(0).getName();
-		artistAnimDuration = getResources().getInteger(R.integer.labels_animation_duration);
-		artistOffset1 = getResources().getDimensionPixelSize(R.dimen.left_offset);
-		artistOffset2 = getResources().getDimensionPixelSize(R.dimen.card_width);
-		mainTitleView1.setX(artistOffset1);
-		mainTitleView2.setX(artistOffset2);
-		mainTitleView1.setText(musicItemName);
-		mainTitleView2.setAlpha(0f);
-		mainTitleView2.setText(musicItemName);
+		slideInName(musicItems, 0);
 	}
 
 	private void initMusicItemNameTextForAlbumDatas(@NonNull List<AlbumData> musicItems) {
 		AlbumData albumData = musicItems.get(0);
 		((DetailsActivityCallback) getActivity()).loadImageIntoToolbar(albumData.getImage());
 		artistAnimDuration = getResources().getInteger(R.integer.labels_animation_duration);
-		artistOffset1 = getResources().getDimensionPixelSize(R.dimen.left_offset);
+		artistOffset1 = getResources().getDimensionPixelSize(R.dimen.left_slide_offset);
 		artistOffset2 = getResources().getDimensionPixelSize(R.dimen.card_width);
 		mainTitleView1.setX(artistOffset1);
 		mainTitleView2.setX(artistOffset2);
@@ -514,6 +506,10 @@ public class MusicItemsListFragment extends Fragment {
 		} else {
 			processArtistInfo((Artist) musicItem);
 		}
+		slideInName(musicItems, pos);
+	}
+
+	private void slideInName(List<? extends MusicItem> musicItems, int pos) {
 		int animH[] = new int[]{R.anim.slide_in_right, R.anim.slide_out_left};
 		int animV[] = new int[]{R.anim.slide_in_top, R.anim.slide_out_bottom};
 

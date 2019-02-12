@@ -18,7 +18,7 @@ public class ServiceUtil {
 		builder.setOverrideDeadline(3 * 1000); // maximum delay
 		//builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED); // require unmetered network
 		//builder.setRequiresDeviceIdle(true); // device should be idle
-		//builder.setRequiresCharging(false); // we don't care if the device is charging or not
+		builder.setRequiresCharging(false); // we don't care if the device is charging or not
 		JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
 		int resultCode = jobScheduler.schedule(builder.build());
 		if (resultCode == JobScheduler.RESULT_SUCCESS) {

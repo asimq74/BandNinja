@@ -20,6 +20,8 @@
 
     <RelativeLayout
         android:id="@+id/mainTitleLayout"
+        android:layout_marginEnd="@dimen/right_offset"
+        android:layout_marginStart="@dimen/left_offset"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 

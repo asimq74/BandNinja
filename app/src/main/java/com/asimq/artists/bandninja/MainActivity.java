@@ -45,6 +45,7 @@ import com.asimq.artists.bandninja.jobs.BandSyncJobService;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
+import com.asimq.artists.bandninja.service.ServiceUtil;
 import com.asimq.artists.bandninja.ui.CustomEditText;
 import com.asimq.artists.bandninja.utils.Util;
 import com.firebase.jobdispatcher.Constraint;
@@ -252,11 +253,15 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			currentArtist = bundle.getString(EXTRA_CURRENT_ARTIST);
 			currentAlbum = bundle.getString(EXTRA_CURRENT_ALBUM);
 			currentMethod = bundle.getString(EXTRA_CURRENT_METHOD);
-			Log.d(TAG, String.format("oncreate: current state %s, %s, %s, %s", currentMethod, currentArtist, currentAlbum, currentTag));
+			Log.d(TAG, String.format("current state restored onCreate %s, %s, %s, %s", currentMethod, currentArtist, currentAlbum, currentTag));
 		}
 		setContentView(R.layout.activity_main);
-		mDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
-		scheduleJob();
+		if (Util.isGooglePlayServicesAvailable(this)) {
+			mDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+			scheduleJob();
+		} else {
+			ServiceUtil.scheduleJob(this);
+		}
 		ButterKnife.bind(this);
 		final MyApplication application = (MyApplication) getApplicationContext();
 		applicationComponent = application.getApplicationComponent();
@@ -327,7 +332,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 		SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
 		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-//        searchView.setIconified(false);
 		searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextChange(String s) {
@@ -408,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		currentArtist = savedInstanceState.getString(EXTRA_CURRENT_ARTIST);
 		currentAlbum = savedInstanceState.getString(EXTRA_CURRENT_ALBUM);
 		currentMethod = savedInstanceState.getString(EXTRA_CURRENT_METHOD);
-		Log.d(TAG, String.format("current state %s, %s, %s, %s", currentMethod, currentArtist, currentAlbum, currentTag));
+		Log.d(TAG, String.format("current state restored %s, %s, %s, %s", currentMethod, currentArtist, currentAlbum, currentTag));
 		super.onRestoreInstanceState(savedInstanceState);
 	}
 
@@ -435,7 +439,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		outState.putString(EXTRA_CURRENT_ARTIST, currentArtist);
 		outState.putString(EXTRA_CURRENT_ALBUM, currentAlbum);
 		outState.putString(EXTRA_CURRENT_METHOD, currentMethod);
-		Log.d(TAG, String.format("current saved state %s, %s, %s, %s", currentMethod, currentArtist, currentAlbum, currentTag));
+		Log.d(TAG, String.format("current state saved %s, %s, %s, %s", currentMethod, currentArtist, currentAlbum, currentTag));
 	}
 
 	@Override
@@ -443,10 +447,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		MusicItemsListFragment musicItemsListFragment = (MusicItemsListFragment)
 				getSupportFragmentManager().findFragmentById(R.id.musicItemsListFragment);
 		if (musicItemsListFragment != null) {
-			currentArtist = "";
 			currentMethod = ON_QUERY_TEXT_SUBMIT;
-			currentAlbum = "";
-			currentTag = "";
 			musicItemsListFragment.displaySearchResultsByArtist(artistName);
 		}
 		hideKeyboard();
