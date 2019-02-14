@@ -7,6 +7,7 @@ import java.util.Locale;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -22,11 +23,13 @@ import android.preference.SwitchPreference;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.asimq.artists.bandninja.receivers.RefreshNavigationDrawerReceiver;
 import com.asimq.artists.bandninja.utils.Util;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -44,8 +47,6 @@ import com.google.gson.Gson;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends PreferenceActivity {
-	private SwitchPreference locationSwitchPreference;
-
 
 	public static class MyPreferenceFragment extends PreferenceFragment {
 
@@ -135,7 +136,6 @@ public class SettingsActivity extends PreferenceActivity {
 				settingsActivity.locationSwitchPreference.setSummary(postalCode);
 			}
 
-
 // SwitchPreference preference change listener
 			settingsActivity.locationSwitchPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
 				@Override
@@ -178,10 +178,18 @@ public class SettingsActivity extends PreferenceActivity {
 		}
 
 	}
-
 	private static final int ALL_PERMISSIONS_RESULT = 101;
 	private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
 	static final String TAG = SettingsActivity.class.getSimpleName();
+
+	public static void sendMessage(@NonNull Context context) {
+		Log.d("sender", "Broadcasting message");
+		Intent intent = new Intent(MainActivity.REFRESH_DRAWER_INTENT);
+		// You can also include some extra data.
+		intent.putExtra(RefreshNavigationDrawerReceiver.SHOULD_REFRESH_DRAWER, true);
+		LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+	}
+	private SwitchPreference locationSwitchPreference;
 	/**
 	 * Provides the entry point to the Fused Location Provider API.
 	 */
@@ -269,6 +277,12 @@ public class SettingsActivity extends PreferenceActivity {
 				}
 			}
 		}
+	}
+
+	@Override
+	protected void onStop() {
+		sendMessage(this);
+		super.onStop();
 	}
 
 	protected void processLocation() {
@@ -361,5 +375,4 @@ public class SettingsActivity extends PreferenceActivity {
 				new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
 				REQUEST_PERMISSIONS_REQUEST_CODE);
 	}
-
 }

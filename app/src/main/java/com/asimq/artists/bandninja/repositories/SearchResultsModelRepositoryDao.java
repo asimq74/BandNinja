@@ -16,7 +16,6 @@ import com.asimq.artists.bandninja.BuildConfig;
 import com.asimq.artists.bandninja.asynctasks.searchResults.EmptySearchResultsProcessor;
 import com.asimq.artists.bandninja.asynctasks.searchResults.FoundSearchResultsProcessor;
 import com.asimq.artists.bandninja.json.Artist;
-import com.asimq.artists.bandninja.json.ArtistWrapper;
 import com.asimq.artists.bandninja.json.ArtistsWrapper;
 import com.asimq.artists.bandninja.json.ResultsWrapper;
 import com.asimq.artists.bandninja.json.TopArtistsByTagWrapper;
@@ -32,77 +31,10 @@ import retrofit2.Response;
 
 public class SearchResultsModelRepositoryDao implements SearchResultsRepository {
 
-	public class ArtistContainer {
-
-		private Artist artist;
-
-		public ArtistContainer(Artist artist) {
-			this.artist = artist;
-		}
-
-		public Artist getArtist() {
-			return artist;
-		}
-
-		public void setArtist(Artist artist) {
-			this.artist = artist;
-		}
-	}
-
 	public static final String API_KEY = BuildConfig.LastFMApiKey;
 	public static final String DEFAULT_FORMAT = "json";
 	public static final int SEARCH_RESULTS_LIMIT = 10;
 	final String TAG = this.getClass().getSimpleName();
-
-	@Override
-	public Artist getArtist(@NonNull String artistName) {
-		final GetMusicInfo service
-				= BackgroundRetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
-		Call<ArtistWrapper> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
-				API_KEY, DEFAULT_FORMAT);
-		final ArtistContainer container = new ArtistContainer(new Artist());
-		artistInfoCall.enqueue(new Callback<ArtistWrapper>() {
-			@Override
-			public void onFailure(Call<ArtistWrapper> call, Throwable t) {
-				container.setArtist(new Artist());
-			}
-
-			@Override
-			public void onResponse(Call<ArtistWrapper> call, Response<ArtistWrapper> response) {
-				final ArtistWrapper artistWrapper = response.body();
-				if (artistWrapper == null) {
-					container.setArtist(new Artist());
-					return;
-				}
-				container.setArtist(artistWrapper.getArtist());
-			}
-		});
-		return container.getArtist();
-	}
-
-	@Override
-	public LiveData<Artist> getArtistInfo(@NonNull String artistName) {
-		final GetMusicInfo service = RetrofitClientInstance.getRetrofitInstance().create(GetMusicInfo.class);
-		final MutableLiveData<Artist> artistInfoMutableLiveData = new MutableLiveData<>();
-		Call<ArtistWrapper> artistInfoCall = service.getArtistInfo("artist.getinfo", artistName,
-				API_KEY, DEFAULT_FORMAT);
-		artistInfoCall.enqueue(new Callback<ArtistWrapper>() {
-			@Override
-			public void onFailure(Call<ArtistWrapper> call, Throwable t) {
-				artistInfoMutableLiveData.setValue(null);
-			}
-
-			@Override
-			public void onResponse(Call<ArtistWrapper> call, Response<ArtistWrapper> response) {
-				final ArtistWrapper artistWrapper = response.body();
-				if (artistWrapper == null) {
-					return;
-				}
-				artistInfoMutableLiveData.setValue(artistWrapper.getArtist());
-			}
-		});
-		return artistInfoMutableLiveData;
-	}
 
 	@Override
 	public LiveData<List<Artist>> getTopArtists() {

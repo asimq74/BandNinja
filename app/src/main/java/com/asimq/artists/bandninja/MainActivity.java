@@ -11,8 +11,10 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 
 import android.app.SearchManager;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -21,6 +23,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -43,12 +46,15 @@ import com.asimq.artists.bandninja.MusicItemsListFragment.OnMainActivityInteract
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
 import com.asimq.artists.bandninja.jobs.BandSyncJobService;
 import com.asimq.artists.bandninja.json.Artist;
+import com.asimq.artists.bandninja.receivers.RefreshNavigationDrawerReceiver;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.service.ServiceUtil;
 import com.asimq.artists.bandninja.ui.CustomEditText;
 import com.asimq.artists.bandninja.ui.DrawerHeaderView;
 import com.asimq.artists.bandninja.utils.Util;
+import com.asimq.artists.bandninja.viewmodelfactories.NavigationDrawerMenuViewModelFactory;
+import com.asimq.artists.bandninja.viewmodels.NavigationDrawerMenuViewModel;
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
@@ -98,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	public static final String ON_DISPLAYING_TOP_ARTISTS = "onDisplayingTopArtists";
 	public static final String ON_QUERY_TEXT_SUBMIT = "onQueryTextSubmit";
 	public static final String ON_SEARCH_FOR_AN_ARTIST = "onSearchForAnArtist";
+	public static final String REFRESH_DRAWER_INTENT = "refresh-drawer-intent";
 	final String TAG = this.getClass().getSimpleName();
 	AdView adView;
 	private ApplicationComponent applicationComponent;
@@ -107,6 +114,8 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	private String currentArtist = "";
 	private String currentMethod = "";
 	private String currentTag = "";
+	DrawerHeaderView drawerHeaderView;
+	private RefreshNavigationDrawerReceiver drawerReceiver;
 	private Map<String, String> genreMap = new HashMap<>();
 	@BindView(R.id.header_view_author)
 	TextView headerAuthor;
@@ -124,6 +133,9 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	private Location mLocation = null;
 	@BindView(R.id.recycler_view)
 	RecyclerView mRecyclerView;
+	private NavigationDrawerMenuViewModel navigationDrawerMenuViewModel;
+	@Inject
+	NavigationDrawerMenuViewModelFactory navigationDrawerMenuViewModelFactory;
 	@BindView(R.id.nav_view)
 	NavigationView navigationView;
 	@BindView(R.id.searchByArtistEditView)
@@ -148,8 +160,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		drawerHeaderView.bindTo(name, localityAndPostalCode);
 		navigationView.addHeaderView(drawerHeaderView);
 	}
-
-	DrawerHeaderView drawerHeaderView;
 
 	private void cancelJob(String jobTag) {
 		if ("".equals(jobTag)) {
@@ -269,8 +279,12 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		}
 		ButterKnife.bind(this);
 		final MyApplication application = (MyApplication) getApplicationContext();
+		drawerReceiver = new RefreshNavigationDrawerReceiver();
 		applicationComponent = application.getApplicationComponent();
 		applicationComponent.inject(this);
+		navigationDrawerMenuViewModel = ViewModelProviders.of(this, navigationDrawerMenuViewModelFactory)
+				.get(NavigationDrawerMenuViewModel.class);
+
 		setSupportActionBar(toolbar);
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -288,54 +302,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			onDisplayingTopArtists();
 		}
 
-	}
-
-	private void setupDrawer() {
-		bindDrawerHeaderView();
-		ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.open_drawer, R.string.close_drawer) {
-
-			@Override
-			public void onDrawerClosed(View drawerView) {
-				super.onDrawerClosed(drawerView);
-			}
-
-			@Override
-			public void onDrawerOpened(View drawerView) {
-				super.onDrawerOpened(drawerView);
-			}
-		};
-		populateDrawerMenu();
-		navigationView.setNavigationItemSelectedListener(
-				new NavigationView.OnNavigationItemSelectedListener() {
-					@Override
-					public boolean onNavigationItemSelected(MenuItem menuItem) {
-						// set item as selected to persist highlight
-						menuItem.setChecked(true);
-						// close drawer when item is tapped
-						mDrawerLayout.closeDrawers();
-
-						String popupMenuItemText = menuItem.getTitle().toString();
-						if (genreMap.containsKey(popupMenuItemText)) {
-							onDisplayingArtistsByTag(genreMap.get(popupMenuItemText));
-							return true;
-						}
-						if (getString(R.string.topArtists).equals(popupMenuItemText)) {
-							onDisplayingTopArtists();
-							return true;
-						}
-						if (getString(R.string.topArtistsByGenre).equals(popupMenuItemText)) {
-							considerDisplayingArtistsFromStorage();
-							return true;
-						}
-						if (getString(R.string.topAlbums).equals(popupMenuItemText)) {
-							onDisplayingTopAlbums();
-							return true;
-						}
-						return true;
-					}
-				});
-		mDrawerLayout.addDrawerListener(drawerToggle);
-		drawerToggle.syncState();
 	}
 
 	@Override
@@ -446,8 +412,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		}
 		headerTitle.setText(R.string.app_name);
 		headerAuthor.setText(titleViewBuilder.toString());
-		populateDrawerMenu();
-		bindDrawerHeaderView();
 	}
 
 	@Override
@@ -474,6 +438,10 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	@Override
 	protected void onStart() {
 		super.onStart();
+		// add data source
+		navigationDrawerMenuViewModel.addDataSource(drawerReceiver.getData());
+		navigationDrawerMenuViewModel.shouldRefreshNavigationDrawerObservable().observe(this, this::refreshDrawer);
+		LocalBroadcastManager.getInstance(this).registerReceiver(drawerReceiver, new IntentFilter(REFRESH_DRAWER_INTENT));
 		SharedPreferences sharedPreferences = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
 		String json = sharedPreferences.getString("location", null);
 		if (null != json) {
@@ -482,6 +450,20 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			locationView.setText(postalCode);
 		}
 
+	}
+
+	private void refreshDrawer(boolean refreshDrawer) {
+		Log.i(TAG, "refresh Drawer " + refreshDrawer);
+		populateDrawerMenu();
+		bindDrawerHeaderView();
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		// don't forget to remove receiver data source
+		navigationDrawerMenuViewModel.removeDataSource(drawerReceiver.getData());
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(drawerReceiver);
 	}
 
 	private void populateDrawerMenu() {
@@ -545,6 +527,54 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			}
 			return false;
 		});
+	}
+
+	private void setupDrawer() {
+		bindDrawerHeaderView();
+		ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.open_drawer, R.string.close_drawer) {
+
+			@Override
+			public void onDrawerClosed(View drawerView) {
+				super.onDrawerClosed(drawerView);
+			}
+
+			@Override
+			public void onDrawerOpened(View drawerView) {
+				super.onDrawerOpened(drawerView);
+			}
+		};
+		populateDrawerMenu();
+		navigationView.setNavigationItemSelectedListener(
+				new NavigationView.OnNavigationItemSelectedListener() {
+					@Override
+					public boolean onNavigationItemSelected(MenuItem menuItem) {
+						// set item as selected to persist highlight
+						menuItem.setChecked(true);
+						// close drawer when item is tapped
+						mDrawerLayout.closeDrawers();
+
+						String popupMenuItemText = menuItem.getTitle().toString();
+						if (genreMap.containsKey(popupMenuItemText)) {
+							onDisplayingArtistsByTag(genreMap.get(popupMenuItemText));
+							return true;
+						}
+						if (getString(R.string.topArtists).equals(popupMenuItemText)) {
+							onDisplayingTopArtists();
+							return true;
+						}
+						if (getString(R.string.topArtistsByGenre).equals(popupMenuItemText)) {
+							considerDisplayingArtistsFromStorage();
+							return true;
+						}
+						if (getString(R.string.topAlbums).equals(popupMenuItemText)) {
+							onDisplayingTopAlbums();
+							return true;
+						}
+						return true;
+					}
+				});
+		mDrawerLayout.addDrawerListener(drawerToggle);
+		drawerToggle.syncState();
 	}
 
 }

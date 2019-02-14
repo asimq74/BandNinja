@@ -11,10 +11,6 @@ import com.asimq.artists.bandninja.json.Artist;
 
 public interface SearchResultsRepository {
 
-	Artist getArtist(@NonNull String artistName);
-
-	LiveData<Artist> getArtistInfo(@NonNull String artistName);
-
 	LiveData<List<Artist>> getTopArtists();
 
 	void searchForArtistByTag(@NonNull String tagName, @NonNull MediatorLiveData<Boolean> isRefreshingObservable,

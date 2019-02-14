@@ -9,6 +9,8 @@ import android.content.Context;
 import com.asimq.artists.bandninja.repositories.AlbumInfoRepository;
 import com.asimq.artists.bandninja.repositories.AlbumInfoRepositoryDao;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
+import com.asimq.artists.bandninja.repositories.NavigationDrawerMenuRepository;
+import com.asimq.artists.bandninja.repositories.NavigationDrawerMenuRepositoryDao;
 import com.asimq.artists.bandninja.repositories.SearchResultsModelRepositoryDao;
 import com.asimq.artists.bandninja.repositories.SearchResultsRepository;
 import com.asimq.artists.bandninja.repositories.TagModelRepository;
@@ -21,6 +23,7 @@ import com.asimq.artists.bandninja.room.database.BandItemDataSource;
 import com.asimq.artists.bandninja.room.database.BandItemDatabase;
 import com.asimq.artists.bandninja.viewmodelfactories.AlbumDetailViewModelFactory;
 import com.asimq.artists.bandninja.viewmodelfactories.ArtistDetailViewModelFactory;
+import com.asimq.artists.bandninja.viewmodelfactories.NavigationDrawerMenuViewModelFactory;
 import com.asimq.artists.bandninja.viewmodelfactories.SearchResultsViewModelFactory;
 import com.asimq.artists.bandninja.viewmodelfactories.TagDetailViewModelFactory;
 
@@ -62,6 +65,12 @@ public class ApplicationModule {
 
 	@Provides
 	@Singleton
+	public NavigationDrawerMenuRepository navigationDrawerMenuRepository() {
+		return new NavigationDrawerMenuRepositoryDao();
+	}
+
+	@Provides
+	@Singleton
 	public AlbumDataDao provideAlbumDataDao(BandItemDatabase bandItemDatabase) {
 		return bandItemDatabase.albumDataDao();
 	}
@@ -99,6 +108,12 @@ public class ApplicationModule {
 	@Provides
 	public Context provideContext() {
 		return mApplication;
+	}
+
+	@Provides
+	@Singleton
+	NavigationDrawerMenuViewModelFactory provideNavigationDrawerMenuViewModelFactory(NavigationDrawerMenuRepository navigationDrawerMenuRepository) {
+		return new NavigationDrawerMenuViewModelFactory(mApplication, navigationDrawerMenuRepository);
 	}
 
 	@Provides
