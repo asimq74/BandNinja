@@ -132,7 +132,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	Toolbar toolbar;
 
 	private void bindDrawerHeaderView() {
-		navigationView.removeHeaderView(drawerHeaderView);
 		String localityAndPostalCode = "";
 		String name = "";
 		SharedPreferences sharedPreferences = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
@@ -143,9 +142,9 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			mLocation = new Gson().fromJson(locationFromPreferences, Location.class);
 			localityAndPostalCode = Util.getLocalityAndPostalCode(this, mLocation.getLatitude(), mLocation.getLongitude());
 		}
-		if (null == drawerHeaderView) {
-			drawerHeaderView = (DrawerHeaderView) LayoutInflater.from(this).inflate(R.layout.drawer_header, null);
-		}
+		navigationView.removeHeaderView(drawerHeaderView);
+		drawerHeaderView = null;
+		drawerHeaderView = (DrawerHeaderView) LayoutInflater.from(this).inflate(R.layout.drawer_header, null);
 		drawerHeaderView.bindTo(name, localityAndPostalCode);
 		navigationView.addHeaderView(drawerHeaderView);
 	}
@@ -447,6 +446,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		}
 		headerTitle.setText(R.string.app_name);
 		headerAuthor.setText(titleViewBuilder.toString());
+		populateDrawerMenu();
 		bindDrawerHeaderView();
 	}
 
@@ -485,6 +485,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	}
 
 	private void populateDrawerMenu() {
+		navigationView.getMenu().clear();
 		final Menu menu = navigationView.getMenu();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		Set<String> favoriteGenres = prefs.getStringSet(getString(R.string.favorite_genre_key), new HashSet<>());
