@@ -1,108 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<android.support.v4.widget.DrawerLayout
+    android:id="@+id/drawer_layout"
     xmlns:ads="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
+    android:clickable="true"
+    android:focusable="true"
     android:focusableInTouchMode="true">
 
 
-    <android.support.design.widget.AppBarLayout
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/main_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark">
+        android:layout_height="match_parent">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?android:actionBarSize"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:contentInsetStart="@dimen/mainToolbarcontentInset"
-            app:layout_collapseMode="pin"
-            app:navigationIcon="@drawable/ic_menu">
 
-            <include
-                android:id="@+id/toolbar_header_view"
-                layout="@layout/toolbar_header_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/header_view_end_margin_right"/>
-        </android.support.v7.widget.Toolbar>
-
-        <RelativeLayout
-            android:id="@+id/search_layout"
-            android:visibility="gone"
+        <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/toolbar"
-            android:background="@color/colorPrimary"
-            android:padding="@dimen/activity_horizontal_margin">
+            android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
-            <com.asimq.artists.bandninja.ui.CustomEditText
-                android:id="@+id/searchByArtistEditView"
-                android:imeOptions="actionDone"
-                android:singleLine="true"
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawablePadding="@dimen/customable_edit_text_padding"
-                android:drawableEnd="@android:drawable/ic_menu_search"
-                android:drawableStart="@android:drawable/ic_menu_close_clear_cancel"
-                android:gravity="start|center"
-                android:hint="@string/search_by_artist"
-                android:background="@color/ltgray"
-                android:padding="@dimen/card_corner_radius"
-                android:textColor="@android:color/black"
-                android:textColorHint="@android:color/black" />
-        </RelativeLayout>
+                android:layout_height="?android:actionBarSize"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                app:contentInsetStart="@dimen/mainToolbarcontentInset"
+                app:layout_collapseMode="pin"
+                app:navigationIcon="@drawable/ic_menu">
 
-    </android.support.design.widget.AppBarLayout>
-
-    <android.support.v4.widget.NestedScrollView
-        android:id="@+id/scroll"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipChildren="false"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/location_view_padding"
-            android:paddingStart="@dimen/list_side_margin"
-            android:paddingEnd="@dimen/list_side_margin"
-            android:paddingTop="@dimen/activity_vertical_margin">
-
-            <TextView
-                android:id="@+id/locationView"
-                android:padding="@dimen/list_side_margin"
-                android:layout_margin="@dimen/list_side_margin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <fragment
-                android:id="@+id/musicItemsListFragment"
-                class="com.asimq.artists.bandninja.MusicItemsListFragment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
-
-                <com.google.android.gms.ads.AdView
-                    android:id="@+id/ad_view"
-                    android:padding="@dimen/list_side_margin"
-                    android:layout_margin="@dimen/list_side_margin"
+                <include
+                    android:id="@+id/toolbar_header_view"
+                    layout="@layout/toolbar_header_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    ads:adSize="BANNER"
-                    ads:adUnitId="@string/banner_ad_unit_id" />
+                    android:layout_marginEnd="@dimen/header_view_end_margin_right"/>
+            </android.support.v7.widget.Toolbar>
+
+            <RelativeLayout
+                android:id="@+id/search_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/toolbar"
+                android:background="@color/colorPrimary"
+                android:padding="@dimen/activity_horizontal_margin"
+                android:visibility="gone">
+
+                <com.asimq.artists.bandninja.ui.CustomEditText
+                    android:id="@+id/searchByArtistEditView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/ltgray"
+                    android:drawableEnd="@android:drawable/ic_menu_search"
+                    android:drawablePadding="@dimen/customable_edit_text_padding"
+                    android:drawableStart="@android:drawable/ic_menu_close_clear_cancel"
+                    android:gravity="start|center"
+                    android:hint="@string/search_by_artist"
+                    android:imeOptions="actionDone"
+                    android:padding="@dimen/card_corner_radius"
+                    android:singleLine="true"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@android:color/black"/>
+            </RelativeLayout>
+
+        </android.support.design.widget.AppBarLayout>
+
+        <android.support.v4.widget.NestedScrollView
+            android:id="@+id/scroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="false"
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/location_view_padding"
+                android:paddingEnd="@dimen/list_side_margin"
+                android:paddingStart="@dimen/list_side_margin"
+                android:paddingTop="@dimen/activity_vertical_margin">
+
+                <TextView
+                    android:id="@+id/locationView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/list_side_margin"
+                    android:padding="@dimen/list_side_margin"/>
+
+                <fragment
+                    android:id="@+id/musicItemsListFragment"
+                    class="com.asimq.artists.bandninja.MusicItemsListFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+
+                    <com.google.android.gms.ads.AdView
+                        android:id="@+id/ad_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/list_side_margin"
+                        android:padding="@dimen/list_side_margin"
+                        ads:adSize="BANNER"
+                        ads:adUnitId="@string/banner_ad_unit_id"/>
+
+                </LinearLayout>
 
             </LinearLayout>
+        </android.support.v4.widget.NestedScrollView>
 
-        </LinearLayout>
-    </android.support.v4.widget.NestedScrollView>
+    </android.support.design.widget.CoordinatorLayout>
 
-</android.support.design.widget.CoordinatorLayout>
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"/>
+</android.support.v4.widget.DrawerLayout>

@@ -318,7 +318,6 @@ public class ArticleDetailActivity extends AppCompatActivity
 			final MediatorLiveData<AlbumData> albumLiveData = albumDetailViewModel.getObservableAlbumData();
 			albumLiveData.observe(this, this::populateInitialView);
 			albumDetailViewModel.obtainAlbumData(albumName, musicItemId);
-//			albumLiveData.removeObservers(this);
 		}
 	}
 

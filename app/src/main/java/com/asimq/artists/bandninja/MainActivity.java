@@ -19,22 +19,22 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.ListPopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,6 +47,7 @@ import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.service.ServiceUtil;
 import com.asimq.artists.bandninja.ui.CustomEditText;
+import com.asimq.artists.bandninja.ui.DrawerHeaderView;
 import com.asimq.artists.bandninja.utils.Util;
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
@@ -87,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			}
 		}
 	}
+
 	public static final String EXTRA_CURRENT_ALBUM = "EXTRA_CURRENT_ALBUM";
 	public static final String EXTRA_CURRENT_ARTIST = "EXTRA_CURRENT_ARTIST";
 	public static final String EXTRA_CURRENT_METHOD = "EXTRA_CURRENT_METHOD";
@@ -117,13 +119,38 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	TextView locationView;
 	private GoogleApiClient mClient;
 	private FirebaseJobDispatcher mDispatcher;
+	@BindView(R.id.drawer_layout)
+	DrawerLayout mDrawerLayout;
 	private Location mLocation = null;
 	@BindView(R.id.recycler_view)
 	RecyclerView mRecyclerView;
+	@BindView(R.id.nav_view)
+	NavigationView navigationView;
 	@BindView(R.id.searchByArtistEditView)
 	CustomEditText searchByArtistEditTextView;
 	@BindView(R.id.toolbar)
 	Toolbar toolbar;
+
+	private void bindDrawerHeaderView() {
+		navigationView.removeHeaderView(drawerHeaderView);
+		String localityAndPostalCode = "";
+		String name = "";
+		SharedPreferences sharedPreferences = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
+		SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String locationFromPreferences = sharedPreferences.getString("location", null);
+		name = defaultSharedPreferences.getString(getString(R.string.display_name_key), "");
+		if (null != locationFromPreferences) {
+			mLocation = new Gson().fromJson(locationFromPreferences, Location.class);
+			localityAndPostalCode = Util.getLocalityAndPostalCode(this, mLocation.getLatitude(), mLocation.getLongitude());
+		}
+		if (null == drawerHeaderView) {
+			drawerHeaderView = (DrawerHeaderView) LayoutInflater.from(this).inflate(R.layout.drawer_header, null);
+		}
+		drawerHeaderView.bindTo(name, localityAndPostalCode);
+		navigationView.addHeaderView(drawerHeaderView);
+	}
+
+	DrawerHeaderView drawerHeaderView;
 
 	private void cancelJob(String jobTag) {
 		if ("".equals(jobTag)) {
@@ -136,27 +163,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 
 	private void considerDisplayingArtistsFromStorage() {
 		new ConsiderDisplayingArtistsFromStorageTask().executeOnExecutor(Executors.newSingleThreadExecutor(), artistDataDao);
-	}
-
-	private String[] getPopupMenuItems() {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		Set<String> favoriteGenres = prefs.getStringSet(getString(R.string.favorite_genre_key), new HashSet<>());
-		List<String> popupMenuItems = new ArrayList<>();
-		popupMenuItems.add(getString(R.string.topArtists));
-		if (favoriteGenres.isEmpty()) {
-			popupMenuItems.add(getString(R.string.topArtistsByGenre));
-		}
-		popupMenuItems.add(getString(R.string.topAlbums));
-		for (String genre : favoriteGenres) {
-			if (!genre.isEmpty()) {
-				String capitalGenre = genre.substring(0, 1).toUpperCase() + genre.substring(1);
-				final String byGenreKey = String.format("Top Artists in %s", capitalGenre);
-				popupMenuItems.add(byGenreKey);
-				genreMap.put(byGenreKey, genre);
-			}
-		}
-		String[] items = new String[popupMenuItems.size()];
-		return popupMenuItems.toArray(items);
 	}
 
 	private void hideKeyboard() {
@@ -268,49 +274,9 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		applicationComponent.inject(this);
 		setSupportActionBar(toolbar);
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-		toolbar.setNavigationOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Toast.makeText(getApplicationContext(), "your icon was clicked", Toast.LENGTH_SHORT).show();
-				listPopupWindow = new ListPopupWindow(MainActivity.this);
-				final String[] popupMenuItems = getPopupMenuItems();
-				listPopupWindow.setAdapter(new ArrayAdapter<>(MainActivity.this, R.layout.popup_menu_list_item,
-						popupMenuItems));
-				listPopupWindow.setAnchorView(toolbar);
-				listPopupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
-				listPopupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
-
-				listPopupWindow.setModal(true);
-				listPopupWindow.setOnItemClickListener(new OnItemClickListener() {
-					@Override
-					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-						listPopupWindow.dismiss();
-						final String popupMenuItemText = popupMenuItems[position];
-						Toast.makeText(getApplicationContext(), popupMenuItemText + " was clicked", Toast.LENGTH_SHORT).show();
-						if (genreMap.containsKey(popupMenuItemText)) {
-							onDisplayingArtistsByTag(genreMap.get(popupMenuItemText));
-							return;
-						}
-						if (getString(R.string.topArtists).equals(popupMenuItemText)) {
-							onDisplayingTopArtists();
-							return;
-						}
-						if (getString(R.string.topArtistsByGenre).equals(popupMenuItemText)) {
-							considerDisplayingArtistsFromStorage();
-							return;
-						}
-						if (getString(R.string.topAlbums).equals(popupMenuItemText)) {
-							onDisplayingTopAlbums();
-							return;
-						}
-					}
-				});
-				listPopupWindow.show();
-			}
-
-		});
-
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+		setupDrawer();
 		loadAd();
 		setUpSearchByArtistView();
 		if (ON_DISPLAYING_ARTISTS_BY_TAG.equals(currentMethod)) {
@@ -323,6 +289,54 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			onDisplayingTopArtists();
 		}
 
+	}
+
+	private void setupDrawer() {
+		bindDrawerHeaderView();
+		ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.open_drawer, R.string.close_drawer) {
+
+			@Override
+			public void onDrawerClosed(View drawerView) {
+				super.onDrawerClosed(drawerView);
+			}
+
+			@Override
+			public void onDrawerOpened(View drawerView) {
+				super.onDrawerOpened(drawerView);
+			}
+		};
+		populateDrawerMenu();
+		navigationView.setNavigationItemSelectedListener(
+				new NavigationView.OnNavigationItemSelectedListener() {
+					@Override
+					public boolean onNavigationItemSelected(MenuItem menuItem) {
+						// set item as selected to persist highlight
+						menuItem.setChecked(true);
+						// close drawer when item is tapped
+						mDrawerLayout.closeDrawers();
+
+						String popupMenuItemText = menuItem.getTitle().toString();
+						if (genreMap.containsKey(popupMenuItemText)) {
+							onDisplayingArtistsByTag(genreMap.get(popupMenuItemText));
+							return true;
+						}
+						if (getString(R.string.topArtists).equals(popupMenuItemText)) {
+							onDisplayingTopArtists();
+							return true;
+						}
+						if (getString(R.string.topArtistsByGenre).equals(popupMenuItemText)) {
+							considerDisplayingArtistsFromStorage();
+							return true;
+						}
+						if (getString(R.string.topAlbums).equals(popupMenuItemText)) {
+							onDisplayingTopAlbums();
+							return true;
+						}
+						return true;
+					}
+				});
+		mDrawerLayout.addDrawerListener(drawerToggle);
+		drawerToggle.syncState();
 	}
 
 	@Override
@@ -402,6 +416,9 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			Intent intent = new Intent(this, SettingsActivity.class);
 			startActivity(intent);
 			return true;
+		} else if (item.getItemId() == android.R.id.home) {
+			mDrawerLayout.openDrawer(GravityCompat.START);
+			return true;
 		}
 		return false;
 	}
@@ -430,6 +447,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		}
 		headerTitle.setText(R.string.app_name);
 		headerAuthor.setText(titleViewBuilder.toString());
+		bindDrawerHeaderView();
 	}
 
 	@Override
@@ -464,6 +482,25 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			locationView.setText(postalCode);
 		}
 
+	}
+
+	private void populateDrawerMenu() {
+		final Menu menu = navigationView.getMenu();
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		Set<String> favoriteGenres = prefs.getStringSet(getString(R.string.favorite_genre_key), new HashSet<>());
+		menu.add(getString(R.string.topArtists));
+		if (favoriteGenres.isEmpty()) {
+			menu.add(getString(R.string.topArtistsByGenre));
+		}
+		menu.add(getString(R.string.topAlbums));
+		for (String genre : favoriteGenres) {
+			if (!genre.isEmpty()) {
+				String capitalGenre = genre.substring(0, 1).toUpperCase() + genre.substring(1);
+				final String byGenreKey = String.format("Top Artists in %s", capitalGenre);
+				menu.add(byGenreKey);
+				genreMap.put(byGenreKey, genre);
+			}
+		}
 	}
 
 	private void scheduleJob() {

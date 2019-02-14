@@ -74,9 +74,6 @@ public class CustomMultiSelectListPreference extends MultiSelectListPreference {
         });
     }
 
-    public CustomMultiSelectListPreference(Context context) {
-        this(context, null);
-    }
 
     static class TagsContainer {
         final List<Tag> tags;
