@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 import android.util.Log;
 
 import com.asimq.artists.bandninja.MyApplication;
-import com.asimq.artists.bandninja.service.BandDataSyncAsyncTask;
+import com.asimq.artists.bandninja.asynctasks.main.RefreshBandDataSyncAsyncTask;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 
@@ -20,7 +20,7 @@ public class BandSyncJobService extends JobService {
 		String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
 		Log.d(TAG, "Started job at " + currentDateTimeString);
 		final MyApplication application = (MyApplication) getApplicationContext();
-		new BandDataSyncAsyncTask(application.getApplicationComponent()).executeOnExecutor(Executors.newSingleThreadExecutor());
+		new RefreshBandDataSyncAsyncTask(application.getApplicationComponent()).executeOnExecutor(Executors.newSingleThreadExecutor());
 		jobFinished(job, true);
 		return false;
 	}

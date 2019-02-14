@@ -7,6 +7,7 @@ import android.app.job.JobService;
 import android.util.Log;
 
 import com.asimq.artists.bandninja.MyApplication;
+import com.asimq.artists.bandninja.asynctasks.main.RefreshBandDataSyncAsyncTask;
 
 public class DataSyncJobService extends JobService {
 
@@ -21,7 +22,7 @@ public class DataSyncJobService extends JobService {
 		final MyApplication application = (MyApplication) getApplicationContext();
 		isWorking = true;
 		// We need 'jobParameters' so we can call 'jobFinished'
-		new BandDataSyncAsyncTask(application.getApplicationComponent()).executeOnExecutor(Executors.newSingleThreadExecutor());
+		new RefreshBandDataSyncAsyncTask(application.getApplicationComponent()).executeOnExecutor(Executors.newSingleThreadExecutor());
 		return isWorking;
 	}
 

@@ -12,7 +12,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.asimq.artists.bandninja.BuildConfig;
-import com.asimq.artists.bandninja.asynctasks.SaveArtistDataTask;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.json.ArtistWrapper;
 import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;

@@ -1,4 +1,4 @@
-package com.asimq.artists.bandninja.asynctasks;
+package com.asimq.artists.bandninja.asynctasks.artists;
 
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;

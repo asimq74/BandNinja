@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executors;
 
 import android.arch.lifecycle.MediatorLiveData;
@@ -13,17 +12,12 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.asimq.artists.bandninja.BuildConfig;
-import com.asimq.artists.bandninja.asynctasks.SaveAlbumDataTask;
-import com.asimq.artists.bandninja.asynctasks.SaveArtistDataTask;
 import com.asimq.artists.bandninja.json.AlbumInfo;
 import com.asimq.artists.bandninja.json.AlbumInfoWrapper;
-import com.asimq.artists.bandninja.json.Artist;
-import com.asimq.artists.bandninja.json.ArtistWrapper;
 import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.AlbumData;
-import com.asimq.artists.bandninja.room.ArtistData;
 import com.google.gson.internal.LinkedHashTreeMap;
 
 import retrofit2.Call;

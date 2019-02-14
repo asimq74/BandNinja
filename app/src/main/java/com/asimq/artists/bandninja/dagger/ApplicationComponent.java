@@ -10,9 +10,11 @@ import com.asimq.artists.bandninja.DetailsActivity;
 import com.asimq.artists.bandninja.MainActivity;
 import com.asimq.artists.bandninja.MusicItemsListFragment;
 import com.asimq.artists.bandninja.MyApplication;
-import com.asimq.artists.bandninja.asynctasks.FetchAllSavedAlbumDataTask;
+import com.asimq.artists.bandninja.asynctasks.albums.FetchAllSavedAlbumDataTask;
+import com.asimq.artists.bandninja.asynctasks.albums.UpdateAllAlbumsAndTracksTask;
+import com.asimq.artists.bandninja.asynctasks.artists.UpdateAllArtistsTask;
+import com.asimq.artists.bandninja.asynctasks.tags.UpdateAllTagsTask;
 import com.asimq.artists.bandninja.repositories.SearchResultsModelRepositoryDao;
-import com.asimq.artists.bandninja.service.BandDataSyncAsyncTask;
 import com.asimq.artists.bandninja.service.DataSyncJobService;
 import com.asimq.artists.bandninja.ui.CustomMultiSelectListPreference;
 import com.asimq.artists.bandninja.viewmodels.AlbumDetailViewModel;
@@ -51,8 +53,6 @@ public interface ApplicationComponent {
 
 	void inject(CustomMultiSelectListPreference customMultiSelectListPreference);
 
-	void inject(BandDataSyncAsyncTask bandDataSyncAsyncTask);
-
 	void inject(ArticleDetailActivity articleDetailActivity);
 
 	void inject(TopArtistsAppWidgetRemoteViewsFactory topArtistsAppWidgetRemoteViewsFactory);
@@ -62,4 +62,10 @@ public interface ApplicationComponent {
 	void inject(FetchAllSavedAlbumDataTask fetchAllSavedAlbumDataTask);
 
 	void inject(DetailsActivity detailsActivity);
+
+	void inject(UpdateAllArtistsTask updateAllArtistsTask);
+
+	void inject(UpdateAllAlbumsAndTracksTask updateAllAlbumsAndTracksTask);
+
+	void inject(UpdateAllTagsTask updateAllTagsTask);
 }

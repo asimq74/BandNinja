@@ -6,7 +6,7 @@ import android.util.AttributeSet;
 
 import com.asimq.artists.bandninja.BuildConfig;
 import com.asimq.artists.bandninja.MyApplication;
-import com.asimq.artists.bandninja.asynctasks.SaveTagDataTask;
+import com.asimq.artists.bandninja.asynctasks.tags.SaveTagDataTask;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
 import com.asimq.artists.bandninja.json.Tag;
 import com.asimq.artists.bandninja.json.TopTagsWrapper;
@@ -14,9 +14,6 @@ import com.asimq.artists.bandninja.remote.retrofit.GetMusicInfo;
 import com.asimq.artists.bandninja.remote.retrofit.RetrofitClientInstance;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.TagData;
-import com.asimq.artists.bandninja.room.dao.TagDataDao;
-import com.asimq.artists.bandninja.viewmodelfactories.ArtistDetailViewModelFactory;
-import com.asimq.artists.bandninja.viewmodels.ArtistDetailViewModel;
 
 import java.util.ArrayList;
 import java.util.List;

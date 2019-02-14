@@ -1,4 +1,4 @@
-package com.asimq.artists.bandninja.asynctasks;
+package com.asimq.artists.bandninja.asynctasks.albums;
 
 import android.arch.lifecycle.MediatorLiveData;
 import android.content.Context;

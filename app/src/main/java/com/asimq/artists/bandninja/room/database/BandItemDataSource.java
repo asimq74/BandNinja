@@ -25,6 +25,16 @@ public class BandItemDataSource implements BandItemRepository {
 	private final TagDataDao tagDataDao;
 	private final TrackDataDao trackDataDao;
 
+	@Inject
+	public BandItemDataSource(ArtistDataDao artistDataDao,
+			TrackDataDao trackDataDao, AlbumDataDao albumDataDao,
+			TagDataDao tagDataDao) {
+		this.artistDataDao = artistDataDao;
+		this.trackDataDao = trackDataDao;
+		this.albumDataDao = albumDataDao;
+		this.tagDataDao = tagDataDao;
+	}
+
 	@Override
 	public AlbumData getAlbumDataByNameAndId(@NonNull String name, @NonNull String mbid) {
 		AlbumData albumData = albumDataDao.fetchAlbumDataByNameAndId(name, mbid);
@@ -41,29 +51,6 @@ public class BandItemDataSource implements BandItemRepository {
 		return albumDatasByArtist;
 	}
 
-	@Inject
-	public BandItemDataSource(ArtistDataDao artistDataDao,
-			TrackDataDao trackDataDao, AlbumDataDao albumDataDao,
-			TagDataDao tagDataDao) {
-		this.artistDataDao = artistDataDao;
-		this.trackDataDao = trackDataDao;
-		this.albumDataDao = albumDataDao;
-		this.tagDataDao = tagDataDao;
-	}
-
-	@NonNull
-	@Override
-	public List<AlbumData> getAlbumDatas(@NonNull String mbid) {
-		return albumDataDao.fetchAlbumDatas(mbid);
-	}
-
-	@NonNull
-	@Override
-	public List<AlbumData> getAlbumDatasByAlbumNames(@NonNull List<String> names) {
-		return albumDataDao.fetchAlbumDatasByAlbumNames(names);
-	}
-
-
 	@NonNull
 	@Override
 	public List<AlbumData> getAllAlbumDatas() {
@@ -72,20 +59,14 @@ public class BandItemDataSource implements BandItemRepository {
 
 	@NonNull
 	@Override
-	public LiveData<List<AlbumData>> getAllAlbumLiveDatas() {
-		return albumDataDao.fetchAllLiveAlbumDatas();
+	public List<ArtistData> getAllArtistDatas() {
+		return artistDataDao.fetchAllArtistDatas();
 	}
 
 	@NonNull
 	@Override
-	public LiveData<List<ArtistData>> getAllArtistData() {
-		return artistDataDao.fetchAllArtistLiveDatas();
-	}
-
-	@NonNull
-	@Override
-	public LiveData<List<TrackData>> getAllTrackLiveDatas() {
-		return trackDataDao.fetchAllTrackLiveDatas();
+	public List<ArtistData> getArtistDatasByNames(@NonNull Set<String> names) {
+		return artistDataDao.fetchArtistDataByNames(names);
 	}
 
 	@NonNull
@@ -96,62 +77,8 @@ public class BandItemDataSource implements BandItemRepository {
 
 	@NonNull
 	@Override
-	public ArtistData getArtistDataByName(@NonNull String name) {
-		return artistDataDao.fetchArtistDataByName(name);
-	}
-
-	@NonNull
-	@Override
-	public List<ArtistData> getArtistDatasByNames(@NonNull Set<String> names) {
-		return artistDataDao.fetchArtistDataByNames(names);
-	}
-
-	@Override
-	public LiveData<List<ArtistData>> getArtistLiveDatasByNames(@NonNull Set<String> names) {
-		return artistDataDao.fetchArtistLiveDatasByNames(names);
-	}
-
-	@NonNull
-	@Override
-	public LiveData<List<AlbumData>> getLiveAlbumDatas(@NonNull String mbid) {
-		return albumDataDao.fetchLiveAlbumDatas(mbid);
-	}
-
-	@NonNull
-	@Override
 	public LiveData<ArtistData> getArtistLiveDataByName(@NonNull String name) {
 		return artistDataDao.fetchLiveArtistDataByName(name);
-	}
-
-	@Override
-	public List<TagData> getTopTagDatas() {
-		return tagDataDao.fetchTopTagDatas();
-	}
-
-	@NonNull
-	@Override
-	public LiveData<List<TagData>> getTopTagLiveDatas() {
-		return tagDataDao.fetchTopTagLiveDatas();
-	}
-
-	@Override
-	public List<TrackData> getTrackDatas(@NonNull String mbid) {
-		return trackDataDao.fetchTrackDatas(mbid);
-	}
-
-	@Override
-	public List<TrackData> getTrackDatasByArtistName(@NonNull String artistName) {
-		return trackDataDao.fetchTrackDatasByArtist(artistName);
-	}
-
-	@Override
-	public LiveData<List<TrackData>> getTrackLiveDatas(@NonNull String mbid) {
-		return trackDataDao.fetchLiveTrackDatas(mbid);
-	}
-
-	@Override
-	public List<TrackData> getTrackLiveDatasByArtistAndAlbum(@NonNull String artistName, @NonNull String albumName) {
-		return trackDataDao.getTrackLiveDatasByArtistAndAlbum(artistName, albumName);
 	}
 
 	@Override
@@ -167,8 +94,8 @@ public class BandItemDataSource implements BandItemRepository {
 	}
 
 	@Override
-	public void saveAlbumData(@NonNull AlbumData albumData) {
-		albumDataDao.insertAlbumData(albumData);
+	public void saveTag(@NonNull TagData tagData) {
+		tagDataDao.insertTagData(tagData);
 	}
 
 	@Override
@@ -177,27 +104,8 @@ public class BandItemDataSource implements BandItemRepository {
 	}
 
 	@Override
-	public void saveMultipleAlbumDatas(@NonNull List<AlbumData> albumDatas) {
-		albumDataDao.insertMultipleAlbumDatas(albumDatas);
-	}
-
-	@Override
-	public void saveMultipleArtists(@NonNull List<ArtistData> artistDataList) {
-		artistDataDao.insertMultipleArtists(artistDataList);
-	}
-
-	@Override
 	public void saveMultipleTagDatas(@NonNull List<TagData> tagDatas) {
 		tagDataDao.insertMultipleTagDatas(tagDatas);
 	}
 
-	@Override
-	public void saveMultipleTrackDatas(@NonNull List<TrackData> trackDatas) {
-		trackDataDao.insertMultipleTrackDatas(trackDatas);
-	}
-
-	@Override
-	public void saveTrackData(@NonNull TrackData trackData) {
-		trackDataDao.insertTrackData(trackData);
-	}
 }

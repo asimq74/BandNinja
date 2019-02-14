@@ -10,16 +10,12 @@ import android.arch.lifecycle.MediatorLiveData;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.asimq.artists.bandninja.asynctasks.FetchAllSavedAlbumDataTask;
+import com.asimq.artists.bandninja.asynctasks.albums.FetchAllSavedAlbumDataTask;
 import com.asimq.artists.bandninja.asynctasks.albums.AlbumDataByNameAndIdFromStorageTask;
-import com.asimq.artists.bandninja.json.Album;
 import com.asimq.artists.bandninja.json.AlbumInfo;
 import com.asimq.artists.bandninja.repositories.AlbumInfoRepository;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.AlbumData;
-import com.asimq.artists.bandninja.room.TrackData;
-import com.asimq.artists.bandninja.room.dao.AlbumDataDao;
-import com.asimq.artists.bandninja.room.dao.TrackDataDao;
 
 public class AlbumDetailViewModel extends AndroidViewModel {
 
