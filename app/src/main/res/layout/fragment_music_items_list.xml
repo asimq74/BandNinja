@@ -32,7 +32,7 @@
             app:autoSizeMinTextSize="14sp"
             app:autoSizeMaxTextSize="34sp"
             app:autoSizeStepGranularity="2sp"
-            android:maxLines="1"
+            android:maxLines="2"
             tools:text="Del Tha funkee Homosapien"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -45,7 +45,7 @@
             app:autoSizeMinTextSize="14sp"
             app:autoSizeMaxTextSize="34sp"
             app:autoSizeStepGranularity="2sp"
-            android:maxLines="1"
+            android:maxLines="2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 

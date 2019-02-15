@@ -32,12 +32,14 @@ public interface BandItemRepository {
 	@NonNull
 	LiveData<ArtistData> getArtistLiveDataByName(@NonNull String name);
 
-	void insertAlbumWithTracks(AlbumData albumData);
+	List<TagData> getTopTagDatas();
 
-	void saveTag(@NonNull TagData tagData);
+	void insertAlbumWithTracks(@NonNull AlbumData albumData);
 
 	void saveArtist(@NonNull ArtistData artistData);
 
 	void saveMultipleTagDatas(@NonNull List<TagData> tagDatas);
+
+	void saveTag(@NonNull TagData tagData);
 
 }

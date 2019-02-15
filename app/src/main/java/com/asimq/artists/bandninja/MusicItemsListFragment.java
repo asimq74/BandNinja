@@ -1,6 +1,5 @@
 package com.asimq.artists.bandninja;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -40,7 +39,6 @@ import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.json.Track;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.AlbumData;
-import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.AlbumDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.utils.Util;
@@ -87,6 +85,8 @@ public class MusicItemsListFragment extends Fragment {
 	 */
 	public interface OnMainActivityInteractionListener {
 
+		void closeNavigationDrawer();
+
 		void considerDisplayingArtistsFromStorage();
 
 		void hideKeyboard();
@@ -100,8 +100,6 @@ public class MusicItemsListFragment extends Fragment {
 		void onDisplayingTopArtists();
 
 		void onSearchedForArtistName(@NonNull String artistName);
-
-		void closeNavigationDrawer();
 	}
 
 	private class OnAlbumDataCardClickedListener implements View.OnClickListener {
@@ -272,7 +270,6 @@ public class MusicItemsListFragment extends Fragment {
 	@Inject
 	AlbumDataDao albumDataDao;
 	private AlbumDataSliderAdapter albumDataSliderAdapter;
-	private Map<String, AlbumData> albumDatasByName = new HashMap<>();
 	private AlbumDetailViewModel albumDetailViewModel;
 	@Inject
 	AlbumDetailViewModelFactory albumDetailViewModelFactory;
@@ -282,7 +279,6 @@ public class MusicItemsListFragment extends Fragment {
 	private long artistAnimDuration;
 	@Inject
 	ArtistDataDao artistDataDao;
-	private Map<String, ArtistData> artistDatasByName = new HashMap<>();
 	private ArtistDetailViewModel artistDetailViewModel;
 	@Inject
 	ArtistDetailViewModelFactory artistDetailViewModelFactory;

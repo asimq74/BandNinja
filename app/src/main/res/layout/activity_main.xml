@@ -29,15 +29,7 @@
                 android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
                 app:contentInsetStart="@dimen/mainToolbarcontentInset"
                 app:layout_collapseMode="pin"
-                app:navigationIcon="@drawable/ic_menu">
-
-                <include
-                    android:id="@+id/toolbar_header_view"
-                    layout="@layout/toolbar_header_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/header_view_end_margin_right"/>
-            </android.support.v7.widget.Toolbar>
+                app:navigationIcon="@drawable/ic_menu"/>
 
         </android.support.design.widget.AppBarLayout>
 

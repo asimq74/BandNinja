@@ -82,6 +82,11 @@ public class BandItemDataSource implements BandItemRepository {
 	}
 
 	@Override
+	public List<TagData> getTopTagDatas() {
+		return tagDataDao.fetchTopTagDatas();
+	}
+
+	@Override
 	public void insertAlbumWithTracks(AlbumData albumData) {
 		List<TrackData> trackDataList = albumData.getTrackDatas();
 		for (TrackData trackData : trackDataList) {
@@ -94,11 +99,6 @@ public class BandItemDataSource implements BandItemRepository {
 	}
 
 	@Override
-	public void saveTag(@NonNull TagData tagData) {
-		tagDataDao.insertTagData(tagData);
-	}
-
-	@Override
 	public void saveArtist(@NonNull ArtistData artistData) {
 		artistDataDao.insertArtist(artistData);
 	}
@@ -106,6 +106,11 @@ public class BandItemDataSource implements BandItemRepository {
 	@Override
 	public void saveMultipleTagDatas(@NonNull List<TagData> tagDatas) {
 		tagDataDao.insertMultipleTagDatas(tagDatas);
+	}
+
+	@Override
+	public void saveTag(@NonNull TagData tagData) {
+		tagDataDao.insertTagData(tagData);
 	}
 
 }

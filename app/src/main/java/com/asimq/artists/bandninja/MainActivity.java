@@ -32,13 +32,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ListPopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,7 +48,6 @@ import com.asimq.artists.bandninja.receivers.RefreshNavigationDrawerReceiver;
 import com.asimq.artists.bandninja.room.ArtistData;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.service.ServiceUtil;
-import com.asimq.artists.bandninja.ui.CustomEditText;
 import com.asimq.artists.bandninja.ui.DrawerHeaderView;
 import com.asimq.artists.bandninja.utils.Util;
 import com.asimq.artists.bandninja.viewmodelfactories.NavigationDrawerMenuViewModelFactory;
@@ -65,7 +62,6 @@ import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.Gson;
 
 import butterknife.BindView;
@@ -117,16 +113,8 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	DrawerHeaderView drawerHeaderView;
 	private RefreshNavigationDrawerReceiver drawerReceiver;
 	private Map<String, String> genreMap = new HashMap<>();
-	@BindView(R.id.header_view_author)
-	TextView headerAuthor;
-	@BindView(R.id.header_view_published_date)
-	TextView headerPublishedDate;
-	@BindView(R.id.header_view_title)
-	TextView headerTitle;
-	ListPopupWindow listPopupWindow;
 	@BindView(R.id.locationView)
 	TextView locationView;
-	private GoogleApiClient mClient;
 	private FirebaseJobDispatcher mDispatcher;
 	@BindView(R.id.drawer_layout)
 	DrawerLayout mDrawerLayout;
@@ -166,6 +154,11 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 			mDispatcher.cancel(jobTag);
 		}
 		Toast.makeText(this, "Job Cancelled!", Toast.LENGTH_LONG).show();
+	}
+
+	@Override
+	public void closeNavigationDrawer() {
+		mDrawerLayout.closeDrawers();
 	}
 
 	@Override
@@ -286,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 				.get(NavigationDrawerMenuViewModel.class);
 
 		setSupportActionBar(toolbar);
-		getSupportActionBar().setDisplayShowTitleEnabled(false);
+		getSupportActionBar().setDisplayShowTitleEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
 		setupDrawer();
@@ -399,22 +392,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	}
 
 	@Override
-	protected void onResume() {
-		super.onResume();
-		SharedPreferences sharedPreferences = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
-		SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		String locationFromPreferences = sharedPreferences.getString("location", null);
-		StringBuilder titleViewBuilder = new StringBuilder(defaultSharedPreferences.getString(getString(R.string.display_name_key), ""));
-		if (null != locationFromPreferences) {
-			mLocation = new Gson().fromJson(locationFromPreferences, Location.class);
-			String localityAndPostalCode = Util.getLocalityAndPostalCode(this, mLocation.getLatitude(), mLocation.getLongitude());
-			titleViewBuilder.append("\n").append(localityAndPostalCode);
-		}
-		headerTitle.setText(R.string.app_name);
-		headerAuthor.setText(titleViewBuilder.toString());
-	}
-
-	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putString(EXTRA_CURRENT_TAG, currentTag);
@@ -452,12 +429,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 
 	}
 
-	private void refreshDrawer(boolean refreshDrawer) {
-		Log.i(TAG, "refresh Drawer " + refreshDrawer);
-		populateDrawerMenu();
-		bindDrawerHeaderView();
-	}
-
 	@Override
 	protected void onStop() {
 		super.onStop();
@@ -484,6 +455,12 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 				genreMap.put(byGenreKey, genre);
 			}
 		}
+	}
+
+	private void refreshDrawer(boolean refreshDrawer) {
+		Log.i(TAG, "refresh Drawer " + refreshDrawer);
+		populateDrawerMenu();
+		bindDrawerHeaderView();
 	}
 
 	private void scheduleJob() {
@@ -519,41 +496,33 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		};
 		populateDrawerMenu();
 		navigationView.setNavigationItemSelectedListener(
-				new NavigationView.OnNavigationItemSelectedListener() {
-					@Override
-					public boolean onNavigationItemSelected(MenuItem menuItem) {
-						// set item as selected to persist highlight
-						menuItem.setChecked(true);
-						// close drawer when item is tapped
-						closeNavigationDrawer();
+				menuItem -> {
+					// set item as selected to persist highlight
+					menuItem.setChecked(true);
+					// close drawer when item is tapped
+					closeNavigationDrawer();
 
-						String popupMenuItemText = menuItem.getTitle().toString();
-						if (genreMap.containsKey(popupMenuItemText)) {
-							onDisplayingArtistsByTag(genreMap.get(popupMenuItemText));
-							return true;
-						}
-						if (getString(R.string.topArtists).equals(popupMenuItemText)) {
-							onDisplayingTopArtists();
-							return true;
-						}
-						if (getString(R.string.topArtistsByGenre).equals(popupMenuItemText)) {
-							considerDisplayingArtistsFromStorage();
-							return true;
-						}
-						if (getString(R.string.topAlbums).equals(popupMenuItemText)) {
-							onDisplayingTopAlbums();
-							return true;
-						}
+					String popupMenuItemText = menuItem.getTitle().toString();
+					if (genreMap.containsKey(popupMenuItemText)) {
+						onDisplayingArtistsByTag(genreMap.get(popupMenuItemText));
 						return true;
 					}
+					if (getString(R.string.topArtists).equals(popupMenuItemText)) {
+						onDisplayingTopArtists();
+						return true;
+					}
+					if (getString(R.string.topArtistsByGenre).equals(popupMenuItemText)) {
+						considerDisplayingArtistsFromStorage();
+						return true;
+					}
+					if (getString(R.string.topAlbums).equals(popupMenuItemText)) {
+						onDisplayingTopAlbums();
+						return true;
+					}
+					return true;
 				});
 		mDrawerLayout.addDrawerListener(drawerToggle);
 		drawerToggle.syncState();
-	}
-
-	@Override
-	public void closeNavigationDrawer() {
-		mDrawerLayout.closeDrawers();
 	}
 
 }
