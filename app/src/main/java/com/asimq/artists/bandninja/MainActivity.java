@@ -138,8 +138,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	NavigationDrawerMenuViewModelFactory navigationDrawerMenuViewModelFactory;
 	@BindView(R.id.nav_view)
 	NavigationView navigationView;
-	@BindView(R.id.searchByArtistEditView)
-	CustomEditText searchByArtistEditTextView;
 	@BindView(R.id.toolbar)
 	Toolbar toolbar;
 
@@ -170,11 +168,13 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		Toast.makeText(this, "Job Cancelled!", Toast.LENGTH_LONG).show();
 	}
 
-	private void considerDisplayingArtistsFromStorage() {
+	@Override
+	public void considerDisplayingArtistsFromStorage() {
 		new ConsiderDisplayingArtistsFromStorageTask().executeOnExecutor(Executors.newSingleThreadExecutor(), artistDataDao);
 	}
 
-	private void hideKeyboard() {
+	@Override
+	public void hideKeyboard() {
 		InputMethodManager inputManager =
 				(InputMethodManager) this.
 						getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -291,7 +291,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
 		setupDrawer();
 		loadAd();
-		setUpSearchByArtistView();
+		drawerHeaderView.setUpSearchByArtistView(this);
 		if (ON_DISPLAYING_ARTISTS_BY_TAG.equals(currentMethod)) {
 			onDisplayingArtistsByTag(currentTag);
 		} else if (ON_DISPLAYING_TOP_ARTISTS.equals(currentMethod)) {
@@ -503,32 +503,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		mDispatcher.mustSchedule(myJob);
 	}
 
-	private void setUpSearchByArtistView() {
-		searchByArtistEditTextView.setDrawableClickListener(target -> {
-			switch (target) {
-				case RIGHT:
-					onSearchedForArtistName(searchByArtistEditTextView.getText().toString());
-					break;
-				case LEFT:
-					searchByArtistEditTextView.getText().clear();
-					hideKeyboard();
-					considerDisplayingArtistsFromStorage();
-					break;
-				default:
-					break;
-			}
-		});
-		searchByArtistEditTextView.setOnKeyListener((v, keyCode, event) -> {
-			// If the event is a key-down event on the "enter" button
-			if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
-					(keyCode == KeyEvent.KEYCODE_ENTER)) {
-				onSearchedForArtistName(searchByArtistEditTextView.getText().toString());
-				return true;
-			}
-			return false;
-		});
-	}
-
 	private void setupDrawer() {
 		bindDrawerHeaderView();
 		ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.open_drawer, R.string.close_drawer) {
@@ -551,7 +525,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 						// set item as selected to persist highlight
 						menuItem.setChecked(true);
 						// close drawer when item is tapped
-						mDrawerLayout.closeDrawers();
+						closeNavigationDrawer();
 
 						String popupMenuItemText = menuItem.getTitle().toString();
 						if (genreMap.containsKey(popupMenuItemText)) {
@@ -575,6 +549,11 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 				});
 		mDrawerLayout.addDrawerListener(drawerToggle);
 		drawerToggle.syncState();
+	}
+
+	@Override
+	public void closeNavigationDrawer() {
+		mDrawerLayout.closeDrawers();
 	}
 
 }

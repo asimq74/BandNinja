@@ -87,6 +87,10 @@ public class MusicItemsListFragment extends Fragment {
 	 */
 	public interface OnMainActivityInteractionListener {
 
+		void considerDisplayingArtistsFromStorage();
+
+		void hideKeyboard();
+
 		void onDisplayArtistList(@NonNull List<Artist> artists);
 
 		void onDisplayingArtistsByTag(@NonNull String tag);
@@ -97,6 +101,7 @@ public class MusicItemsListFragment extends Fragment {
 
 		void onSearchedForArtistName(@NonNull String artistName);
 
+		void closeNavigationDrawer();
 	}
 
 	private class OnAlbumDataCardClickedListener implements View.OnClickListener {
@@ -250,9 +255,9 @@ public class MusicItemsListFragment extends Fragment {
 
 	public static class TracksViewHolder extends RecyclerView.ViewHolder {
 
-		TextView trackListItemView;
-		TextView number;
 		TextView duration;
+		TextView number;
+		TextView trackListItemView;
 
 		public TracksViewHolder(View view) {
 			super(view);
@@ -261,6 +266,7 @@ public class MusicItemsListFragment extends Fragment {
 			duration = view.findViewById(R.id.duration);
 		}
 	}
+
 	public final CardSnapHelper CARD_SNAP_HELPER = new CardSnapHelper();
 	final String TAG = this.getClass().getSimpleName();
 	@Inject
@@ -397,6 +403,32 @@ public class MusicItemsListFragment extends Fragment {
 		artistDetailViewModel.populateArtistDatasFromStorage(artistsByName);
 	}
 
+	@NonNull
+	private BaseOnTabSelectedListener getBaseOnTabSelectedListener(AlbumInfo albumInfo, Entities type) {
+		return new BaseOnTabSelectedListener() {
+			@Override
+			public void onTabReselected(Tab tab) {
+
+			}
+
+			@Override
+			public void onTabSelected(Tab tab) {
+				if (tab.getText().equals(getString(R.string.summary))) {
+					populateSummary(albumInfo, type, articleBody);
+				} else if (tab.getText().equals(getString(R.string.tracks))) {
+					populateTracks(albumInfo, articleBody);
+				} else {
+					populateGenres(albumInfo, articleBody);
+				}
+			}
+
+			@Override
+			public void onTabUnselected(Tab tab) {
+
+			}
+		};
+	}
+
 	void handleRefreshing(Entities type, boolean isRefreshing) {
 		Log.d(TAG, String.format("%s are refreshing: %s", type.name(), isRefreshing));
 		if (isRefreshing) {
@@ -509,23 +541,6 @@ public class MusicItemsListFragment extends Fragment {
 		slideInName(musicItems, pos);
 	}
 
-	private void slideInName(List<? extends MusicItem> musicItems, int pos) {
-		int animH[] = new int[]{R.anim.slide_in_right, R.anim.slide_out_left};
-		int animV[] = new int[]{R.anim.slide_in_top, R.anim.slide_out_bottom};
-
-		final boolean left2right = pos < currentPosition;
-		if (left2right) {
-			animH[0] = R.anim.slide_in_left;
-			animH[1] = R.anim.slide_out_right;
-			animV[0] = R.anim.slide_in_bottom;
-			animV[1] = R.anim.slide_out_top;
-		}
-
-		setArtistText(musicItems.get(pos % musicItems.size()).getName(), left2right);
-
-		currentPosition = pos;
-	}
-
 	private void onActiveCardChangeForAlbumDatas(List<AlbumData> musicItems) {
 		final int pos = layoutManger.getActiveCardPosition();
 		if (pos == RecyclerView.NO_POSITION || pos == currentPosition) {
@@ -612,6 +627,18 @@ public class MusicItemsListFragment extends Fragment {
 
 	protected void populateArtistsByTag(@NonNull String tag) {
 		searchResultsViewModel.searchForArtistByTag(tag);
+	}
+
+	protected void populateGenres(AlbumInfo albumInfo, TextView textView) {
+		textView.setVisibility(View.VISIBLE);
+		tracksRecyclerView.setVisibility(View.GONE);
+		articleBody.setText(Util.getTagsAsString(albumInfo.getTagWrapper().getTags()));
+	}
+
+	protected void populateGenres(Artist artist, TextView textView) {
+		textView.setVisibility(View.VISIBLE);
+		tracksRecyclerView.setVisibility(View.GONE);
+		articleBody.setText(Util.getTagsAsString(artist.getTagWrapper().getTags()));
 	}
 
 	private void populateSummary(Artist artist, Entities type, TextView textView) {
@@ -750,6 +777,23 @@ public class MusicItemsListFragment extends Fragment {
 		descriptionLayout.setVisibility(visibility);
 	}
 
+	private void slideInName(List<? extends MusicItem> musicItems, int pos) {
+		int animH[] = new int[]{R.anim.slide_in_right, R.anim.slide_out_left};
+		int animV[] = new int[]{R.anim.slide_in_top, R.anim.slide_out_bottom};
+
+		final boolean left2right = pos < currentPosition;
+		if (left2right) {
+			animH[0] = R.anim.slide_in_left;
+			animH[1] = R.anim.slide_out_right;
+			animV[0] = R.anim.slide_in_bottom;
+			animV[1] = R.anim.slide_out_top;
+		}
+
+		setArtistText(musicItems.get(pos % musicItems.size()).getName(), left2right);
+
+		currentPosition = pos;
+	}
+
 	private void updateDescriptionsSwitcher(AlbumData albumData) {
 		String wiki = albumData.getWiki();
 		if (!wiki.isEmpty()) {
@@ -780,44 +824,6 @@ public class MusicItemsListFragment extends Fragment {
 		tabLayout.addTab(tabLayout.newTab().setText(R.string.genres));
 		populateSummary(albumInfo, type, articleBody);
 		tabLayout.setOnTabSelectedListener(getBaseOnTabSelectedListener(albumInfo, type));
-	}
-
-	@NonNull
-	private BaseOnTabSelectedListener getBaseOnTabSelectedListener(AlbumInfo albumInfo, Entities type) {
-		return new BaseOnTabSelectedListener() {
-			@Override
-			public void onTabReselected(Tab tab) {
-
-			}
-
-			@Override
-			public void onTabSelected(Tab tab) {
-				if (tab.getText().equals(getString(R.string.summary))) {
-					populateSummary(albumInfo, type, articleBody);
-				} else if (tab.getText().equals(getString(R.string.tracks))) {
-					populateTracks(albumInfo, articleBody);
-				} else {
-					populateGenres(albumInfo, articleBody);
-				}
-			}
-
-			@Override
-			public void onTabUnselected(Tab tab) {
-
-			}
-		};
-	}
-
-	protected void populateGenres(AlbumInfo albumInfo, TextView textView) {
-		textView.setVisibility(View.VISIBLE);
-		tracksRecyclerView.setVisibility(View.GONE);
-		articleBody.setText(Util.getTagsAsString(albumInfo.getTagWrapper().getTags()));
-	}
-
-	protected void populateGenres(Artist artist, TextView textView) {
-		textView.setVisibility(View.VISIBLE);
-		tracksRecyclerView.setVisibility(View.GONE);
-		articleBody.setText(Util.getTagsAsString(artist.getTagWrapper().getTags()));
 	}
 
 	private void updateDescriptionsSwitcher(Artist artist, Entities type) {

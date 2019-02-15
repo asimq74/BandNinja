@@ -28,4 +28,31 @@
         android:textColor="@android:color/white"
         android:textSize="14sp"
         android:textStyle="normal"/>
+    <RelativeLayout
+        android:id="@+id/search_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/toolbar"
+        android:background="@color/colorPrimary"
+        android:paddingTop="@dimen/activity_horizontal_margin"
+        android:paddingBottom="@dimen/activity_horizontal_margin"
+        android:paddingEnd="@dimen/activity_horizontal_margin">
+
+        <com.asimq.artists.bandninja.ui.CustomEditText
+            android:id="@+id/searchByArtistEditView"
+            style="@style/TextAppearance.AppCompat.Small"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:drawableEnd="@android:drawable/ic_menu_search"
+            android:drawablePadding="@dimen/customable_edit_text_padding"
+            android:drawableStart="@android:drawable/ic_menu_close_clear_cancel"
+            android:gravity="start|center"
+            android:hint="@string/search_by_artist"
+            android:imeOptions="actionDone"
+            android:padding="@dimen/spacing_medium"
+            android:singleLine="true"
+            android:textColor="@android:color/black"
+            android:textColorHint="@color/ltgrayHint"/>
+    </RelativeLayout>
 </com.asimq.artists.bandninja.ui.DrawerHeaderView>

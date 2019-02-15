@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
+              android:background="@color/ltgray"
               android:gravity="center_vertical"
               android:orientation="horizontal">
 
@@ -14,6 +15,7 @@
 
     <EditText
         android:hint="@string/search_by_artist"
+        android:textColorHint="@color/colorPrimaryDark"
         android:id="@+id/searchEditText"
         android:layout_width="175dp"
         android:layout_height="wrap_content"
@@ -21,7 +23,7 @@
         android:ems="10"
         android:imeOptions="actionDone"
         android:inputType="text"
-        android:textColor="@android:color/white">
+        android:textColor="@android:color/black">
 
         <requestFocus/>
     </EditText>

@@ -39,32 +39,6 @@
                     android:layout_marginEnd="@dimen/header_view_end_margin_right"/>
             </android.support.v7.widget.Toolbar>
 
-            <RelativeLayout
-                android:id="@+id/search_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/toolbar"
-                android:background="@color/colorPrimary"
-                android:padding="@dimen/activity_horizontal_margin"
-                android:visibility="gone">
-
-                <com.asimq.artists.bandninja.ui.CustomEditText
-                    android:id="@+id/searchByArtistEditView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/ltgray"
-                    android:drawableEnd="@android:drawable/ic_menu_search"
-                    android:drawablePadding="@dimen/customable_edit_text_padding"
-                    android:drawableStart="@android:drawable/ic_menu_close_clear_cancel"
-                    android:gravity="start|center"
-                    android:hint="@string/search_by_artist"
-                    android:imeOptions="actionDone"
-                    android:padding="@dimen/card_corner_radius"
-                    android:singleLine="true"
-                    android:textColor="@android:color/black"
-                    android:textColorHint="@android:color/black"/>
-            </RelativeLayout>
-
         </android.support.design.widget.AppBarLayout>
 
         <android.support.v4.widget.NestedScrollView
