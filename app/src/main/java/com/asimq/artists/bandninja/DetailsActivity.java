@@ -190,7 +190,6 @@ public class DetailsActivity extends AppCompatActivity implements OnDetailsInter
             String localityAndPostalCode = Util.getLocalityAndPostalCode(this, mLocation.getLatitude(), mLocation.getLongitude());
             titleViewBuilder.append("\n").append(localityAndPostalCode);
         }
-        titleView.setText(titleViewBuilder.toString());
     }
 
     @Override

@@ -643,9 +643,6 @@ public class MusicItemsListFragment extends Fragment {
 			textView.setText(R.string.summaryUnavailable);
 		} else {
 			Util.populateHTMLForTextView(textView, summaryText);
-			Util.makeTextViewResizable(textView, 7, getString(R.string.readMore), true);
-		}
-		if (!summaryText.isEmpty()) {
 			textView.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -668,9 +665,6 @@ public class MusicItemsListFragment extends Fragment {
 			textView.setText(R.string.summaryUnavailable);
 		} else {
 			Util.populateHTMLForTextView(textView, summaryText);
-			Util.makeTextViewResizable(textView, 7, getString(R.string.readMore), true);
-		}
-		if (!summaryText.isEmpty()) {
 			textView.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -793,13 +787,10 @@ public class MusicItemsListFragment extends Fragment {
 	private void updateDescriptionsSwitcher(AlbumData albumData) {
 		String wiki = albumData.getWiki();
 		if (!wiki.isEmpty()) {
-			descriptionTextView.setText(R.string.summaryUnavailable);
+			articleBody.setText(R.string.summaryUnavailable);
 		} else {
-			Util.populateHTMLForTextView(descriptionTextView, wiki);
-			Util.makeTextViewResizable(descriptionTextView, 3, getString(R.string.readMore), true);
-		}
-		if (!wiki.isEmpty()) {
-			descriptionTextView.setOnClickListener(new OnClickListener() {
+			articleBody.setText(wiki);
+			articleBody.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					Intent articleDetailIntent = new Intent(getActivity(), ArticleDetailActivity.class);

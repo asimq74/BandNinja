@@ -38,7 +38,7 @@
     <string name="locationServicesRequireInternet">Please Check your Internet Connection</string>
     <string name="locationServicesEnabled">Location Enabled</string>
     <string name="locationServicesDisabled">Location Disabled</string>
-    <string name="readMore">READ MORE...</string>
+    <string name="clickForMore">CLICK FOR MORE</string>
     <string name="summaryUnavailable">Summary Unavailable</string>
     <string name="tracksUnavailable">Tracks Unavailable</string>
 

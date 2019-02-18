@@ -423,8 +423,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		String json = sharedPreferences.getString("location", null);
 		if (null != json) {
 			mLocation = new Gson().fromJson(json, Location.class);
-			String postalCode = Util.getPostalCode(this, mLocation.getLatitude(), mLocation.getLongitude());
-			locationView.setText(postalCode);
 		}
 
 	}
@@ -442,6 +440,9 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		final Menu menu = navigationView.getMenu();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		Set<String> favoriteGenres = prefs.getStringSet(getString(R.string.favorite_genre_key), new HashSet<>());
+		if (favoriteGenres.isEmpty()) {
+			menu.add(getString(R.string.pref_title_favorite_genres));
+		}
 		menu.add(getString(R.string.topArtists));
 		if (favoriteGenres.isEmpty()) {
 			menu.add(getString(R.string.topArtistsByGenre));
@@ -513,6 +514,10 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 					}
 					if (getString(R.string.topArtistsByGenre).equals(popupMenuItemText)) {
 						considerDisplayingArtistsFromStorage();
+						return true;
+					}
+					if (getString(R.string.pref_title_favorite_genres).equals(popupMenuItemText)) {
+						startActivity(new Intent(this, SettingsActivity.class));
 						return true;
 					}
 					if (getString(R.string.topAlbums).equals(popupMenuItemText)) {

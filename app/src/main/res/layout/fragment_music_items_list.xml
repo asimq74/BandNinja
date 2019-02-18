@@ -88,7 +88,7 @@
             app:tabMaxWidth="0dp"
             app:tabMode="fixed"/>
 
-        <TextView
+        <com.asimq.artists.bandninja.ui.ExpandableTextView
             android:id="@+id/article_body"
             style="@style/ArticleBody"
             android:layout_width="match_parent"
