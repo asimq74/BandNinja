@@ -14,7 +14,7 @@
         android:src="@android:drawable/ic_menu_search"/>
 
     <EditText
-        android:hint="@string/search_by_artist"
+        android:hint="@string/searchForAnArtist"
         android:textColorHint="@color/colorPrimaryDark"
         android:id="@+id/searchEditText"
         android:layout_width="175dp"

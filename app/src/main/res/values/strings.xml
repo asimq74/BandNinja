@@ -24,7 +24,6 @@
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="search_by_artist">Search by Artist...</string>
     <string name="searchForAnArtist">Search for an Artist</string>
     <string name="logoDescription">Application Logo</string>
     <string name="band_widget">Band Ninja Widget</string>
