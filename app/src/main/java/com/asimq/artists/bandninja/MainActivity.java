@@ -38,7 +38,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.asimq.artists.bandninja.MusicItemsListFragment.OnMainActivityInteractionListener;
 import com.asimq.artists.bandninja.dagger.ApplicationComponent;
@@ -96,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	public static final String EXTRA_CURRENT_METHOD = "EXTRA_CURRENT_METHOD";
 	public static final String EXTRA_CURRENT_TAG = "EXTRA_CURRENT_TAG";
 	private static final String JOB_TAG = "MyJobService";
+	public static final String NETWORK_CHANGE_INTENT = "network-change-intent";
 	public static final String ON_DISPLAYING_ARTISTS_BY_TAG = "onDisplayingArtistsByTag";
 	public static final String ON_DISPLAYING_TOP_ARTISTS = "onDisplayingTopArtists";
 	public static final String ON_QUERY_TEXT_SUBMIT = "onQueryTextSubmit";
@@ -149,7 +149,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		drawerHeaderView.bindTo(name, localityAndPostalCode);
 		navigationView.addHeaderView(drawerHeaderView);
 	}
-
 
 	@Override
 	public void closeNavigationDrawer() {
@@ -436,7 +435,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		if (null != json) {
 			mLocation = new Gson().fromJson(json, Location.class);
 		}
-
 	}
 
 	@Override
@@ -504,6 +502,9 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 
 			@Override
 			public void onDrawerOpened(View drawerView) {
+				if (!Util.isConnected(MainActivity.this)) {
+					SettingsActivity.sendMessage(MainActivity.this);
+				}
 				super.onDrawerOpened(drawerView);
 			}
 		};
