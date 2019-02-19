@@ -143,18 +143,13 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		navigationView.removeHeaderView(drawerHeaderView);
 		drawerHeaderView = null;
 		drawerHeaderView = (DrawerHeaderView) LayoutInflater.from(this).inflate(R.layout.drawer_header, null);
+		if (!Util.isConnected(this)) {
+			drawerHeaderView.hideSearchLayout();
+		}
 		drawerHeaderView.bindTo(name, localityAndPostalCode);
 		navigationView.addHeaderView(drawerHeaderView);
 	}
 
-	private void cancelJob(String jobTag) {
-		if ("".equals(jobTag)) {
-			mDispatcher.cancelAll();
-		} else {
-			mDispatcher.cancel(jobTag);
-		}
-		Toast.makeText(this, "Job Cancelled!", Toast.LENGTH_LONG).show();
-	}
 
 	@Override
 	public void closeNavigationDrawer() {
@@ -164,6 +159,22 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	@Override
 	public void considerDisplayingArtistsFromStorage() {
 		new ConsiderDisplayingArtistsFromStorageTask().executeOnExecutor(Executors.newSingleThreadExecutor(), artistDataDao);
+	}
+
+	private void determineDataToDisplay() {
+		if (!Util.isConnected(this)) {
+			onDisplayingYourTopArtists();
+			return;
+		}
+		if (ON_DISPLAYING_ARTISTS_BY_TAG.equals(currentMethod)) {
+			onDisplayingArtistsByTag(currentTag);
+		} else if (ON_DISPLAYING_TOP_ARTISTS.equals(currentMethod)) {
+			onDisplayingTopArtists();
+		} else if (ON_QUERY_TEXT_SUBMIT.equals(currentMethod)) {
+			onSearchedForArtistName(currentArtist);
+		} else {
+			onDisplayingTopArtists();
+		}
 	}
 
 	@Override
@@ -285,15 +296,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		setupDrawer();
 		loadAd();
 		drawerHeaderView.setUpSearchByArtistView(this);
-		if (ON_DISPLAYING_ARTISTS_BY_TAG.equals(currentMethod)) {
-			onDisplayingArtistsByTag(currentTag);
-		} else if (ON_DISPLAYING_TOP_ARTISTS.equals(currentMethod)) {
-			onDisplayingTopArtists();
-		} else if (ON_QUERY_TEXT_SUBMIT.equals(currentMethod)) {
-			onSearchedForArtistName(currentArtist);
-		} else {
-			onDisplayingTopArtists();
-		}
+		determineDataToDisplay();
 
 	}
 
@@ -369,6 +372,15 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	}
 
 	@Override
+	public void onDisplayingYourTopArtists() {
+		MusicItemsListFragment musicItemsListFragment = (MusicItemsListFragment)
+				getSupportFragmentManager().findFragmentById(R.id.musicItemsListFragment);
+		if (musicItemsListFragment != null) {
+			musicItemsListFragment.populateYourTopArtists();
+		}
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.action_settings) {
 			Intent intent = new Intent(this, SettingsActivity.class);
@@ -439,15 +451,16 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		navigationView.getMenu().clear();
 		final Menu menu = navigationView.getMenu();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		if (!Util.isConnected(this)) {
+			menu.add(getString(R.string.yourTopAlbums));
+			menu.add(getString(R.string.yourTopArtists));
+			return;
+		}
 		Set<String> favoriteGenres = prefs.getStringSet(getString(R.string.favorite_genre_key), new HashSet<>());
 		if (favoriteGenres.isEmpty()) {
 			menu.add(getString(R.string.pref_title_favorite_genres));
 		}
 		menu.add(getString(R.string.topArtists));
-		if (favoriteGenres.isEmpty()) {
-			menu.add(getString(R.string.topArtistsByGenre));
-		}
-		menu.add(getString(R.string.topAlbums));
 		for (String genre : favoriteGenres) {
 			if (!genre.isEmpty()) {
 				String capitalGenre = genre.substring(0, 1).toUpperCase() + genre.substring(1);
@@ -459,7 +472,6 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 	}
 
 	private void refreshDrawer(boolean refreshDrawer) {
-		Log.i(TAG, "refresh Drawer " + refreshDrawer);
 		populateDrawerMenu();
 		bindDrawerHeaderView();
 	}
@@ -512,16 +524,16 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 						onDisplayingTopArtists();
 						return true;
 					}
-					if (getString(R.string.topArtistsByGenre).equals(popupMenuItemText)) {
-						considerDisplayingArtistsFromStorage();
-						return true;
-					}
 					if (getString(R.string.pref_title_favorite_genres).equals(popupMenuItemText)) {
 						startActivity(new Intent(this, SettingsActivity.class));
 						return true;
 					}
-					if (getString(R.string.topAlbums).equals(popupMenuItemText)) {
+					if (getString(R.string.yourTopAlbums).equals(popupMenuItemText)) {
 						onDisplayingTopAlbums();
+						return true;
+					}
+					if (getString(R.string.yourTopArtists).equals(popupMenuItemText)) {
+						onDisplayingYourTopArtists();
 						return true;
 					}
 					return true;

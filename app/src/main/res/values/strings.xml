@@ -42,8 +42,8 @@
     <string name="tracksUnavailable">Tracks Unavailable</string>
 
     <string name="topArtists">Top Artists</string>
-    <string name="topArtistsByGenre">Top Artists By Genre</string>
-    <string name="topAlbums">Top Albums</string>
+    <string name="yourTopAlbums">Your Top Albums</string>
+    <string name="yourTopArtists">Your Top Artists</string>
 
     <string name="summary">Summary</string>
     <string name="tracks">Tracks</string>
@@ -55,6 +55,7 @@
     <string name="title_activity_details">DetailsActivity</string>
     <string name="appwidget_text">Band Ninja Widget</string>
     <string name="add_widget">Add widget</string>
+    <string name="generic_profile_pic">Generic Profile Picture</string>
     <string name="title_activity_settings">Settings</string>
     <string name="display_name_key">display_name_key</string>
     <string name="favorite_genre_key">favorite_genre_key</string>
@@ -69,7 +70,7 @@
     <string name="pref_description_location">Enable location to recieve customized ads</string>
     <string name="hint">Editor #%d</string>
     <string name="pref_title_display_name">Display name</string>
-    <string name="pref_default_display_name">John Smith</string>
+    <string name="pref_default_display_name">Please Enter your Name</string>
 
     <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
     <string-array name="pref_example_list_titles">

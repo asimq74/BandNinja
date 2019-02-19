@@ -1,5 +1,7 @@
 package com.asimq.artists.bandninja;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,6 +41,8 @@ import com.asimq.artists.bandninja.json.MusicItem;
 import com.asimq.artists.bandninja.json.Track;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.AlbumData;
+import com.asimq.artists.bandninja.room.ArtistData;
+import com.asimq.artists.bandninja.room.TrackData;
 import com.asimq.artists.bandninja.room.dao.AlbumDataDao;
 import com.asimq.artists.bandninja.room.dao.ArtistDataDao;
 import com.asimq.artists.bandninja.utils.Util;
@@ -100,6 +104,8 @@ public class MusicItemsListFragment extends Fragment {
 		void onDisplayingTopArtists();
 
 		void onSearchedForArtistName(@NonNull String artistName);
+
+		void onDisplayingYourTopArtists();
 	}
 
 	private class OnAlbumDataCardClickedListener implements View.OnClickListener {
@@ -340,6 +346,22 @@ public class MusicItemsListFragment extends Fragment {
 		initRecyclerView(albumInfos, new OnAlbumInfoCardClickedListener(albumInfos));
 		initMusicItemNameText(albumInfos);
 		buildSwitchers(albumInfos);
+	}
+
+	private void buildArtistsFromArtistDatas(@NonNull List<ArtistData> artistDatas) {
+		if (null == artistDatas || artistDatas.isEmpty()) {
+			recyclerView.setVisibility(View.GONE);
+			mainTitleView1.setText(getString(R.string.informationUnavailable));
+			hideFieldsExceptTitle();
+			return;
+		}
+		List<Artist> artists = new ArrayList<>();
+		for (ArtistData artistData : artistDatas) {
+			artists.add(new Artist(artistData));
+		}
+		Collections.sort(artists);
+		setVisibilityOnMainFields(View.VISIBLE);
+		buildArtists(artists);
 	}
 
 	private void buildArtists(@NonNull List<Artist> artists) {
@@ -599,6 +621,7 @@ public class MusicItemsListFragment extends Fragment {
 				isRefreshing -> handleRefreshing(Entities.ALBUM, isRefreshing));
 		albumDetailViewModel.getAlbumsLiveDataObservable().observe(this, this::buildAlbums);
 		artistDetailViewModel.getArtistsObservable().observe(this, this::buildArtists);
+		artistDetailViewModel.getObservableArtistDatas().observe(this, this::buildArtistsFromArtistDatas);
 		artistDetailViewModel.getIsRefreshingObservable().observe(this,
 				isRefreshing -> handleRefreshing(Entities.ARTIST, isRefreshing));
 		return view;
@@ -631,6 +654,12 @@ public class MusicItemsListFragment extends Fragment {
 		articleBody.setText(Util.getTagsAsString(albumInfo.getTagWrapper().getTags()));
 	}
 
+	protected void populateGenres(AlbumData albumData, TextView textView) {
+		textView.setVisibility(View.VISIBLE);
+		tracksRecyclerView.setVisibility(View.GONE);
+		articleBody.setText(albumData.getTags());
+	}
+
 	protected void populateGenres(Artist artist, TextView textView) {
 		textView.setVisibility(View.VISIBLE);
 		tracksRecyclerView.setVisibility(View.GONE);
@@ -642,6 +671,7 @@ public class MusicItemsListFragment extends Fragment {
 		if (summaryText.isEmpty()) {
 			textView.setText(R.string.summaryUnavailable);
 		} else {
+			textView.setVisibility(View.VISIBLE);
 			Util.populateHTMLForTextView(textView, summaryText);
 			textView.setOnClickListener(new OnClickListener() {
 				@Override
@@ -682,8 +712,12 @@ public class MusicItemsListFragment extends Fragment {
 	protected void populateTopAlbums() {
 		Intent detailsIntent = new Intent(getActivity(), DetailsActivity.class);
 		detailsIntent.putExtra(DetailsActivity.EXTRA_IMAGE, "");
-		detailsIntent.putExtra(DetailsActivity.EXTRA_TITLE, getString(R.string.topAlbums));
+		detailsIntent.putExtra(DetailsActivity.EXTRA_TITLE, getString(R.string.yourTopAlbums));
 		startActivity(detailsIntent);
+	}
+
+	protected void populateYourTopArtists() {
+		artistDetailViewModel.obtainAllArtistDatas(getActivity().getApplicationContext());
 	}
 
 	protected void populateTopArtists() {
@@ -785,17 +819,70 @@ public class MusicItemsListFragment extends Fragment {
 	}
 
 	private void updateDescriptionsSwitcher(AlbumData albumData) {
-		String wiki = albumData.getWiki();
-		if (!wiki.isEmpty()) {
-			articleBody.setText(R.string.summaryUnavailable);
+		tabLayout.removeAllTabs();
+		tabLayout.addTab(tabLayout.newTab().setText(R.string.summary));
+		tabLayout.addTab(tabLayout.newTab().setText(R.string.tracks));
+		tabLayout.addTab(tabLayout.newTab().setText(R.string.genres));
+		populateSummary(albumData, Entities.ALBUM, articleBody);
+		tabLayout.setOnTabSelectedListener(getBaseOnTabSelectedListener(albumData, Entities.ALBUM));
+	}
+
+	@NonNull
+	private BaseOnTabSelectedListener getBaseOnTabSelectedListener(AlbumData albumData, Entities type) {
+		return new BaseOnTabSelectedListener() {
+			@Override
+			public void onTabReselected(Tab tab) {
+
+			}
+
+			@Override
+			public void onTabSelected(Tab tab) {
+				if (tab.getText().equals(getString(R.string.summary))) {
+					populateSummary(albumData, type, articleBody);
+				} else if (tab.getText().equals(getString(R.string.tracks))) {
+					populateTracks(albumData, articleBody);
+				} else {
+					populateGenres(albumData, articleBody);
+				}
+			}
+
+			@Override
+			public void onTabUnselected(Tab tab) {
+
+			}
+		};
+	}
+
+	private void populateTracks(AlbumData albumdata, TextView textView) {
+		final List<TrackData> trackDatas = albumdata.getTrackDatas();
+		if (trackDatas.isEmpty()) {
+			textView.setText(R.string.tracksUnavailable);
 		} else {
-			articleBody.setText(wiki);
-			articleBody.setOnClickListener(new OnClickListener() {
+			textView.setVisibility(View.GONE);
+			tracksRecyclerView.setVisibility(View.VISIBLE);
+			List<Track> tracks = new ArrayList<>();
+			for (TrackData trackData : trackDatas) {
+				Track track = new Track(trackData);
+				tracks.add(track);
+			}
+			populateTracksRecyclerView(tracks);
+		}
+	}
+
+	private void populateSummary(AlbumData albumData, Entities type, TextView textView) {
+		textView.setVisibility(View.VISIBLE);
+		tracksRecyclerView.setVisibility(View.GONE);
+		final String summaryText = albumData.getWiki();
+		if (summaryText.isEmpty()) {
+			textView.setText(R.string.summaryUnavailable);
+		} else {
+			Util.populateHTMLForTextView(textView, summaryText);
+			textView.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					Intent articleDetailIntent = new Intent(getActivity(), ArticleDetailActivity.class);
 					articleDetailIntent.putExtra(ArticleDetailActivity.MBID, albumData.getMbid());
-					articleDetailIntent.putExtra(ArticleDetailActivity.ENTITY_TYPE, Entities.ALBUM.name());
+					articleDetailIntent.putExtra(ArticleDetailActivity.ENTITY_TYPE, type.name());
 					articleDetailIntent.putExtra(ArticleDetailActivity.ARTIST, albumData.getArtist());
 					articleDetailIntent.putExtra(ArticleDetailActivity.ALBUM, albumData.getName());
 					startActivity(articleDetailIntent);
@@ -817,6 +904,7 @@ public class MusicItemsListFragment extends Fragment {
 		tabLayout.removeAllTabs();
 		tabLayout.addTab(tabLayout.newTab().setText(R.string.summary));
 		tabLayout.addTab(tabLayout.newTab().setText(R.string.genres));
+		tabLayout.setVisibility(View.VISIBLE);
 		populateSummary(artist, type, articleBody);
 		tabLayout.setOnTabSelectedListener(new BaseOnTabSelectedListener() {
 			@Override

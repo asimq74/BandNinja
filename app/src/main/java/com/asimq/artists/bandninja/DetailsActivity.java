@@ -3,7 +3,6 @@ package com.asimq.artists.bandninja;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
@@ -13,13 +12,11 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.transition.Slide;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -132,7 +129,7 @@ public class DetailsActivity extends AppCompatActivity implements OnDetailsInter
         floatHeaderView.bindTo(itemTitle, "", "");
         String extraImageUrl = getIntent().getStringExtra(EXTRA_IMAGE);
         loadImageIntoToolbar(extraImageUrl);
-        if (itemTitle.equals(getString(R.string.topAlbums))) {
+        if (itemTitle.equals(getString(R.string.yourTopAlbums))) {
             onDisplayTopAlbums();
             return;
         }
@@ -145,7 +142,7 @@ public class DetailsActivity extends AppCompatActivity implements OnDetailsInter
     @Override
     public void loadImageIntoToolbar(String extraImageUrl) {
         if (!extraImageUrl.isEmpty()) {
-            Picasso.with(this).load(extraImageUrl).into(image, new Callback() {
+            Picasso.with(this).load(extraImageUrl).error(R.drawable.logo).into(image, new Callback() {
                 @Override
                 public void onError() {
 
@@ -161,6 +158,8 @@ public class DetailsActivity extends AppCompatActivity implements OnDetailsInter
                     });
                 }
             });
+        } else {
+            Picasso.with(this).load(R.drawable.logo).into(image);
         }
     }
 

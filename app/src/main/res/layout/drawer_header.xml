@@ -8,6 +8,7 @@
                                                  android:paddingStart="@dimen/left_slide_offset">
     <ImageView
         android:id="@+id/profileImageView"
+        android:contentDescription="@string/generic_profile_pic"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_gravity="start|top"
@@ -37,6 +38,7 @@
         android:background="@color/colorPrimary"
         android:paddingBottom="@dimen/activity_horizontal_margin"
         android:paddingEnd="@dimen/activity_horizontal_margin"
+        android:paddingStart="@dimen/drawer_padding_start"
         android:paddingTop="@dimen/activity_horizontal_margin">
 
         <com.asimq.artists.bandninja.ui.CustomEditText

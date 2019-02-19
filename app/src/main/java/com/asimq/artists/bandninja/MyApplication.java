@@ -31,7 +31,6 @@ public class MyApplication extends Application {
 				.applicationModule(new ApplicationModule(this))
 				.build();
 		applicationComponent.inject(this);
-//		ServiceUtil.scheduleJob(this);
 	}
 
 }

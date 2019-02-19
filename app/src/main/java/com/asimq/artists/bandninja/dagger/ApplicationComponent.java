@@ -12,6 +12,7 @@ import com.asimq.artists.bandninja.MusicItemsListFragment;
 import com.asimq.artists.bandninja.MyApplication;
 import com.asimq.artists.bandninja.asynctasks.albums.FetchAllSavedAlbumDataTask;
 import com.asimq.artists.bandninja.asynctasks.albums.UpdateAllAlbumsAndTracksTask;
+import com.asimq.artists.bandninja.asynctasks.artists.FetchAllSavedArtistDataTask;
 import com.asimq.artists.bandninja.asynctasks.artists.UpdateAllArtistsTask;
 import com.asimq.artists.bandninja.asynctasks.tags.UpdateAllTagsTask;
 import com.asimq.artists.bandninja.repositories.SearchResultsModelRepositoryDao;
@@ -68,4 +69,6 @@ public interface ApplicationComponent {
 	void inject(UpdateAllAlbumsAndTracksTask updateAllAlbumsAndTracksTask);
 
 	void inject(UpdateAllTagsTask updateAllTagsTask);
+
+	void inject(FetchAllSavedArtistDataTask fetchAllSavedArtistDataTask);
 }

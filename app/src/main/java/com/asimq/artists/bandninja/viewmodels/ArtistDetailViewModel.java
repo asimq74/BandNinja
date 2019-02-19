@@ -9,12 +9,16 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MediatorLiveData;
+import android.content.Context;
 import android.support.annotation.NonNull;
 
+import com.asimq.artists.bandninja.asynctasks.albums.FetchAllSavedAlbumDataTask;
 import com.asimq.artists.bandninja.asynctasks.artists.ArtistDatasByNamesFromStorageTask;
 import com.asimq.artists.bandninja.asynctasks.artists.EmptyArtistsProcessor;
+import com.asimq.artists.bandninja.asynctasks.artists.FetchAllSavedArtistDataTask;
 import com.asimq.artists.bandninja.json.Artist;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
+import com.asimq.artists.bandninja.room.AlbumData;
 import com.asimq.artists.bandninja.room.ArtistData;
 
 public class ArtistDetailViewModel extends AndroidViewModel {
@@ -23,6 +27,7 @@ public class ArtistDetailViewModel extends AndroidViewModel {
 	private final BandItemRepository bandItemRepository;
 	private MediatorLiveData<Boolean> isRefreshingObservable = new MediatorLiveData<>();
 	private LiveData<ArtistData> mLiveArtistData;
+	private MediatorLiveData<List<ArtistData>> mObservableArtistDatas = new MediatorLiveData<>();
 
 	public ArtistDetailViewModel(@NonNull Application application, @NonNull BandItemRepository bandItemRepository) {
 		super(application);
@@ -49,6 +54,15 @@ public class ArtistDetailViewModel extends AndroidViewModel {
 
 	public MediatorLiveData<Boolean> getIsRefreshingObservable() {
 		return isRefreshingObservable;
+	}
+
+	public MediatorLiveData<List<ArtistData>> getObservableArtistDatas() {
+		return mObservableArtistDatas;
+	}
+
+	public void obtainAllArtistDatas(Context context) {
+		new FetchAllSavedArtistDataTask(context, mObservableArtistDatas).
+				executeOnExecutor(Executors.newSingleThreadExecutor());
 	}
 
 	public void populateArtistDatasFromStorage(@NonNull Map<String, Artist> searchResultsByName) {

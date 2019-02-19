@@ -26,6 +26,8 @@ public class DrawerHeaderView extends LinearLayout {
 	ImageView profileImage;
 	@BindView(R.id.searchByArtistEditView)
 	CustomEditText searchByArtistEditTextView;
+	@BindView(R.id.search_layout)
+	View searchLayout;
 
 	public DrawerHeaderView(Context context) {
 		super(context);
@@ -54,6 +56,10 @@ public class DrawerHeaderView extends LinearLayout {
 			tv.setVisibility(View.GONE);
 		else
 			tv.setText(text);
+	}
+
+	public void hideSearchLayout() {
+		searchLayout.setVisibility(View.GONE);
 	}
 
 	@Override
