@@ -9,15 +9,12 @@ import android.util.Log;
 public class ServiceUtil {
 
 	static final String TAG = ServiceUtil.class.getSimpleName();
-
+	private static final long ONE_DAY_INTERVAL = 24 * 60 * 60 * 1000L; // 1 Day
 	// schedule the start of the service every 10 - 30 seconds
 	public static void scheduleJob(Context context) {
 		ComponentName serviceComponent = new ComponentName(context, DataSyncJobService.class);
 		JobInfo.Builder builder = new JobInfo.Builder(12, serviceComponent);
-		builder.setMinimumLatency(1 * 1000); // wait at least
-		builder.setOverrideDeadline(3 * 1000); // maximum delay
-		//builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED); // require unmetered network
-		//builder.setRequiresDeviceIdle(true); // device should be idle
+		builder.setPeriodic(ONE_DAY_INTERVAL);
 		builder.setRequiresCharging(false); // we don't care if the device is charging or not
 		JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
 		int resultCode = jobScheduler.schedule(builder.build());

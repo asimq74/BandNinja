@@ -40,8 +40,8 @@ public class Util {
 		ARTIST, ALBUM, GENRE
 	}
 
-	public enum ServiceStatus {
-		SUCCESS, FAILURE
+	public enum ConnectedStatus {
+		CONNECTED, NOT_CONNECTED
 	}
 
 	public static class MySpannable extends ClickableSpan {

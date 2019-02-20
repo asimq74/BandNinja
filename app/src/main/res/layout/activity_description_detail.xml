@@ -89,12 +89,12 @@
                     android:orientation="vertical"
                     android:scrollbarStyle="outsideOverlay">
 
-
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/tracksRecyclerView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"/>
+                        android:layout_gravity="center_vertical"
+                        android:layout_margin="@dimen/detail_inner_horiz_margin"/>
 
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/body_text_recycler_view"

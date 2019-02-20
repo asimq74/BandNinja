@@ -145,6 +145,9 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		drawerHeaderView = (DrawerHeaderView) LayoutInflater.from(this).inflate(R.layout.drawer_header, null);
 		if (!Util.isConnected(this)) {
 			drawerHeaderView.hideSearchLayout();
+			drawerHeaderView.setDisconnectedFromInternetViewShown(true);
+		} else {
+			drawerHeaderView.setDisconnectedFromInternetViewShown(false);
 		}
 		drawerHeaderView.bindTo(name, localityAndPostalCode);
 		navigationView.addHeaderView(drawerHeaderView);
@@ -450,10 +453,12 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 		final Menu menu = navigationView.getMenu();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		if (!Util.isConnected(this)) {
+			drawerHeaderView.setDisconnectedFromInternetViewShown(true);
 			menu.add(getString(R.string.yourTopAlbums));
 			menu.add(getString(R.string.yourTopArtists));
 			return;
 		}
+		drawerHeaderView.setDisconnectedFromInternetViewShown(false);
 		Set<String> favoriteGenres = prefs.getStringSet(getString(R.string.favorite_genre_key), new HashSet<>());
 		if (favoriteGenres.isEmpty()) {
 			menu.add(getString(R.string.pref_title_favorite_genres));
@@ -481,7 +486,7 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 				.setService(BandSyncJobService.class)
 				.setTag(JOB_TAG)
 				.setRecurring(true)
-				.setTrigger(Trigger.executionWindow(5, 30))
+				.setTrigger(Trigger.executionWindow(8640, 8700))
 				.setLifetime(Lifetime.UNTIL_NEXT_BOOT)
 				.setReplaceCurrent(false)
 				.setConstraints(Constraint.ON_ANY_NETWORK)
@@ -502,9 +507,8 @@ public class MainActivity extends AppCompatActivity implements OnMainActivityInt
 
 			@Override
 			public void onDrawerOpened(View drawerView) {
-				if (!Util.isConnected(MainActivity.this)) {
-					SettingsActivity.sendMessage(MainActivity.this);
-				}
+				SettingsActivity.sendMessage(MainActivity.this);
+				drawerHeaderView.setDisconnectedFromInternetViewShown(!drawerHeaderView.isDisconnectedFromInternetViewShown());
 				super.onDrawerOpened(drawerView);
 			}
 		};

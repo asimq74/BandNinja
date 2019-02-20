@@ -28,6 +28,15 @@ public class DrawerHeaderView extends LinearLayout {
 	CustomEditText searchByArtistEditTextView;
 	@BindView(R.id.search_layout)
 	View searchLayout;
+	private boolean disconnectedFromInternetViewShown = false;
+
+	public boolean isDisconnectedFromInternetViewShown() {
+		return disconnectedFromInternetViewShown;
+	}
+
+	public void setDisconnectedFromInternetViewShown(boolean disconnectedFromInternetViewShown) {
+		this.disconnectedFromInternetViewShown = disconnectedFromInternetViewShown;
+	}
 
 	public DrawerHeaderView(Context context) {
 		super(context);
