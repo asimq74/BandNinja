@@ -2,27 +2,23 @@ package com.asimq.artists.bandninja.ui;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.support.v7.widget.AppCompatTextView;
 import android.text.SpannableStringBuilder;
-import android.text.TextPaint;
-import android.text.style.ClickableSpan;
 import android.util.AttributeSet;
 import android.view.View;
 
 import com.asimq.artists.bandninja.R;
 import com.asimq.artists.bandninja.utils.Util;
-import com.asimq.artists.bandninja.utils.Util.MySpannable;
 
 public class ExpandableTextView extends AppCompatTextView {
+
 	private static final int DEFAULT_TRIM_LENGTH = 200;
 	private static final String ELLIPSIS = ".....";
-
-	private CharSequence originalText;
-	private CharSequence trimmedText;
 	private BufferType bufferType;
+	private CharSequence originalText;
 	private boolean trim = true;
 	private int trimLength;
+	private CharSequence trimmedText;
 
 	public ExpandableTextView(Context context) {
 		this(context, null);
@@ -35,33 +31,22 @@ public class ExpandableTextView extends AppCompatTextView {
 		this.trimLength = typedArray.getInt(R.styleable.ExpandableTextView_trimLength, DEFAULT_TRIM_LENGTH);
 		typedArray.recycle();
 
-		setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				trim = !trim;
-				setText();
-				requestFocusFromTouch();
-			}
+		setOnClickListener(v -> {
+			trim = !trim;
+			setText();
+			requestFocusFromTouch();
 		});
-	}
-
-	private void setText() {
-		super.setText(getDisplayableText(), bufferType);
 	}
 
 	private CharSequence getDisplayableText() {
 		return trim ? trimmedText : originalText;
 	}
 
-	@Override
-	public void setText(CharSequence text, BufferType type) {
-		originalText = text.toString().trim();
-		trimmedText = getTrimmedText(text);
-		bufferType = type;
-		setText();
+	public int getTrimLength() {
+		return trimLength;
 	}
 
-	private CharSequence getTrimmedText(CharSequence text) {
+	private CharSequence getTrimmedText() {
 		if (originalText != null && originalText.length() > trimLength) {
 			final String spannableText = getContext().getResources().getString(R.string.clickForMore);
 			final SpannableStringBuilder thisCharacterSequence = new SpannableStringBuilder(originalText, 0, trimLength + 1)
@@ -73,7 +58,7 @@ public class ExpandableTextView extends AppCompatTextView {
 
 				ssb.setSpan(new Util.MySpannable(false) {
 					@Override
-					public void onClick(View widget) {
+					public void onClick(View widget) {// do nothing
 					}
 				}, characterSequenceString.indexOf(spannableText), characterSequenceString.indexOf(spannableText)
 						+ spannableText.length(), 0);
@@ -85,40 +70,21 @@ public class ExpandableTextView extends AppCompatTextView {
 		}
 	}
 
-	public CharSequence getOriginalText() {
-		return originalText;
+	@Override
+	public void setText(CharSequence text, BufferType type) {
+		originalText = text.toString().trim();
+		trimmedText = getTrimmedText();
+		bufferType = type;
+		setText();
+	}
+
+	private void setText() {
+		super.setText(getDisplayableText(), bufferType);
 	}
 
 	public void setTrimLength(int trimLength) {
 		this.trimLength = trimLength;
-		trimmedText = getTrimmedText(originalText);
+		trimmedText = getTrimmedText();
 		setText();
-	}
-
-	public static class MySpannable extends ClickableSpan {
-
-		private boolean isUnderline = true;
-
-		/**
-		 * Constructor
-		 */
-		public MySpannable(boolean isUnderline) {
-			this.isUnderline = isUnderline;
-		}
-
-		@Override
-		public void onClick(View widget) {
-
-		}
-
-		@Override
-		public void updateDrawState(TextPaint ds) {
-			ds.setUnderlineText(isUnderline);
-			ds.setColor(Color.parseColor("#1b76d3"));
-		}
-	}
-
-	public int getTrimLength() {
-		return trimLength;
 	}
 }

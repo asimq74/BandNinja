@@ -16,14 +16,12 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.text.Html;
-import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.TextView;
 
 import com.asimq.artists.bandninja.json.Image;
@@ -38,10 +36,6 @@ public class Util {
 
 	public enum Entities {
 		ARTIST, ALBUM, GENRE
-	}
-
-	public enum ConnectedStatus {
-		CONNECTED, NOT_CONNECTED
 	}
 
 	public static class MySpannable extends ClickableSpan {
@@ -66,27 +60,10 @@ public class Util {
 			ds.setColor(Color.parseColor("#1b76d3"));
 		}
 	}
+
 	private static List<String> BLOCKED_TAGS = Arrays.asList("albums I own", "favorite albums");
 
-	private static SpannableStringBuilder addClickablePartTextViewResizable(final Spanned strSpanned, final TextView tv,
-			final int maxLine, final String spanableText, final boolean viewMore) {
-		String str = strSpanned.toString();
-		SpannableStringBuilder ssb = new SpannableStringBuilder(strSpanned);
-
-		if (str.contains(spanableText)) {
-
-			ssb.setSpan(new MySpannable(false) {
-				@Override
-				public void onClick(View widget) {
-				}
-			}, str.indexOf(spanableText), str.indexOf(spanableText) + spanableText.length(), 0);
-
-		}
-		return ssb;
-
-	}
-
-	public static boolean containsImageUrls(List<Image> images) {
+	private static boolean containsImageUrls(List<Image> images) {
 		if (null == images || images.isEmpty()) {
 			return false;
 		}
@@ -123,7 +100,7 @@ public class Util {
 		try {
 			Geocoder geocoder = new Geocoder(context, Locale.getDefault());
 			List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
-			if (addresses.size() > 0) {
+			if (!addresses.isEmpty()) {
 				Address address = addresses.get(0);
 				result.append(address.getLocality()).append(", ");
 				result.append(address.getAdminArea()).append(" ");
@@ -141,10 +118,8 @@ public class Util {
 		try {
 			Geocoder geocoder = new Geocoder(context, Locale.getDefault());
 			List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
-			if (addresses.size() > 0) {
+			if (!addresses.isEmpty()) {
 				Address address = addresses.get(0);
-//                result.append(address.getLocality()).append("\n");
-//                result.append(address.getCountryName());
 				result.append(address.getPostalCode());
 			}
 		} catch (IOException e) {
@@ -172,7 +147,7 @@ public class Util {
 		if (tagString.isEmpty()) {
 			return tags;
 		}
-		if (tagString.indexOf(",") < 0) {
+		if (tagString.indexOf(',') < 0) {
 			tags.add(new Tag(tagString));
 			return tags;
 		}
@@ -195,66 +170,6 @@ public class Util {
 	public static boolean isGooglePlayServicesAvailable(@NonNull Context context) {
 		return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
 				== ConnectionResult.SUCCESS;
-	}
-
-	public static String toMinsAndSeconds(String secondsString) {
-		int milliseconds = stringToInt(secondsString);
-  	if (milliseconds < 0) {
-  		return milliseconds + "";
-		}
-		long minutes = milliseconds / 60;
-		long seconds = milliseconds  % 60;
-		final String secondsFormattedString = seconds < 10 ? "0" + seconds : seconds + "";
-
-		return String.format("%d:%s", minutes, secondsFormattedString);
-
-	}
-
-	public static void makeTextViewResizable(final TextView tv, final int maxLine, final String expandText, final boolean viewMore) {
-
-		if (tv.getTag() == null) {
-			tv.setTag(tv.getText());
-		}
-		ViewTreeObserver vto = tv.getViewTreeObserver();
-		vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-
-			@SuppressWarnings("deprecation")
-			@Override
-			public void onGlobalLayout() {
-
-				ViewTreeObserver obs = tv.getViewTreeObserver();
-				obs.removeGlobalOnLayoutListener(this);
-				if (maxLine == 0) {
-					int lineEndIndex = tv.getLayout().getLineEnd(0);
-					String text = tv.getText().subSequence(0, lineEndIndex - expandText.length() + 1) + " " + expandText;
-					tv.setText(text);
-					tv.setMovementMethod(LinkMovementMethod.getInstance());
-					tv.setText(
-							addClickablePartTextViewResizable(Html.fromHtml(tv.getText().toString()), tv, maxLine, expandText,
-									viewMore), TextView.BufferType.SPANNABLE);
-				} else if (maxLine > 0 && tv.getLineCount() >= maxLine) {
-					int lineEndIndex = tv.getLayout().getLineEnd(maxLine - 1);
-					String text = tv.getText().subSequence(0, lineEndIndex - expandText.length() + 1) + " " + expandText;
-					tv.setText(text);
-					tv.setMovementMethod(LinkMovementMethod.getInstance());
-					tv.setText(
-							addClickablePartTextViewResizable(Html.fromHtml(tv.getText().toString()), tv, maxLine, expandText,
-									viewMore), TextView.BufferType.SPANNABLE);
-				} else {
-					if (null == tv || null == tv.getLayout()) {
-						return;
-					}
-					int lineEndIndex = tv.getLayout().getLineEnd(tv.getLayout().getLineCount() - 1);
-					String text = tv.getText().subSequence(0, lineEndIndex) + " " + expandText;
-					tv.setText(text);
-					tv.setMovementMethod(LinkMovementMethod.getInstance());
-					tv.setText(
-							addClickablePartTextViewResizable(Html.fromHtml(tv.getText().toString()), tv, lineEndIndex, expandText,
-									viewMore), TextView.BufferType.SPANNABLE);
-				}
-			}
-		});
-
 	}
 
 	public static void populateHTMLForTextView(@NonNull TextView textView, @NonNull String content) {
@@ -287,7 +202,7 @@ public class Util {
 	}
 
 	// Generic function to remove Null Using Iterator
-	public static <T> List<T> removeUsingIterator(List<T> l, Predicate<T> p) {
+	private static <T> List<T> removeUsingIterator(List<T> l, Predicate<T> p) {
 
 		// Create an iterator from the l
 		Iterator<T> itr = l.iterator();
@@ -317,5 +232,18 @@ public class Util {
 		} catch (NumberFormatException e) {
 			return -1;
 		}
+	}
+
+	public static String toMinsAndSeconds(String secondsString) {
+		int milliseconds = stringToInt(secondsString);
+		if (milliseconds < 0) {
+			return milliseconds + "";
+		}
+		long minutes = milliseconds / 60;
+		long seconds = milliseconds % 60;
+		final String secondsFormattedString = seconds < 10 ? "0" + seconds : seconds + "";
+
+		return String.format("%d:%s", minutes, secondsFormattedString);
+
 	}
 }

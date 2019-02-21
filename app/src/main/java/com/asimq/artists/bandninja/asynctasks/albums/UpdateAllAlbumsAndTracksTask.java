@@ -24,8 +24,8 @@ import retrofit2.Response;
 
 public class UpdateAllAlbumsAndTracksTask extends AsyncTask<Void, Void, List<AlbumData>> {
 
-	public static final String API_KEY = BuildConfig.LastFMApiKey;
-	public static final String DEFAULT_FORMAT = "json";
+	private static final String API_KEY = BuildConfig.LastFMApiKey;
+	private static final String DEFAULT_FORMAT = "json";
 	private final String TAG = this.getClass().getSimpleName();
 	@Inject
 	BandItemRepository bandItemRepository;

@@ -26,21 +26,22 @@ import retrofit2.Response;
 
 public class AlbumInfosByNamesFromServerTask extends AsyncTask<List<AlbumInfo>, Void, Void> {
 
-	public static final String API_KEY = BuildConfig.LastFMApiKey;
-	public static final String DEFAULT_FORMAT = "json";
+	private static final String API_KEY = BuildConfig.LastFMApiKey;
+	private static final String DEFAULT_FORMAT = "json";
 	private static Map<String, Boolean> mapOfAttachmentTasks = new LinkedHashTreeMap<>();
 
-	public static synchronized void addTask(String taskQueryString) {
+	private static synchronized void addTask(String taskQueryString) {
 		mapOfAttachmentTasks.put(taskQueryString, true);
 	}
 
-	public static synchronized boolean isTasksEmpty() {
+	private static synchronized boolean isTasksEmpty() {
 		return mapOfAttachmentTasks.isEmpty();
 	}
 
-	public static synchronized void removeTask(String taskQueryString) {
+	private static synchronized void removeTask(String taskQueryString) {
 		mapOfAttachmentTasks.remove(taskQueryString);
 	}
+
 	final String TAG = this.getClass().getSimpleName();
 	private List<AlbumInfo> albumInfos = new ArrayList<>();
 	private final BandItemRepository bandItemRepository;

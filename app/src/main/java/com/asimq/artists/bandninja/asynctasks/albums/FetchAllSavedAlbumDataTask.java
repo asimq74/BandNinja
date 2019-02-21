@@ -1,30 +1,27 @@
 package com.asimq.artists.bandninja.asynctasks.albums;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
 import android.arch.lifecycle.MediatorLiveData;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.asimq.artists.bandninja.MyApplication;
-import com.asimq.artists.bandninja.json.Track;
 import com.asimq.artists.bandninja.repositories.BandItemRepository;
 import com.asimq.artists.bandninja.room.AlbumData;
-import com.asimq.artists.bandninja.room.TrackData;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
 
 public class FetchAllSavedAlbumDataTask extends AsyncTask<String, Void, List<AlbumData>> {
 
+	private final String TAG = this.getClass().getSimpleName();
 	@Inject
 	BandItemRepository bandItemRepository;
 	private final MediatorLiveData<List<AlbumData>> mObservableAlbumDatas;
 
 	public FetchAllSavedAlbumDataTask(Context applicationContext,
-									  MediatorLiveData<List<AlbumData>> mObservableAlbumDatas) {
+			MediatorLiveData<List<AlbumData>> mObservableAlbumDatas) {
 		final MyApplication application = (MyApplication) applicationContext;
 		application.getApplicationComponent().inject(this);
 		this.mObservableAlbumDatas = mObservableAlbumDatas;
@@ -45,6 +42,4 @@ public class FetchAllSavedAlbumDataTask extends AsyncTask<String, Void, List<Alb
 		Log.d(TAG, "albumDatas refreshed: " + albumDatas);
 		mObservableAlbumDatas.setValue(albumDatas);
 	}
-
-	private final String TAG = this.getClass().getSimpleName();
 }

@@ -9,7 +9,7 @@ import android.os.AsyncTask;
 import com.asimq.artists.bandninja.json.AlbumInfo;
 
 public class EmptyAlbumsProcessor extends AsyncTask<Void, Void, Void> {
-	
+
 	private final MediatorLiveData<Boolean> isRefreshingObservable;
 	private final MediatorLiveData<List<AlbumInfo>> musicItemObservable;
 
